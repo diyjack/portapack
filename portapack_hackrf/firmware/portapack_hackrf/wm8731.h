@@ -22,6 +22,8 @@
 #ifndef __WM8731_H__
 #define __WM8731_H__
 
+#define WM8731_I2C_ADDR 0b00110100
+
 #define WM8731_LIN (0b0000000)
 #define WM8731_LIN_LINVOL(x) ((x) << 0)
 #define WM8731_LIN_LINMUTE(x) ((x) << 7)
