@@ -37,8 +37,6 @@
 
 
 
-#ifdef JAWBREAKER
-
 #define SCU_PINMUX_I2S0_TX_MCLK (CLK2)
 #define SCU_PINMUX_I2S0_TX_SCK (P3_0)
 #define SCU_PINMUX_I2S0_TX_WS (P3_1)
@@ -330,5 +328,3 @@ int16_t* portapack_i2s_tx_empty_buffer() {
 	}
 	return tx_lli[0].csrcaddr;
 }
-
-#endif/*JAWBREAKER*/
