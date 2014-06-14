@@ -22,22 +22,6 @@
 #include <stdint.h>
 #include <math.h>
 
-/*
-static void swap(complex_t* const a, complex_t* const b) {
-	const complex_t t = *a;
-	*a = *b;
-	*b = t;
-}
-*/
-/*
-static void swap(float* const a, float* const b) {
-	
-}
-*/
-#define SWAP(x, y)  {const float __t = x; x = y; y = __t;}
-
-//#define M_PI (3.14159265358979323846264338327950288419716939937510f)
-
 /* http://beige.ucs.indiana.edu/B673/node14.html */
 /* http://www.drdobbs.com/cpp/a-simple-and-efficient-fft-implementatio/199500857?pgno=3 */
 
