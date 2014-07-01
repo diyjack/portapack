@@ -15,4 +15,6 @@
   (lib (name ipc_sot)(type Legacy)(uri ${KIPRJMOD}/../../../../library/kicad/ipc_sot.mod)(options "")(descr ""))
   (lib (name tp)(type Legacy)(uri ${KIPRJMOD}/../../../../library/kicad/tp.mod)(options "")(descr ""))
   (lib (name sharebrained)(type KiCad)(uri ${KIPRJMOD}/../../../../library/kicad/sharebrained.pretty)(options "")(descr ""))
+  (lib (name ipc_indc)(type Legacy)(uri ${KIPRJMOD}/../../../../library/kicad/ipc_indc.mod)(options "")(descr ""))
+  (lib (name fiducial)(type KiCad)(uri ${KIPRJMOD}/../../../../library/kicad/fiducial.pretty)(options "")(descr ""))
 )

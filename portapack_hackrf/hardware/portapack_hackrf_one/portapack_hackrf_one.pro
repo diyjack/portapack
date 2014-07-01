@@ -1,4 +1,4 @@
-update=Tuesday, May 06, 2014 'PMt' 04:35:34 PM
+update=Tuesday, July 01, 2014 'AMt' 09:12:34 AM
 version=1
 last_client=eeschema
 [cvpcb]
@@ -74,3 +74,5 @@ LibName14=regulator
 LibName15=tp
 LibName16=header
 LibName17=hole
+LibName18=sharebrained
+LibName19=fiducial
