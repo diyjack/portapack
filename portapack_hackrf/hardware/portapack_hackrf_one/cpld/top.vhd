@@ -110,7 +110,7 @@ begin
 	MCU_ROT_A <= not SW_ROT_A;
 	MCU_ROT_B <= not SW_ROT_B;
 	
-	CODEC_ENABLEX <= '0' if codec_enable_q else 'Z';
+	CODEC_ENABLEX <= '0' when codec_enable_q else 'Z';
 	
 	-- State management
 	target <= target_lcd when MCU_MODE = '1' else target_io;
