@@ -49,7 +49,7 @@ entity top is
 		LCD_RS			:	out	std_logic;
 		LCD_WRX			:	out	std_logic;
 		LCD_RDX			:	out	std_logic;
-		LCD_DB			:	inout	std_logic_vector(17 downto 0);
+		LCD_DB			:	inout	std_logic_vector(15 downto 0);
 		LCD_TE			:	in		std_logic;
 		LCD_BACKLIGHT	:	out	std_logic;
 		
@@ -78,9 +78,9 @@ architecture rtl of top is
 	signal	mcu_data_out : std_logic_vector(7 downto 0);
 	signal	mcu_data_in	: std_logic_vector(7 downto 0);
 	
-	signal	lcd_data_in : std_logic_vector(17 downto 0);
+	signal	lcd_data_in : std_logic_vector(15 downto 0);
 	signal  lcd_data_in_mux : std_logic_vector(7 downto 0);
-	signal	lcd_data_out : std_logic_vector(17 downto 0);
+	signal	lcd_data_out : std_logic_vector(15 downto 0);
 	
 	signal  lcd_data_in_q : std_logic_vector(7 downto 0) := (others => '0');
 	signal  lcd_data_out_q : std_logic_vector(7 downto 0) := (others => '0');
@@ -128,7 +128,7 @@ begin
 	LCD_RDX <= '0' when lcd_read and MCU_STROBE = '0' else '1';
 	LCD_WRX <= '0' when lcd_write and MCU_STROBE = '0' else '1';
 	
-	lcd_data_out <= "00" & lcd_data_out_q & mcu_data_in;
+	lcd_data_out <= lcd_data_out_q & mcu_data_in;
 	lcd_data_in <= LCD_DB;
 	LCD_DB <= lcd_data_out when lcd_write else (others => 'Z');
 	
