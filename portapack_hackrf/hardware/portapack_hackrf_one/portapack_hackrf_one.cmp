@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2014-03-01 BZR 4730)-product date = Tuesday, July 01, 2014 'PMt' 12:46:22 PM
+Cmp-Mod V01 Created by CvPcb (2014-03-01 BZR 4730)-product date = Tuesday, July 08, 2014 'AMt' 09:29:02 AM
 
 BeginCmp
 TimeStamp = /53A8C780/53A8D535;
@@ -535,21 +535,21 @@ EndCmp
 BeginCmp
 TimeStamp = /53A8C780/53AB79CA;
 Reference = R1;
-ValeurCmp = 100R;
+ValeurCmp = 220R;
 IdModule  = ipc_resc:IPC_RESC1608X55N;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A8C780/53AB79D5;
 Reference = R2;
-ValeurCmp = 100R;
+ValeurCmp = 220R;
 IdModule  = ipc_resc:IPC_RESC1608X55N;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A8C780/53AB79EA;
 Reference = R3;
-ValeurCmp = 100R;
+ValeurCmp = 220R;
 IdModule  = ipc_resc:IPC_RESC1608X55N;
 EndCmp
 
@@ -661,56 +661,56 @@ EndCmp
 BeginCmp
 TimeStamp = /53A9129D/53A91657;
 Reference = R19;
-ValeurCmp = 10K;
+ValeurCmp = 47K;
 IdModule  = ipc_resc:IPC_RESC1608X55N;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A9129D/53A91635;
 Reference = R20;
-ValeurCmp = 10K;
+ValeurCmp = 47K;
 IdModule  = ipc_resc:IPC_RESC1608X55N;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A9129D/53A9161D;
 Reference = R21;
-ValeurCmp = R;
+ValeurCmp = 0R;
 IdModule  = ipc_resc:IPC_RESC1608X55N;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A8C780/53A915E9;
 Reference = R22;
-ValeurCmp = 100R;
+ValeurCmp = 220R;
 IdModule  = ipc_resc:IPC_RESC1608X55N;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A8BFC3/53AB09AD;
 Reference = RP1;
-ValeurCmp = 100R;
+ValeurCmp = 220R;
 IdModule  = ipc_resc:IPC_RESCAXS80P160X320X60-8N;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A8C780/53AB047A;
 Reference = RP4;
-ValeurCmp = 100R;
+ValeurCmp = 220R;
 IdModule  = ipc_resc:IPC_RESCAXS80P160X320X60-8N;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A8C780/53AB04B9;
 Reference = RP6;
-ValeurCmp = 100R;
+ValeurCmp = 220R;
 IdModule  = ipc_resc:IPC_RESCAXS80P160X320X60-8N;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A8C780/53AB04D6;
 Reference = RP7;
-ValeurCmp = 100R;
+ValeurCmp = 220R;
 IdModule  = ipc_resc:IPC_RESCAXS80P160X320X60-8N;
 EndCmp
 
