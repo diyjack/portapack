@@ -375,7 +375,7 @@ BeginCmp
 TimeStamp = /53A9129D/53A8C6D0;
 Reference = J2;
 ValeurCmp = MICROSD_DETSW;
-IdModule  = alps:ALPS_SCHA4B0400;
+IdModule  = alps:ALPS_SCHA4B0100;
 EndCmp
 
 BeginCmp
