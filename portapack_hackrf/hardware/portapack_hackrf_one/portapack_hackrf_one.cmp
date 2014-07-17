@@ -1,17 +1,10 @@
-Cmp-Mod V01 Created by CvPcb (2014-03-01 BZR 4730)-product date = Tuesday, July 08, 2014 'AMt' 09:29:02 AM
+Cmp-Mod V01 Created by CvPcb (2014-03-01 BZR 4730)-product date = Thursday, July 17, 2014 'AMt' 08:44:29 AM
 
 BeginCmp
 TimeStamp = /53A8C780/53A8D535;
 Reference = BT1;
 ValeurCmp = BATTERY;
 IdModule  = bat_coin:MPD_BU2032SM-BT-G;
-EndCmp
-
-BeginCmp
-TimeStamp = /53A8BFC3/53A8C7D4;
-Reference = C1;
-ValeurCmp = 100N;
-IdModule  = ipc_capc:IPC_CAPC1005X55N;
 EndCmp
 
 BeginCmp
@@ -519,17 +512,10 @@ IdModule  = header:HEADER_11X2_REV_SM_254;
 EndCmp
 
 BeginCmp
-TimeStamp = /53A8BFC3/53A8C7C1;
+TimeStamp = /53A9129D/53C5B6EB;
 Reference = Q1;
-ValeurCmp = MOSFET_P;
-IdModule  = ipc_sot:IPC_SOT95P240X110-3N;
-EndCmp
-
-BeginCmp
-TimeStamp = /53A9129D/53A91674;
-Reference = Q2;
-ValeurCmp = MOSFET_P;
-IdModule  = ipc_sot:IPC_SOT95P240X110-3N;
+ValeurCmp = MOSFET_N;
+IdModule  = ipc_sot:IPC_SOT95P230X110-3N;
 EndCmp
 
 BeginCmp
@@ -550,20 +536,6 @@ BeginCmp
 TimeStamp = /53A8C780/53AB79EA;
 Reference = R3;
 ValeurCmp = 220R;
-IdModule  = ipc_resc:IPC_RESC1608X55N;
-EndCmp
-
-BeginCmp
-TimeStamp = /53A8BFC3/53A8C7C7;
-Reference = R4;
-ValeurCmp = 10K;
-IdModule  = ipc_resc:IPC_RESC1608X55N;
-EndCmp
-
-BeginCmp
-TimeStamp = /53A8BFC3/53A8C7CE;
-Reference = R5;
-ValeurCmp = 47K;
 IdModule  = ipc_resc:IPC_RESC1608X55N;
 EndCmp
 
@@ -598,7 +570,7 @@ EndCmp
 BeginCmp
 TimeStamp = /53A8BFC3/53A8C2B0;
 Reference = R10;
-ValeurCmp = R;
+ValeurCmp = 47K;
 IdModule  = ipc_resc:IPC_RESC1608X55N;
 EndCmp
 
@@ -669,13 +641,6 @@ BeginCmp
 TimeStamp = /53A9129D/53A91635;
 Reference = R20;
 ValeurCmp = 47K;
-IdModule  = ipc_resc:IPC_RESC1608X55N;
-EndCmp
-
-BeginCmp
-TimeStamp = /53A9129D/53A9161D;
-Reference = R21;
-ValeurCmp = 0R;
 IdModule  = ipc_resc:IPC_RESC1608X55N;
 EndCmp
 
