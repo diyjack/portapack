@@ -25,8 +25,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 2 4
 Title "PortaPack for HackRF One"
-Date "July 1, 2014"
-Rev "20140701"
+Date "July 17, 2014"
+Rev "20140717"
 Comp "ShareBrained Technology, Inc."
 Comment1 "Copyright © 2014 Jared Boone"
 Comment2 "License: GNU General Public License, version 2"
