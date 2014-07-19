@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Jared Boone, ShareBrained Technology, Inc.
+ * Copyright (C) 2014 Jared Boone, ShareBrained Technology, Inc.
  *
  * This file is part of PortaPack.
  *
@@ -19,15 +19,20 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef __PORTAPACK_AUDIO_H__
-#define __PORTAPACK_AUDIO_H__
+#ifndef __LCD_TOUCH_H__
+#define __LCD_TOUCH_H__
 
-#include <stddef.h>
 #include <stdint.h>
 
-void portapack_audio_init();
-void portapack_audio_codec_write(const uint_fast8_t address, const uint_fast16_t data);
+typedef struct touch_state_t {
+	uint16_t x;
+	uint16_t y;
+	uint16_t pressure;
+} touch_state_t;
 
-int_fast8_t portapack_audio_out_volume_set(const int_fast8_t db);
+void lcd_touch_init();
+//void lcd_touch_convert_start();
+//void lcd_touch_convert_stop();
+void lcd_touch_convert(touch_state_t* const state);
 
-#endif/*__PORTAPACK_AUDIO_H__*/
+#endif//__LCD_TOUCH_H__

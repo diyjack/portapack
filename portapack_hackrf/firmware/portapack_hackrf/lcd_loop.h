@@ -22,24 +22,4 @@
 #ifndef __LCD_LOOP_H__
 #define __LCD_LOOP_H__
 
-#include <stdint.h>
-
-typedef struct device_state_t {
-	int64_t tuned_hz;
-	int32_t lna_gain_db;
-	int32_t if_gain_db;
-	int32_t bb_gain_db;
-	int32_t audio_out_gain_db;
-	int32_t receiver_configuration_index;
-
-	uint32_t duration_decimate;
-	uint32_t duration_channel_filter;
-	uint32_t duration_demodulate;
-	uint32_t duration_audio;
-	uint32_t duration_all;
-	uint32_t duration_all_millipercent;
-} device_state_t;
-
-device_state_t* const device_state = (device_state_t*)0x20007000;
-
 #endif

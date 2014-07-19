@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Jared Boone, ShareBrained Technology, Inc.
+ * Copyright (C) 2014 Jared Boone, ShareBrained Technology, Inc.
  *
  * This file is part of PortaPack.
  *
@@ -19,13 +19,22 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef __PORTAPACK_SPI_H__
-#define __PORTAPACK_SPI_H__
+#ifndef __CONSOLE_H__
+#define __CONSOLE_H__
 
-#ifdef JAWBREAKER
+#include <stdint.h>
 
-void portapack_spi_init();
+#include "lcd.h"
 
-#endif/*JAWBREAKER*/
+typedef struct console_t {
+	lcd_t* lcd;
+	uint16_t x;
+	uint16_t y;
+} console_t;
 
-#endif/*__PORTAPACK_SPI_H__*/
+void console_init(console_t* const console, lcd_t* const lcd, const uint_fast16_t y_top, const uint_fast16_t height);
+
+void console_write(console_t* const console, const char* message);
+void console_writeln(console_t* const console, const char* message);
+
+#endif/*__CONSOLE_H__*/

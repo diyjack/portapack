@@ -19,7 +19,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "portapack_i2s.h"
+#include "i2s.h"
 
 #include <libopencm3/lpc43xx/cgu.h>
 #include <libopencm3/lpc43xx/creg.h>
@@ -35,20 +35,52 @@
 #include <math.h>
 
 
-
-
-#define SCU_PINMUX_I2S0_TX_MCLK (CLK2)
-#define SCU_PINMUX_I2S0_TX_SCK (P3_0)
-#define SCU_PINMUX_I2S0_TX_WS (P3_1)
-#define SCU_PINMUX_I2S0_TX_SDA (P3_2)
-/* NOTE: I2S0_RX_SDA shared with CPLD_TMS */
-#define SCU_PINMUX_I2S0_RX_SDA (P6_2)
-
 int16_t audio_rx[I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT][2];
 int16_t audio_tx[I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT][2];
 
 static struct gpdma_lli_t rx_lli[I2S_BUFFER_COUNT];
 static struct gpdma_lli_t tx_lli[I2S_BUFFER_COUNT];
+
+//const float w = (float)i * (6.2831853072f / (I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT));
+//const float v = sinf(w) * 32767.0f;
+//const int16_t l = v, r = v;
+
+/*uint32_t sample_data = 0;
+while(1) {
+	while(((I2S0_STATE >> I2S0_STATE_TX_LEVEL_SHIFT) & 0xf) >= 7);
+	I2S0_TXFIFO = sample_data;
+	sample_data += 0x07770777;
+}*/
+
+static void i2s_clear_tx_buffers() {
+	for(size_t i=0; i<(I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT); i++) {
+		audio_tx[i][0] = 0;
+		audio_tx[i][1] = 0;
+	}
+}
+
+static void i2s_clear_rx_buffers() {
+	for(size_t i=0; i<(I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT); i++) {
+		audio_rx[i][0] = 0;
+		audio_rx[i][1] = 0;
+	}
+}
+
+void i2s_in_start() {
+	I2S0_DAI &= ~(I2S0_DAI_STOP_MASK);
+}
+
+void i2s_out_start() {
+	I2S0_DAO &= ~(I2S0_DAO_STOP_MASK);
+}
+
+void i2s_mute() {
+	I2S0_DAO |= I2S0_DAO_MUTE_MASK;
+}
+
+void i2s_unmute() {
+	I2S0_DAO &= ~I2S0_DAO_MUTE_MASK;
+}
 
 void portapack_i2s_init() {
 	/* Reset I2S peripheral(s) */
@@ -126,7 +158,7 @@ void portapack_i2s_init() {
 	/* NOTE: Documentation of CREG6 is quite confusing. Refer to "I2S clocking and
 	 * pin connections" and other I2S diagrams for more clarity. */
 	CREG_CREG6 |= CREG_CREG6_I2S0_TX_SCK_IN_SEL;
-	CREG_CREG6 &= ~CREG_CREG6_I2S0_RX_SCK_IN_SEL;
+	CREG_CREG6 |= CREG_CREG6_I2S0_RX_SCK_IN_SEL;
 
 	/* I2S0 TX configuration */
 	/* Section 43.7.2.1.6 "Transmitter master mode (BASE_AUDIO_CLK)" */
@@ -176,11 +208,11 @@ void portapack_i2s_init() {
 		;
 
 	I2S0_RXBITRATE =
-		I2S0_RXBITRATE_RX_BITRATE(0)
+		I2S0_RXBITRATE_RX_BITRATE(7)
 		;
 
 	I2S0_RXMODE =
-		I2S0_RXMODE_RXCLKSEL(2) |
+		I2S0_RXMODE_RXCLKSEL(1) |
 		I2S0_RXMODE_RX4PIN(1) |
 		I2S0_RXMODE_RXMCENA(0)
 		;
@@ -196,13 +228,6 @@ void portapack_i2s_init() {
 		I2S0_DMA2_TX_DMA2_ENABLE(1) |
 		I2S0_DMA2_TX_DEPTH_DMA2(4)
 		;
-
-	/* Configure I2S pins */
-	scu_pinmux(SCU_PINMUX_I2S0_TX_MCLK, SCU_CONF_FUNCTION6 | SCU_CONF_EPUN_DIS_PULLUP);
-	scu_pinmux(SCU_PINMUX_I2S0_TX_SCK,  SCU_CONF_FUNCTION2 | SCU_CONF_EPUN_DIS_PULLUP);
-	scu_pinmux(SCU_PINMUX_I2S0_TX_WS,   SCU_CONF_FUNCTION0 | SCU_CONF_EPUN_DIS_PULLUP);
-	scu_pinmux(SCU_PINMUX_I2S0_TX_SDA,  SCU_CONF_FUNCTION0 | SCU_CONF_EPUN_DIS_PULLUP);
-	scu_pinmux(SCU_PINMUX_I2S0_RX_SDA,  SCU_CONF_FUNCTION3 | SCU_CONF_EPUN_DIS_PULLUP | SCU_CONF_EZI_EN_IN_BUFFER);
 
 	/* Initialize DMA */
 	GPDMA_INTTCCLEAR = GPDMA_INTTCCLEAR_INTTCCLEAR(1 << 6);
@@ -294,29 +319,16 @@ void portapack_i2s_init() {
 		GPDMA_CCONFIG_H(0)
 		;
 
-	/* Start audio */
-
-	for(size_t i=0; i<(I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT); i++) {
-		//const float w = (float)i * (6.2831853072f / (I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT));
-		//const float v = sinf(w) * 32767.0f;
-		//const int16_t l = v, r = v;
-		const int16_t l = 0, r = 0;
-		audio_tx[i][0] = l;
-		audio_tx[i][1] = r;
-	}
+	i2s_clear_tx_buffers();
+	i2s_clear_rx_buffers();
 
 	GPDMA_CCONFIG(6) |= GPDMA_CCONFIG_E(1);
 	GPDMA_CCONFIG(7) |= GPDMA_CCONFIG_E(1);
 
-	I2S0_DAO &= ~(I2S0_DAO_STOP_MASK | I2S0_DAO_MUTE_MASK);
-	I2S0_DAI &= ~I2S0_DAI_STOP_MASK;
+	i2s_out_start();
+	i2s_in_start();
 
-	/*uint32_t sample_data = 0;
-	while(1) {
-		while(((I2S0_STATE >> I2S0_STATE_TX_LEVEL_SHIFT) & 0xf) >= 7);
-		I2S0_TXFIFO = sample_data;
-		sample_data += 0x07770777;
-	}*/
+	i2s_unmute();
 }
 
 int16_t* portapack_i2s_tx_empty_buffer() {
@@ -327,4 +339,15 @@ int16_t* portapack_i2s_tx_empty_buffer() {
 		}
 	}
 	return tx_lli[0].csrcaddr;
+}
+
+int16_t* portapack_i2s_rx_full_buffer() {
+	const uint32_t next_lli = GPDMA_CLLI(7);
+	for(size_t i=0; i<I2S_BUFFER_COUNT; i++) {
+		if( rx_lli[i].clli == next_lli ) {
+			// TODO: This algorithm will go nuts if I2S_BUFFER_COUNT <= 2.
+			return rx_lli[(i + I2S_BUFFER_COUNT - 2) % I2S_BUFFER_COUNT].cdestaddr;
+		}
+	}
+	return rx_lli[0].cdestaddr;
 }

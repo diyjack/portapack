@@ -19,39 +19,13 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef __PORTAPACK_H__
-#define __PORTAPACK_H__
+#ifndef __AUDIO_H__
+#define __AUDIO_H__
 
+#include <stddef.h>
 #include <stdint.h>
 
-#include "ipc.h"
+void portapack_codec_init();
+int_fast8_t portapack_audio_out_volume_set(const int_fast8_t db);
 
-typedef struct dsp_metrics_t {
-	uint32_t duration_decimate;
-	uint32_t duration_channel_filter;
-	uint32_t duration_demodulate;
-	uint32_t duration_audio;
-	uint32_t duration_all;
-	uint32_t duration_all_millipercent;
-} dsp_metrics_t;
-
-typedef struct device_state_t {
-	int64_t tuned_hz;
-	int32_t lna_gain_db;
-	int32_t if_gain_db;
-	int32_t bb_gain_db;
-	int32_t audio_out_gain_db;
-	int32_t receiver_configuration_index;
-	
-	int32_t encoder_position;
-
-	ipc_channel_t ipc_m4;
-	ipc_channel_t ipc_m0;
-
-	dsp_metrics_t dsp_metrics;
-} device_state_t;
-
-void portapack_init();
-void portapack_run();
-
-#endif/*__PORTAPACK_H__*/
+#endif/*__AUDIO_H__*/

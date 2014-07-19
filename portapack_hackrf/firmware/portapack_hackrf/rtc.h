@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Jared Boone, ShareBrained Technology, Inc.
+ * Copyright (C) 2014 Jared Boone, ShareBrained Technology, Inc.
  *
  * This file is part of PortaPack.
  *
@@ -19,22 +19,26 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "portapack_i2c.h"
+#ifndef __RTC_H__
+#define __RTC_H__
 
 #include <stdint.h>
+ 
+void rtc_init();
 
-#include <libopencm3/lpc43xx/i2c.h>
+void rtc_enable();
+void rtc_disable();
 
-#include "wm8731.h"
+void rtc_date_set(const uint_fast16_t year, const uint_fast8_t month, const  uint_fast8_t day_of_month);
+void rtc_time_set(const uint_fast8_t hour, const uint_fast8_t minute, const uint_fast8_t second);
 
-void portapack_i2c_init() {
-}
+uint_fast16_t rtc_year();
+uint_fast8_t rtc_month();
+uint_fast16_t rtc_day_of_year();
+uint_fast8_t rtc_day_of_week();
+uint_fast8_t rtc_day_of_month();
+uint_fast8_t rtc_hour();
+uint_fast8_t rtc_minute();
+uint_fast8_t rtc_second();
 
-void portapack_audio_codec_write(const uint_fast8_t address, const uint_fast16_t data) {
-	uint16_t word = (address << 9) | data;
-	i2c0_tx_start();
-	i2c0_tx_byte(WM8731_I2C_ADDR | I2C_WRITE);
-	i2c0_tx_byte(word >> 8);
-	i2c0_tx_byte(word & 0xff);
-	i2c0_stop();
-}
+#endif/*__RTC_H__*/

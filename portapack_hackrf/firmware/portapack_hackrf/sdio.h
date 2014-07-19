@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Jared Boone, ShareBrained Technology, Inc.
+ * Copyright (C) 2014 Jared Boone, ShareBrained Technology, Inc.
  *
  * This file is part of PortaPack.
  *
@@ -19,19 +19,33 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef __PORTAPACK_I2S_H__
-#define __PORTAPACK_I2S_H__
+#ifndef __SDIO_H__
+#define __SDIO_H__
 
 #include <stdint.h>
+#include <stdbool.h>
 
-#define I2S_BUFFER_COUNT 4
-#define I2S_BUFFER_SAMPLE_COUNT 32
+typedef enum {
+	SDIO_OK = 0,
 
-extern int16_t audio_rx[I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT][2];
-extern int16_t audio_tx[I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT][2];
+	SDIO_ERROR_HARDWARE_IS_LOCKED = -1,
+	SDIO_ERROR_RESPONSE_TIMED_OUT = -2,
+	SDIO_ERROR_RESPONSE_CRC_ERROR = -3,
+	SDIO_ERROR_RESPONSE_ERROR = -4,
 
-void portapack_i2s_init();
+	SDIO_ERROR_RESPONSE_ON_INITIALIZATION = -100,
+	SDIO_ERROR_RESPONSE_CHECK_PATTERN_INCORRECT = -101,
+	SDIO_ERROR_RESPONSE_VOLTAGE_NOT_ACCEPTED = -102,
+} sdio_error_t;
 
-int16_t* portapack_i2s_tx_empty_buffer();
+void sdio_init();
+bool sdio_card_is_present();
 
-#endif/*__PORTAPACK_I2S_H__*/
+void sdio_cclk_set_400khz();
+void sdio_set_width_1bit();
+
+sdio_error_t sdio_cmd0(const uint_fast8_t init);
+sdio_error_t sdio_cmd8();
+sdio_error_t sdio_acmd41(const uint32_t vdd_voltage_window);
+
+#endif/*__SDIO_H__*/

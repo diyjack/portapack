@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Jared Boone, ShareBrained Technology, Inc.
+ * Copyright (C) 2013 Jared Boone, ShareBrained Technology, Inc.
  *
  * This file is part of PortaPack.
  *
@@ -19,13 +19,22 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef __PORTAPACK_I2C_H__
-#define __PORTAPACK_I2C_H__
+#ifndef __I2S_H__
+#define __I2S_H__
 
-#ifdef HACKRF_ONE
+#include <stdint.h>
 
-void portapack_i2c_init();
+#define I2S_BUFFER_COUNT 4
+#define I2S_BUFFER_SAMPLE_COUNT 32
 
-#endif/*HACKRF_ONE*/
+extern int16_t audio_rx[I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT][2];
+extern int16_t audio_tx[I2S_BUFFER_SAMPLE_COUNT * I2S_BUFFER_COUNT][2];
 
-#endif/*__PORTAPACK_I2C_H__*/
+void portapack_i2s_init();
+void i2s_mute();
+void i2s_unmute();
+
+int16_t* portapack_i2s_tx_empty_buffer();
+int16_t* portapack_i2s_rx_full_buffer();
+
+#endif/*__I2S_H__*/

@@ -23,16 +23,33 @@
  * strict type-checking.. See the
  * "unnecessary" pointer comparison.
  */
+
 #define min(x, y) ({				\
 	typeof(x) _min1 = (x);			\
 	typeof(y) _min2 = (y);			\
 	(void) (&_min1 == &_min2);		\
 	_min1 < _min2 ? _min1 : _min2; })
 #define max(x, y) ({				\
-	typeof(x) _min1 = (x);			\
-	typeof(y) _min2 = (y);			\
-	(void) (&_min1 == &_min2);		\
-	_min1 > _min2 ? _min1 : _min2; })
+	typeof(x) _max1 = (x);			\
+	typeof(y) _max2 = (y);			\
+	(void) (&_max1 == &_max2);		\
+	_max1 > _max2 ? _max1 : _max2; })
+
+/*
+ * ..and if you can't take the strict
+ * types, you can specify one yourself.
+ *
+ * Or not use min/max/clamp at all, of course.
+ */
+#define min_t(type, x, y) ({			\
+	type __min1 = (x);			\
+	type __min2 = (y);			\
+	__min1 < __min2 ? __min1: __min2; })
+
+#define max_t(type, x, y) ({			\
+	type __max1 = (x);			\
+	type __max2 = (y);			\
+	__max1 > __max2 ? __max1: __max2; })
 
 typedef uint32_t u32;
 typedef uint64_t u64;
@@ -40,7 +57,7 @@ typedef uint64_t u64;
 typedef uint32_t __u32;
 typedef uint64_t __u64;
 
-#define __always_inline		inline __attribute__((always_inline))
+//#define __always_inline		inline __attribute__((always_inline))
 #define __must_check 		__attribute__((warn_unused_result))
 #define __must_be_array(arr) 0
 
@@ -120,7 +137,7 @@ static inline int fls(int x)
  * Note fls(0) = 0, fls(1) = 1, fls(0x80000000) = 32.
  */
 
-static __always_inline int fls(int x)
+static /*__always_inline*/ inline int fls(int x)
 {
 	int r = 32;
 
@@ -161,7 +178,7 @@ static __always_inline int fls(int x)
  * set bit if value is nonzero. The last (most significant) bit is
  * at position 64.
  */
-static __always_inline int fls64(__u64 x)
+static /*__always_inline*/ inline int fls64(__u64 x)
 {
 	__u32 h = x >> 32;
 	if (h)
