@@ -449,8 +449,12 @@ const receiver_configuration_t receiver_configurations[] = {
 	},
 };
 
+const receiver_configuration_t* get_receiver_configuration() {
+	return &receiver_configurations[device_state->receiver_configuration_index];
+}
+
 bool set_frequency(const int64_t new_frequency) {
-	const receiver_configuration_t* const receiver_configuration = &receiver_configurations[device_state->receiver_configuration_index];
+	const receiver_configuration_t* const receiver_configuration = get_receiver_configuration();
 
 	const int64_t tuned_frequency = new_frequency + receiver_configuration->tuning_offset;
 	if( set_freq(tuned_frequency) ) {
@@ -482,9 +486,9 @@ void set_rx_mode(const uint32_t new_receiver_configuration_index) {
 	/* TODO: Ensure receiver_state_buffer is large enough for new mode, or start using
 	 * heap to allocate necessary memory.
 	 */
-	const receiver_configuration_t* const old_receiver_configuration = &receiver_configurations[device_state->receiver_configuration_index];
+	const receiver_configuration_t* const old_receiver_configuration = get_receiver_configuration();
 	device_state->receiver_configuration_index = new_receiver_configuration_index;
-	const receiver_configuration_t* const receiver_configuration = &receiver_configurations[device_state->receiver_configuration_index];
+	const receiver_configuration_t* const receiver_configuration = get_receiver_configuration();
 
 	if( old_receiver_configuration->tuning_offset != receiver_configuration->tuning_offset ) {
 		set_frequency(device_state->tuned_hz);

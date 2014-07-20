@@ -77,6 +77,6 @@ bool set_frequency(const int64_t new_frequency);
 void set_rx_mode(const uint32_t new_receiver_configuration_index);
 
 extern gpdma_lli_t lli_rx[2];
-extern const receiver_configuration_t receiver_configurations[];
+const receiver_configuration_t* get_receiver_configuration();
 
 #endif/*__PORTAPACK_H__*/

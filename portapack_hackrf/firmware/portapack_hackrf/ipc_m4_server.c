@@ -91,7 +91,7 @@ static void handle_command_set_receiver_configuration(const void* const arg) {
 static void handle_command_ui_frame_sync(const void* const arg) {
 	const ipc_command_ui_frame_sync_t* const command = arg;
 
-	if( !receiver_configurations[device_state->receiver_configuration_index].enable_spectrum ) {
+	if( !get_receiver_configuration()->enable_spectrum ) {
 		return;
 	}
 
