@@ -23,6 +23,7 @@
 #define __DECIMATE_H__
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "complex.h"
 
@@ -32,10 +33,10 @@ typedef struct translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_state_t {
 } translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_state_t;
 
 void translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_init(translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_state_t* const state);
-void translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(
+size_t translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(
 	translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_state_t* const state,
 	complex_s8_t* const src_and_dst,
-	int32_t n
+	const size_t sample_count
 );
 
 typedef struct fir_cic3_decim_2_s8_s16_state_t {
@@ -44,10 +45,10 @@ typedef struct fir_cic3_decim_2_s8_s16_state_t {
 } fir_cic3_decim_2_s8_s16_state_t;
 
 void fir_cic3_decim_2_s8_s16_init(fir_cic3_decim_2_s8_s16_state_t* const state);
-void fir_cic3_decim_2_s8_s16(
+size_t fir_cic3_decim_2_s8_s16(
 	fir_cic3_decim_2_s8_s16_state_t* const state,
 	complex_s8_t* const src_and_dst,
-	int32_t n
+	const size_t sample_count
 );
 
 typedef struct fir_cic3_decim_2_s16_s32_state_t {
@@ -56,10 +57,10 @@ typedef struct fir_cic3_decim_2_s16_s32_state_t {
 } fir_cic3_decim_2_s16_s32_state_t;
 
 void fir_cic3_decim_2_s16_s32_init(fir_cic3_decim_2_s16_s32_state_t* const state);
-void fir_cic3_decim_2_s16_s32(
+size_t fir_cic3_decim_2_s16_s32(
 	fir_cic3_decim_2_s16_s32_state_t* const state,
 	complex_s16_t* const src_and_dst,
-	int32_t n
+	const size_t sample_count
 );
 
 typedef struct fir_cic3_decim_2_s16_s16_state_t {
@@ -68,11 +69,11 @@ typedef struct fir_cic3_decim_2_s16_s16_state_t {
 } fir_cic3_decim_2_s16_s16_state_t;
 
 void fir_cic3_decim_2_s16_s16_init(fir_cic3_decim_2_s16_s16_state_t* const state);
-void fir_cic3_decim_2_s16_s16(
+size_t fir_cic3_decim_2_s16_s16(
 	fir_cic3_decim_2_s16_s16_state_t* const state,
 	complex_s16_t* const src,
 	complex_s16_t* const dst,
-	int32_t n
+	const size_t sample_count
 );
 
 typedef struct fir_cic4_decim_2_real_s16_s16_state_t {
@@ -80,11 +81,11 @@ typedef struct fir_cic4_decim_2_real_s16_s16_state_t {
 } fir_cic4_decim_2_real_s16_s16_state_t;
 
 void fir_cic4_decim_2_real_s16_s16_init(fir_cic4_decim_2_real_s16_s16_state_t* const state);
-void fir_cic4_decim_2_real_s16_s16(
+size_t fir_cic4_decim_2_real_s16_s16(
 	fir_cic4_decim_2_real_s16_s16_state_t* const state,
 	int16_t* src,
 	int16_t* dst,
-	int32_t n
+	const size_t sample_count
 );
 
 typedef struct fir_64_decim_2_real_s16_s16_state_t {
@@ -97,11 +98,11 @@ void fir_64_decim_2_real_s16_s16_init(
 	const int16_t* const taps
 );
 
-void fir_64_decim_2_real_s16_s16(
+size_t fir_64_decim_2_real_s16_s16(
 	fir_64_decim_2_real_s16_s16_state_t* const state,
 	int16_t* src,
 	int16_t* dst,
-	int32_t n
+	const size_t sample_count
 );
 
 #endif/*__DECIMATE_H__*/

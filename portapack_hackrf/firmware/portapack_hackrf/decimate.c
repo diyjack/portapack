@@ -24,6 +24,7 @@
 #include "arm_intrinsics.h"
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "complex.h"
 
@@ -32,11 +33,12 @@ void fir_cic3_decim_2_s8_s16_init(fir_cic3_decim_2_s8_s16_state_t* const state) 
 	state->q = 0;
 }
 
-void fir_cic3_decim_2_s8_s16(
+size_t fir_cic3_decim_2_s8_s16(
 	fir_cic3_decim_2_s8_s16_state_t* const state,
 	complex_s8_t* const src_and_dst,
-	int32_t n
+	const size_t sample_count
 ) {
+	int32_t n = sample_count;
 	uint32_t i = state->i;
 	uint32_t q = state->q;
 	uint32_t taps = 0x00030001;
@@ -102,6 +104,8 @@ void fir_cic3_decim_2_s8_s16(
 	}
 	state->i = i;
 	state->q = q;
+
+	return sample_count / 2;
 }
 
 void fir_cic3_decim_2_s16_s32_init(fir_cic3_decim_2_s16_s32_state_t* const state) {
@@ -109,17 +113,17 @@ void fir_cic3_decim_2_s16_s32_init(fir_cic3_decim_2_s16_s32_state_t* const state
 	state->iq1 = 0;
 }
 
-void fir_cic3_decim_2_s16_s32(
+size_t fir_cic3_decim_2_s16_s32(
 	fir_cic3_decim_2_s16_s32_state_t* const state,
 	complex_s16_t* const src_and_dst,
-	int32_t n
+	const size_t sample_count
 ) {
 	/* Complex non-recursive 3rd-order CIC filter (taps 1,3,3,1).
 	 * Gain of 8.
 	 * Consumes 16 bytes (4 s16:s16 samples) per loop iteration,
 	 * Produces 16 bytes (2 s32:s32 samples) per loop iteration.
 	 */
-
+	int32_t n = sample_count;
 	uint32_t t1 = state->iq0;
 	uint32_t t2 = state->iq1;
 	uint32_t t3, t4;
@@ -161,6 +165,8 @@ void fir_cic3_decim_2_s16_s32(
 	}
 	state->iq0 = t1;
 	state->iq1 = t2;
+
+	return sample_count / 2;
 }
 
 void fir_cic3_decim_2_s16_s16_init(fir_cic3_decim_2_s16_s16_state_t* const state) {
@@ -168,18 +174,18 @@ void fir_cic3_decim_2_s16_s16_init(fir_cic3_decim_2_s16_s16_state_t* const state
 	state->iq1 = 0;
 }
 
-void fir_cic3_decim_2_s16_s16(
+size_t fir_cic3_decim_2_s16_s16(
 	fir_cic3_decim_2_s16_s16_state_t* const state,
 	complex_s16_t* const src,
 	complex_s16_t* const dst,
-	int32_t n
+	const size_t sample_count
 ) {
 	/* Complex non-recursive 3rd-order CIC filter (taps 1,3,3,1).
 	 * Gain of 8.
 	 * Consumes 16 bytes (4 s16:s16 samples) per loop iteration,
 	 * Produces  8 bytes (2 s16:s16 samples) per loop iteration.
 	 */
-
+	int32_t n = sample_count;
 	uint32_t t1 = state->iq0;
 	uint32_t t2 = state->iq1;
 	uint32_t t3, t4;
@@ -220,6 +226,8 @@ void fir_cic3_decim_2_s16_s16(
 	}
 	state->iq0 = t1;
 	state->iq1 = t2;
+
+	return sample_count / 2;
 }
 /*
 void unpack_complex_s8_to_dual_s16(complex_s8_t* src, int16_t* dst_i, int16_t* dst_q, int32_t n) {
@@ -275,10 +283,10 @@ void translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_init(translate_fs_over_4
 	state->q0_i1 = 0;
 }
 
-void translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(
+size_t translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(
 	translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_state_t* const state,
 	complex_s8_t* const src_and_dst,
-	int32_t n
+	const size_t sample_count
 ) {
 	/* Translates incoming complex<int8_t> samples by -fs/4,
 	 * decimates by two using a non-recursive third-order CIC filter.
@@ -312,6 +320,7 @@ void translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(
 	 */
 
 	// 6 cycles per complex input sample, not including loop overhead.
+	int32_t n = sample_count;
 	uint32_t q1_i0 = state->q1_i0;
 	uint32_t q0_i1 = state->q0_i1;
 	uint32_t k_3_1 = 0x00030001;
@@ -356,6 +365,8 @@ void translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(
 	}
 	state->q1_i0 = q1_i0;
 	state->q0_i1 = q0_i1;
+
+	return sample_count / 2;
 }
 
 void fir_cic4_decim_2_real_s16_s16_init(fir_cic4_decim_2_real_s16_s16_state_t* const state) {
@@ -364,14 +375,15 @@ void fir_cic4_decim_2_real_s16_s16_init(fir_cic4_decim_2_real_s16_s16_state_t* c
 	}
 }
 
-void fir_cic4_decim_2_real_s16_s16(
+size_t fir_cic4_decim_2_real_s16_s16(
 	fir_cic4_decim_2_real_s16_s16_state_t* const state,
 	int16_t* src,
 	int16_t* dst,
-	int32_t n
+	const size_t sample_count
 ) {
 	static const int16_t tap[] = { 1, 4, 6, 4, 1 };
 
+	int32_t n = sample_count;
 	for(; n>0; n-=2) {
 		state->z[5] = *(src++);
 		state->z[5+1] = *(src++);
@@ -383,7 +395,10 @@ void fir_cic4_decim_2_real_s16_s16(
 		}
 		*(dst++) = t >> 4;
 	}
+
+	return sample_count / 2;
 }
+
 void fir_64_decim_2_real_s16_s16_init(
 	fir_64_decim_2_real_s16_s16_state_t* const state,
 	const int16_t* const taps
@@ -394,17 +409,18 @@ void fir_64_decim_2_real_s16_s16_init(
 	}
 }
 
-void fir_64_decim_2_real_s16_s16(
+size_t fir_64_decim_2_real_s16_s16(
 	fir_64_decim_2_real_s16_s16_state_t* const state,
 	int16_t* src,
 	int16_t* dst,
-	int32_t n
+	const size_t sample_count
 ) {
 	/* int16_t input (sample count "n" must be multiple of 4)
 	 * -> int16_t output, decimated by 2.
 	 * taps are normalized to 1 << 16 == 1.0.
 	 */
 
+	int32_t n = sample_count;
 	for(; n>0; n-=2) {
 		state->z[64] = *(src++);
 		state->z[65] = *(src++);
@@ -423,6 +439,8 @@ void fir_64_decim_2_real_s16_s16(
 		}
 		*(dst++) = t >> 16;
 	}
+
+	return sample_count / 2;
 }
 /*
 #include "arm_intrinsics.h"
