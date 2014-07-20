@@ -185,7 +185,7 @@ static const void* get_audio_out_gain() {
 	return &device_state->audio_out_gain_db;
 }
 
-static const void* get_receiver_configuration() {
+static const void* get_receiver_configuration_name() {
 	// TODO: Pull this from a shared structure somewhere!
 	switch(device_state->receiver_configuration_index) {
 	case 0: return "SPEC";
@@ -388,7 +388,7 @@ static ui_field_text_t fields[] = {
 			.down = ui_field_value_down_receiver_configuration,
 		},
 		.format = "Mode %4s",
-		.getter = get_receiver_configuration,
+		.getter = get_receiver_configuration_name,
 		.render = render_field_str,
 	},
 	[UI_FIELD_TUNING_STEP_SIZE] = {
