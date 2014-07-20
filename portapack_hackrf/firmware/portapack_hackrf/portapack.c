@@ -176,17 +176,31 @@ void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t*
 
 	const uint32_t channel_filter_end_time = systick_get_value();
 
-	/* 768kHz complex<int32>[N/4]
+	/* 768kHz complex<int16>[N/4]
 	 * -> FM demodulation
-	 * -> 768kHz int32[N/4] */
+	 * -> 768kHz int16[N/4] */
 	fm_demodulate_s16_s16(&state->fm_demodulate_state, out, out, sample_count);
 
 	const uint32_t demodulate_end_time = systick_get_value();
 
+	/* 768kHz int16[N/4]
+	 * -> 4th order CIC decimation by 2, gain of 1
+	 * -> 384kHz int16[N/8] */
 	sample_count = fir_cic4_decim_2_real_s16_s16(&state->audio_dec_1, out, out, sample_count);
+
+	/* 384kHz int16[N/8]
+	 * -> 4th order CIC decimation by 2, gain of 1
+	 * -> 192kHz int16[N/16] */
 	sample_count = fir_cic4_decim_2_real_s16_s16(&state->audio_dec_2, out, out, sample_count);
+
+	/* 192kHz int16[N/16]
+	 * -> 4th order CIC decimation by 2, gain of 1
+	 * -> 96kHz int16[N/32] */
 	sample_count = fir_cic4_decim_2_real_s16_s16(&state->audio_dec_3, out, out, sample_count);
 
+	/* 96kHz int16[N/32]
+	 * -> FIR filter, <15kHz (0.156fs) pass, >19kHz (0.198fs) stop, gain of 1
+	 * -> 48kHz int16[N/64] */
 	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec_4, out, out, sample_count);
 
 	const uint32_t audio_end_time = systick_get_value();
@@ -257,7 +271,14 @@ void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t
 		p->q >>= 6;
 	}
 
+	/* 768kHz complex<int16>[N/4]
+	 * -> 3rd order CIC decimation by 2, gain of 8
+	 * -> 384kHz complex<int16>[N/8] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_3, out, out, sample_count);
+
+	/* 384kHz complex<int16>[N/8]
+	 * -> 3rd order CIC decimation by 2, gain of 8
+	 * -> 192kHz complex<int16>[N/16] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_4, out, out, sample_count);
 
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
@@ -268,6 +289,9 @@ void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t
 		p++;
 	}
 
+	/* 192kHz complex<int16>[N/16]
+	 * -> 3rd order CIC decimation by 2, gain of 8
+	 * -> 96kHz complex<int16>[N/32] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_5, out, out, sample_count);
 
 	const uint32_t decimate_end_time = systick_get_value();
@@ -276,10 +300,16 @@ void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t
 
 	const uint32_t channel_filter_end_time = systick_get_value();
 
+	/* 96kHz complex<int16>[N/32]
+	 * -> FM demodulation
+	 * -> 96kHz int16[N/32] */
 	fm_demodulate_s16_s16(&state->fm_demodulate, out, out, sample_count);
 
 	const uint32_t demodulate_end_time = systick_get_value();
 
+	/* 96kHz int16[N/32]
+	 * -> FIR filter, <3kHz (0.031fs) pass, >6kHz (0.063fs) stop, gain of 1
+	 * -> 48kHz int16[N/64] */
 	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec, out, out, sample_count);
 
 	const uint32_t audio_end_time = systick_get_value();
@@ -348,7 +378,14 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 		p->q >>= 6;
 	}
 
+	/* 768kHz complex<int16>[N/4]
+	 * -> 3rd order CIC decimation by 2, gain of 8
+	 * -> 384kHz complex<int16>[N/8] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_3, out, out, sample_count);
+
+	/* 384kHz complex<int16>[N/8]
+	 * -> 3rd order CIC decimation by 2, gain of 8
+	 * -> 192kHz complex<int16>[N/16] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_4, out, out, sample_count);
 
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
@@ -359,6 +396,9 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 		p++;
 	}
 
+	/* 192kHz complex<int16>[N/16]
+	 * -> 3rd order CIC decimation by 2, gain of 8
+	 * -> 96kHz complex<int16>[N/32] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_5, out, out, sample_count);
 
 	const uint32_t decimate_end_time = systick_get_value();
@@ -367,10 +407,16 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 
 	const uint32_t channel_filter_end_time = systick_get_value();
 
+	/* 96kHz int16[N/32]
+	 * -> AM demodulation
+	 * -> 96kHz int16[N/32] */
 	am_demodulate_s16_s16(out, out, sample_count);
 
 	const uint32_t demodulate_end_time = systick_get_value();
 
+	/* 96kHz int16[N/32]
+	 * -> FIR filter, gain of 1
+	 * -> 48kHz int16[N/64] */
 	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec, out, out, sample_count);
 
 	const uint32_t audio_end_time = systick_get_value();
