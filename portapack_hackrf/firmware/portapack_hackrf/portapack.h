@@ -76,7 +76,7 @@ void portapack_run();
 bool set_frequency(const int64_t new_frequency);
 void set_rx_mode(const uint32_t new_receiver_configuration_index);
 
-extern gpdma_lli_t lli_rx[2];
+complex_s8_t* wait_for_completed_baseband_buffer();
 const receiver_configuration_t* get_receiver_configuration();
 
 #endif/*__PORTAPACK_H__*/

@@ -453,6 +453,15 @@ const receiver_configuration_t* get_receiver_configuration() {
 	return &receiver_configurations[device_state->receiver_configuration_index];
 }
 
+complex_s8_t* wait_for_completed_baseband_buffer() {
+	const size_t last_lli_index = sgpio_dma_current_transfer_index(lli_rx, 2);
+	while( sgpio_dma_current_transfer_index(lli_rx, 2) == last_lli_index );
+	
+	const size_t current_lli_index = sgpio_dma_current_transfer_index(lli_rx, 2);
+	const size_t finished_lli_index = 1 - current_lli_index;
+	return lli_rx[finished_lli_index].cdestaddr;
+}
+
 bool set_frequency(const int64_t new_frequency) {
 	const receiver_configuration_t* const receiver_configuration = get_receiver_configuration();
 

@@ -95,13 +95,7 @@ static void handle_command_ui_frame_sync(const void* const arg) {
 		return;
 	}
 
-	/* Wait for start of a new transfer. */
-	const size_t last_lli_index = sgpio_dma_current_transfer_index(lli_rx, 2);
-	while( sgpio_dma_current_transfer_index(lli_rx, 2) == last_lli_index );
-	
-	const size_t current_lli_index = sgpio_dma_current_transfer_index(lli_rx, 2);
-	const size_t finished_lli_index = 1 - current_lli_index;
-	complex_s8_t* const completed_buffer = lli_rx[finished_lli_index].cdestaddr;
+	complex_s8_t* const completed_buffer = wait_for_completed_baseband_buffer();
 
 	complex_t spectrum[256];
 	/*int32_t sum_r = 0;
