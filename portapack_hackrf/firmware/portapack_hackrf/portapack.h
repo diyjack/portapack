@@ -23,8 +23,27 @@
 #define __PORTAPACK_H__
 
 #include <stdint.h>
+#include <stdbool.h>
 
+#include <gpdma.h>
+
+#include "complex.h"
 #include "ipc.h"
+
+typedef void (*receiver_state_init_t)(void* const state);
+typedef void (*receiver_baseband_handler_t)(void* const state, complex_s8_t* const data, const size_t sample_count, void* const out_buffer);
+
+typedef struct receiver_configuration_t {
+	const char* const name;
+	receiver_state_init_t init;
+	receiver_baseband_handler_t baseband_handler;
+	int64_t tuning_offset;
+	uint32_t sample_rate;
+	uint32_t baseband_bandwidth;
+	uint32_t baseband_decimation;
+	bool enable_audio;
+	bool enable_spectrum;
+} receiver_configuration_t;
 
 typedef struct dsp_metrics_t {
 	uint32_t duration_decimate;
@@ -53,5 +72,11 @@ typedef struct device_state_t {
 
 void portapack_init();
 void portapack_run();
+
+bool set_frequency(const int64_t new_frequency);
+void set_rx_mode(const uint32_t new_receiver_configuration_index);
+
+extern gpdma_lli_t lli_rx[2];
+extern const receiver_configuration_t receiver_configurations[];
 
 #endif/*__PORTAPACK_H__*/

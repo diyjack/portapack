@@ -42,6 +42,7 @@ set(SRC_M4
 	demodulate.c
 	kfifo.c
 	ipc.c
+	ipc_m4_server.c
 	m0_startup.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/rf_path.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/tuning.c
