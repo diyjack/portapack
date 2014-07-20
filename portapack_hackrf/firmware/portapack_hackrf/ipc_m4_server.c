@@ -31,7 +31,9 @@
 #include "portapack.h"
 #include "portapack_driver.h"
 #include "audio.h"
+
 #include "ipc.h"
+#include "ipc_m4.h"
 
 static void handle_command_none(const void* const command) {
 	(void)command;

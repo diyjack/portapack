@@ -40,6 +40,8 @@
 #include <stdio.h>
 
 #include "ipc.h"
+#include "ipc_m4_client.h"
+
 #include "linux_stuff.h"
 
 lcd_t lcd = {

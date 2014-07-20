@@ -77,6 +77,7 @@ set(SRC_M0
 	console.c
 	kfifo.c
 	ipc.c
+	ipc_m4_client.c
 	rtc.c
 	sdio.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/delay.c

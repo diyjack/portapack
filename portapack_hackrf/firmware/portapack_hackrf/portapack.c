@@ -47,6 +47,7 @@
 #include "demodulate.h"
 
 #include "ipc.h"
+#include "ipc_m4.h"
 #include "linux_stuff.h"
 
 gpdma_lli_t lli_rx[2];
