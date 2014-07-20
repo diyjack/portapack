@@ -40,5 +40,6 @@ typedef struct ipc_command_t {
 void ipc_channel_init(ipc_channel_t* const channel, void* const buffer, const size_t buffer_size);
 int ipc_channel_is_empty(ipc_channel_t* const channel);
 uint32_t ipc_channel_read(ipc_channel_t* const channel, void* buffer, const size_t buffer_length);
+void ipc_channel_write(ipc_channel_t* const channel, const void* const buffer, const size_t buffer_length);
 
 #endif/*__IPC_H__*/

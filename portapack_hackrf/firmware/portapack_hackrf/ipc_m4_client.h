@@ -22,6 +22,8 @@
 #ifndef __IPC_M4_CLIENT_H__
 #define __IPC_M4_CLIENT_H__
 
+#include <stdint.h>
+
 #include "ipc.h"
 
 void ipc_command_set_frequency(ipc_channel_t* const channel, const int64_t value_hz);

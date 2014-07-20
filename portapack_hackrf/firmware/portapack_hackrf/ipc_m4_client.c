@@ -27,8 +27,7 @@ void ipc_command_set_frequency(ipc_channel_t* const channel, const int64_t value
 		.id = IPC_COMMAND_ID_SET_FREQUENCY,
 		.frequency_hz = value_hz
 	};
-	kfifo_in(&channel->fifo, &command, sizeof(command));
-	__SEV();
+	ipc_channel_write(channel, &command, sizeof(command));
 }
 
 void ipc_command_set_rf_gain(ipc_channel_t* const channel, const int32_t value_db) {
@@ -36,8 +35,7 @@ void ipc_command_set_rf_gain(ipc_channel_t* const channel, const int32_t value_d
 		.id = IPC_COMMAND_ID_SET_RF_GAIN,
 		.gain_db = value_db
 	};
-	kfifo_in(&channel->fifo, &command, sizeof(command));
-	__SEV();
+	ipc_channel_write(channel, &command, sizeof(command));
 }
 
 void ipc_command_set_if_gain(ipc_channel_t* const channel, const int32_t value_db) {
@@ -45,8 +43,7 @@ void ipc_command_set_if_gain(ipc_channel_t* const channel, const int32_t value_d
 		.id = IPC_COMMAND_ID_SET_IF_GAIN,
 		.gain_db = value_db
 	};
-	kfifo_in(&channel->fifo, &command, sizeof(command));
-	__SEV();
+	ipc_channel_write(channel, &command, sizeof(command));
 }
 
 void ipc_command_set_bb_gain(ipc_channel_t* const channel, const int32_t value_db) {
@@ -54,8 +51,7 @@ void ipc_command_set_bb_gain(ipc_channel_t* const channel, const int32_t value_d
 		.id = IPC_COMMAND_ID_SET_BB_GAIN,
 		.gain_db = value_db
 	};
-	kfifo_in(&channel->fifo, &command, sizeof(command));
-	__SEV();
+	ipc_channel_write(channel, &command, sizeof(command));
 }
 
 void ipc_command_set_audio_out_gain(ipc_channel_t* const channel, const int32_t value_db) {
@@ -63,8 +59,7 @@ void ipc_command_set_audio_out_gain(ipc_channel_t* const channel, const int32_t 
 		.id = IPC_COMMAND_ID_SET_AUDIO_OUT_GAIN,
 		.gain_db = value_db
 	};
-	kfifo_in(&channel->fifo, &command, sizeof(command));
-	__SEV();
+	ipc_channel_write(channel, &command, sizeof(command));
 }
 
 void ipc_command_set_receiver_configuration(ipc_channel_t* const channel, const uint32_t index) {
@@ -72,8 +67,7 @@ void ipc_command_set_receiver_configuration(ipc_channel_t* const channel, const 
 		.id = IPC_COMMAND_ID_SET_RECEIVER_CONFIGURATION,
 		.index = index
 	};
-	kfifo_in(&channel->fifo, &command, sizeof(command));
-	__SEV();
+	ipc_channel_write(channel, &command, sizeof(command));
 }
 
 void ipc_command_ui_frame_sync(ipc_channel_t* const channel, int16_t* const fft_bin) {
@@ -81,6 +75,5 @@ void ipc_command_ui_frame_sync(ipc_channel_t* const channel, int16_t* const fft_
 		.id = IPC_COMMAND_ID_UI_FRAME_SYNC,
 		.fft_bin = fft_bin,
 	};
-	kfifo_in(&channel->fifo, &command, sizeof(command));
-	__SEV();
+	ipc_channel_write(channel, &command, sizeof(command));
 }

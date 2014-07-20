@@ -41,3 +41,8 @@ uint32_t ipc_channel_read(ipc_channel_t* const channel, void* buffer, const size
 		return 0;
 	}
 }
+
+void ipc_channel_write(ipc_channel_t* const channel, const void* const buffer, const size_t buffer_length) {
+	kfifo_in(&channel->fifo, buffer, buffer_length);
+	__SEV();
+}
