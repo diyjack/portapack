@@ -280,8 +280,8 @@ void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t
 	complex_s16_t* p;
 	p = (complex_s16_t*)out;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
-		p->i >>= 6;
-		p->q >>= 6;
+		p->i /= 2;
+		p->q /= 2;
 		p++;
 	}
 
@@ -289,6 +289,14 @@ void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 384kHz complex<int16>[N/8] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_3, out, out, sample_count);
+
+	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
+	p = (complex_s16_t*)out;
+	for(uint_fast16_t n=sample_count; n>0; n-=1) {
+		p->i /= 8;
+		p->q /= 8;
+		p++;
+	}
 
 	/* 384kHz complex<int16>[N/8]
 	 * -> 3rd order CIC decimation by 2, gain of 8
@@ -298,8 +306,8 @@ void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
 	p = (complex_s16_t*)out;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
-		p->i >>= 6;
-		p->q >>= 6;
+		p->i /= 8;
+		p->q /= 8;
 		p++;
 	}
 
@@ -390,8 +398,8 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	complex_s16_t* p;
 	p = (complex_s16_t*)out;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
-		p->i >>= 6;
-		p->q >>= 6;
+		p->i /= 2;
+		p->q /= 2;
 		p++;
 	}
 
@@ -399,6 +407,14 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 384kHz complex<int16>[N/8] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_3, out, out, sample_count);
+
+	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
+	p = (complex_s16_t*)out;
+	for(uint_fast16_t n=sample_count; n>0; n-=1) {
+		p->i /= 8;
+		p->q /= 8;
+		p++;
+	}
 
 	/* 384kHz complex<int16>[N/8]
 	 * -> 3rd order CIC decimation by 2, gain of 8
@@ -408,8 +424,8 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
 	p = (complex_s16_t*)out;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
-		p->i >>= 6;
-		p->q >>= 6;
+		p->i /= 8;
+		p->q /= 8;
 		p++;
 	}
 
