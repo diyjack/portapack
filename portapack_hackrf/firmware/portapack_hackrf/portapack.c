@@ -62,6 +62,17 @@ static volatile uint32_t duration_demodulate = 0;
 static volatile uint32_t duration_audio = 0;
 static volatile uint32_t duration_all = 0;
 
+static void copy_to_audio_output(const int16_t* const source, const size_t sample_count) {
+	if( sample_count != I2S_BUFFER_SAMPLE_COUNT ) {
+		return;
+	}
+
+	int16_t* const audio_tx_buffer = portapack_i2s_tx_empty_buffer();
+	for(size_t i=0, j=0; i<I2S_BUFFER_SAMPLE_COUNT; i++, j++) {
+		audio_tx_buffer[i*2] = audio_tx_buffer[i*2+1] = source[j];
+	}
+}
+
 /* Wideband audio filter */
 /* 96kHz int16_t input
  * -> FIR filter, <15kHz (0.156fs) pass, >19kHz (0.198fs) stop
@@ -205,6 +216,8 @@ void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t*
 
 	const uint32_t audio_end_time = systick_get_value();
 
+	copy_to_audio_output(out, sample_count);
+
 	duration_decimate = systick_difference(start_time, decimate_end_time);
 	duration_channel_filter = systick_difference(decimate_end_time, channel_filter_end_time);
 	duration_demodulate = systick_difference(channel_filter_end_time, demodulate_end_time);
@@ -314,6 +327,8 @@ void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t
 
 	const uint32_t audio_end_time = systick_get_value();
 
+	copy_to_audio_output(out, sample_count);
+
 	duration_decimate = systick_difference(start_time, decimate_end_time);
 	duration_channel_filter = systick_difference(decimate_end_time, channel_filter_end_time);
 	duration_demodulate = systick_difference(channel_filter_end_time, demodulate_end_time);
@@ -420,6 +435,8 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec, out, out, sample_count);
 
 	const uint32_t audio_end_time = systick_get_value();
+
+	copy_to_audio_output(out, sample_count);
 
 	duration_decimate = systick_difference(start_time, decimate_end_time);
 	duration_channel_filter = systick_difference(decimate_end_time, channel_filter_end_time);
@@ -647,14 +664,6 @@ void dma_isr() {
 	if( receiver_baseband_handler ) {
 		int16_t work[2048];
 		receiver_baseband_handler(receiver_state_buffer, completed_buffer, 2048, work);
-
-		int16_t* const audio_tx_buffer = portapack_i2s_tx_empty_buffer();
-		//int16_t* const audio_rx_buffer = portapack_i2s_rx_full_buffer();
-		for(size_t i=0, j=0; i<I2S_BUFFER_SAMPLE_COUNT; i++, j++) {
-			audio_tx_buffer[i*2] = audio_tx_buffer[i*2+1] = work[j];
-			//audio_tx_buffer[i*2+0] = audio_rx_buffer[i*2+0];
-			//audio_tx_buffer[i*2+1] = audio_rx_buffer[i*2+1];
-		}
 	}
 }
 
