@@ -282,6 +282,7 @@ void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
 		p->i >>= 6;
 		p->q >>= 6;
+		p++;
 	}
 
 	/* 768kHz complex<int16>[N/4]
@@ -391,6 +392,7 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
 		p->i >>= 6;
 		p->q >>= 6;
+		p++;
 	}
 
 	/* 768kHz complex<int16>[N/4]
