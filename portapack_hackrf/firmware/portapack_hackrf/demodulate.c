@@ -28,10 +28,11 @@
 #include "complex.h"
 #include "fxpt_atan2.h"
  
-void am_demodulate_s16_s16(complex_s16_t* src, int16_t* dst, int32_t n) {
+void am_demodulate_s16_s16(complex_s16_t* src, uint16_t* dst, int32_t n) {
+	/* Maximum output: 46340 (when input is -32768,-32768) */
 	for(; n>0; n-=1) {
 		const complex_s16_t s = *(src++);
-		const int32_t t = s.i * s.i + s.q * s.q;
+		const uint32_t t = s.i * s.i + s.q * s.q;
 		*(dst++) = sqrtf((float)t);
 	}
 }

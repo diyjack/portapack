@@ -29,7 +29,7 @@
 
 void am_demodulate_s16_s16(
 	complex_s16_t* src,
-	int16_t* dst,
+	uint16_t* dst,
 	int32_t n
 );
 
