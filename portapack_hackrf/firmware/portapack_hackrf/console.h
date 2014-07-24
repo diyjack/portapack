@@ -28,6 +28,8 @@
 
 typedef struct console_t {
 	lcd_t* lcd;
+	lcd_color_t background;
+	lcd_color_t foreground;
 	uint16_t x;
 	uint16_t y;
 } console_t;
