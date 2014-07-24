@@ -964,8 +964,16 @@ static void test_lcd_coordinate_space() {
 }
 #endif
 
-void m4core_isr() {
-	// TODO: Handle IPC from M4?
+#include "ipc_m0.h"
+#include "ipc_m0_server.h"
+
+void handle_command_packet_data_received(const void* const arg) {
+	const ipc_command_packet_data_received_t* const command = arg;
+
+	console_write_uint32(&console, "%08x", command->payload[0]);
+	console_write_uint32(&console, "%08x", command->payload[1]);
+	console_write_uint32(&console, " %03x", command->payload[2] >> 22);
+	console_writeln(&console, "");
 }
 
 int main() {
@@ -1028,6 +1036,7 @@ bool numeric_entry = false;
 
 		encoder_update();
 		handle_joysticks();
+		ipc_m0_handle();
 
 		ipc_command_ui_frame_sync(&device_state->ipc_m4, &fft_bin[0]);
 		lcd_frame_sync();
