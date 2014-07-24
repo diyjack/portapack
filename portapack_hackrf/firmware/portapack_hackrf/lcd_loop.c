@@ -1026,6 +1026,7 @@ bool numeric_entry = false;
 
 		while( !ipc_channel_is_empty(&device_state->ipc_m4) );
 
+		encoder_update();
 		handle_joysticks();
 
 		ipc_command_ui_frame_sync(&device_state->ipc_m4, &fft_bin[0]);

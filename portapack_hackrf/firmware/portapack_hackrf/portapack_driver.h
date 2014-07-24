@@ -55,6 +55,7 @@ void portapack_lcd_touch_sense_y();
 uint32_t portapack_read_switches();
 
 void portapack_encoder_init();
+int encoder_update();
 int32_t portapack_encoder_delta();
 
 void portapack_driver_init();

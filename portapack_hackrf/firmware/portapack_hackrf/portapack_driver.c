@@ -354,14 +354,6 @@ void portapack_lcd_reset(const bool active) {
 	portapack_io_write(1, portapack_io_config_value);
 }
 
-#ifdef LPC43XX_M4
-#include <libopencm3/lpc43xx/m4/nvic.h>
-
-/* PortaPack rotary encoder is read from the M4, since the M0 can't
- * receive multiple GPIO pin interrupts, and polling would be a pain
- * if done properly (fast), or would work poorly if done slowly.
- */
-
 static uint32_t portapack_encoder_phase_0() {
 	return PORTAPACK_ROT_A_GPIO_W & 1;
 }
@@ -391,7 +383,7 @@ static const int8_t encoder_transition_map[] = {
 	 0,	// 1111: noop
 };
 
-static int encoder_update() {
+int encoder_update() {
 	encoder_state <<= 1;
 	const uint32_t phase_0 = portapack_encoder_phase_0();
 	encoder_state |= phase_0;
@@ -408,9 +400,18 @@ static int encoder_update() {
 	return result;
 }
 
+#if (defined ENCODER_USE_INTERRUPTS || defined LPC43XX_M4)
+#include <libopencm3/lpc43xx/m4/nvic.h>
+#endif
+
 void portapack_encoder_init() {
 	device_state->encoder_position = 0;
 
+#if (defined ENCODER_USE_INTERRUPTS || defined LPC43XX_M4)
+	/* PortaPack rotary encoder is read from the M4, since the M0 can't
+	 * receive multiple GPIO pin interrupts, and polling would be a pain
+	 * if done properly (fast), or would work poorly if done slowly.
+	 */
 	SCU_PINTSEL0 =
 		  (PORTAPACK_ROT_B_GPIO_PORT_NUM << 13)
 		| (PORTAPACK_ROT_B_GPIO_PIN << 8)
@@ -436,9 +437,11 @@ void portapack_encoder_init() {
 	nvic_set_priority(NVIC_PIN_INT0_IRQ, 255);
 	nvic_enable_irq(NVIC_PIN_INT0_IRQ);
 	nvic_set_priority(NVIC_PIN_INT1_IRQ, 255);
-	nvic_enable_irq(NVIC_PIN_INT1_IRQ);	
+	nvic_enable_irq(NVIC_PIN_INT1_IRQ);
+#endif
 }
 
+#if (defined ENCODER_USE_INTERRUPTS || defined LPC43XX_M4)
 void pin_int0_isr() {
 	if( GPIO_PIN_INTERRUPT_IST & (1 << 0) ) {
 		encoder_update();
@@ -456,7 +459,6 @@ void pin_int1_isr() {
 		GPIO_PIN_INTERRUPT_IST = (1 << 1);
 	}
 }
-
 #endif
 
 void portapack_driver_init() {
