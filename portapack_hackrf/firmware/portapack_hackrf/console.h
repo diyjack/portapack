@@ -36,5 +36,6 @@ void console_init(console_t* const console, lcd_t* const lcd, const uint_fast16_
 
 void console_write(console_t* const console, const char* message);
 void console_writeln(console_t* const console, const char* message);
+void console_write_uint32(console_t* const console, const char* format, const uint32_t value);
 
 #endif/*__CONSOLE_H__*/

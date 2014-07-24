@@ -22,6 +22,9 @@
 #include "console.h"
 
 #include <stdint.h>
+#include <stddef.h>
+
+#include <stdio.h>
 
 #include "lcd.h"
 
@@ -64,4 +67,11 @@ void console_write(console_t* const console, const char* message) {
 void console_writeln(console_t* const console, const char* message) {
 	console_write(console, message);
 	console_crlf(console);
+}
+
+void console_write_uint32(console_t* const console, const char* format, const uint32_t value) {
+	char temp[80];
+	const size_t temp_len = 79;
+	snprintf(temp, temp_len, format, value);
+	console_write(console, temp);
 }
