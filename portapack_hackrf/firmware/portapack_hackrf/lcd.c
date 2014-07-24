@@ -147,12 +147,16 @@ void lcd_set_font(lcd_t* const lcd, const lcd_font_t* const font) {
 	lcd->font = font;
 }
 
-void lcd_set_foreground(lcd_t* const lcd, const lcd_color_t color) {
+lcd_color_t lcd_set_foreground(lcd_t* const lcd, const lcd_color_t color) {
+	const lcd_color_t prior_color = lcd->colors.foreground;
 	lcd->colors.foreground = color;
+	return prior_color;
 }
 
-void lcd_set_background(lcd_t* const lcd, const lcd_color_t color) {
+lcd_color_t lcd_set_background(lcd_t* const lcd, const lcd_color_t color) {
+	const lcd_color_t prior_color = lcd->colors.background;
 	lcd->colors.background = color;
+	return prior_color;
 }
 
 void lcd_colors_invert(

@@ -111,8 +111,8 @@ void lcd_vertical_scrolling_start_address(
 void lcd_frame_sync();
 
 void lcd_set_font(lcd_t* const lcd, const lcd_font_t* const font);
-void lcd_set_foreground(lcd_t* const lcd, const lcd_color_t color);
-void lcd_set_background(lcd_t* const lcd, const lcd_color_t color);
+lcd_color_t lcd_set_foreground(lcd_t* const lcd, const lcd_color_t color);
+lcd_color_t lcd_set_background(lcd_t* const lcd, const lcd_color_t color);
 void lcd_colors_invert(lcd_t* const lcd);
 
 void lcd_fill_rectangle(
