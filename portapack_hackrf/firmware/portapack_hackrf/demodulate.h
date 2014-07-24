@@ -33,6 +33,12 @@ void am_demodulate_s16_s16(
 	int32_t n
 );
 
+void am_demodulate_s16_f32(
+	complex_s16_t* src,
+	float* dst,
+	int32_t n
+);
+
 typedef struct fm_demodulate_s32_s32_state_t {
 	complex_s32_t z1;
 	float k;

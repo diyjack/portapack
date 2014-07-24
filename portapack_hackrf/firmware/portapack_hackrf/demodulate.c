@@ -36,6 +36,15 @@ void am_demodulate_s16_s16(complex_s16_t* src, uint16_t* dst, int32_t n) {
 		*(dst++) = sqrtf((float)t);
 	}
 }
+ 
+void am_demodulate_s16_f32(complex_s16_t* src, float* dst, int32_t n) {
+	/* Maximum output: 46340.951 (when input is -32768,-32768) */
+	for(; n>0; n-=1) {
+		const complex_s16_t s = *(src++);
+		const uint32_t t = s.i * s.i + s.q * s.q;
+		*(dst++) = sqrtf((float)t);
+	}
+}
 
 void fm_demodulate_s32_s32_init(fm_demodulate_s32_s32_state_t* const state, const float sampling_rate, const float deviation_hz) {
 	state->z1.i = state->z1.q = 0;
