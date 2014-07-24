@@ -990,7 +990,7 @@ int main() {
 	lcd_draw_string(&lcd, 0, 0, "PortaPack                     ", 30);
 	lcd_colors_invert(&lcd);
 
-	console_init(&console, &lcd, 16, lcd.size.h - 16);
+	console_init(&console, &lcd, 16 * 6, lcd.size.h - 16 * 6);
 /*
 	if( sdio_card_is_present() ) {
 		for(size_t n=0; n<1000; n++) {
