@@ -27,7 +27,7 @@
 #include "complex.h"
 
 typedef struct integrator_t {
-	complex_s16_t delay[64];
+	complex_s16_t delay[32];
 	complex_s32_t sum;
 	size_t length;
 	size_t index;
