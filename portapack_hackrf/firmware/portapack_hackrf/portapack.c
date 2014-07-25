@@ -52,15 +52,13 @@
 
 gpdma_lli_t lli_rx[2];
 
-uint32_t systick_difference(const uint32_t t1, const uint32_t t2) {
-	return (t1 - t2) & 0xffffff;
+uint32_t baseband_timestamp() {
+	return systick_get_value();
 }
 
-static volatile uint32_t duration_decimate = 0;
-static volatile uint32_t duration_channel_filter = 0;
-static volatile uint32_t duration_demodulate = 0;
-static volatile uint32_t duration_audio = 0;
-static volatile uint32_t duration_all = 0;
+static uint32_t systick_difference(const uint32_t t1, const uint32_t t2) {
+	return (t1 - t2) & 0xffffff;
+}
 
 static void copy_to_audio_output(const int16_t* const source, const size_t sample_count) {
 	if( sample_count != I2S_BUFFER_SAMPLE_COUNT ) {
@@ -158,12 +156,12 @@ void translate_by_fs_over_4_and_decimate_by_4_to_0_065fs() {
 }
 #endif
 
-void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out) {
+void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
 	rx_fm_broadcast_to_audio_state_t* const state = (rx_fm_broadcast_to_audio_state_t*)_state;
 
 	size_t sample_count = sample_count_in;
 
-	const uint32_t start_time = systick_get_value();
+	timestamps->start = baseband_timestamp();
 
 	/* 3.072MHz complex<int8>[N]
 	 * -> Shift by -fs/4
@@ -176,7 +174,7 @@ void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t*
 	 * -> 768kHz complex<int16>[N/4] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->dec_stage_2_state, (complex_s16_t*)in, out, sample_count);
 
-	const uint32_t decimate_end_time = systick_get_value();
+	timestamps->decimate_end = baseband_timestamp();
 
 	/* 768kHz complex<int32>[N/4]
 	 * -> FIR LPF, 90kHz cut-off, max attenuation by 192kHz.
@@ -185,14 +183,14 @@ void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t*
 	 *		pass < +/- 100kHz, stop > +/- 200kHz
 	 */
 
-	const uint32_t channel_filter_end_time = systick_get_value();
+	timestamps->channel_filter_end = baseband_timestamp();
 
 	/* 768kHz complex<int16>[N/4]
 	 * -> FM demodulation
 	 * -> 768kHz int16[N/4] */
 	fm_demodulate_s16_s16(&state->fm_demodulate_state, out, out, sample_count);
 
-	const uint32_t demodulate_end_time = systick_get_value();
+	timestamps->demodulate_end = baseband_timestamp();
 
 	/* 768kHz int16[N/4]
 	 * -> 4th order CIC decimation by 2, gain of 1
@@ -214,16 +212,9 @@ void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t*
 	 * -> 48kHz int16[N/64] */
 	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec_4, out, out, sample_count);
 
-	const uint32_t audio_end_time = systick_get_value();
+	timestamps->audio_end = baseband_timestamp();
 
 	copy_to_audio_output(out, sample_count);
-
-	duration_decimate = systick_difference(start_time, decimate_end_time);
-	duration_channel_filter = systick_difference(decimate_end_time, channel_filter_end_time);
-	duration_demodulate = systick_difference(channel_filter_end_time, demodulate_end_time);
-	duration_audio = systick_difference(demodulate_end_time, audio_end_time);
-
-	duration_all = systick_difference(start_time, audio_end_time);
 }
 
 typedef struct rx_fm_narrowband_to_audio_state_t {
@@ -250,12 +241,12 @@ void rx_fm_narrowband_to_audio_init(void* const _state) {
 	fir_64_decim_2_real_s16_s16_init(&state->audio_dec, taps_64_lp_031_063);
 }
 
-void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out) {
+void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
 	rx_fm_narrowband_to_audio_state_t* const state = (rx_fm_narrowband_to_audio_state_t*)_state;
 
 	size_t sample_count = sample_count_in;
 
-	const uint32_t start_time = systick_get_value();
+	timestamps->start = baseband_timestamp();
 
 	/* 3.072MHz complex<int8>[N]
 	 * -> Shift by -fs/4
@@ -316,34 +307,27 @@ void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t
 	 * -> 96kHz complex<int16>[N/32] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_5, out, out, sample_count);
 
-	const uint32_t decimate_end_time = systick_get_value();
+	timestamps->decimate_end = baseband_timestamp();
 
 	// TODO: Design a proper channel filter.
 
-	const uint32_t channel_filter_end_time = systick_get_value();
+	timestamps->channel_filter_end = baseband_timestamp();
 
 	/* 96kHz complex<int16>[N/32]
 	 * -> FM demodulation
 	 * -> 96kHz int16[N/32] */
 	fm_demodulate_s16_s16(&state->fm_demodulate, out, out, sample_count);
 
-	const uint32_t demodulate_end_time = systick_get_value();
+	timestamps->demodulate_end = baseband_timestamp();
 
 	/* 96kHz int16[N/32]
 	 * -> FIR filter, <3kHz (0.031fs) pass, >6kHz (0.063fs) stop, gain of 1
 	 * -> 48kHz int16[N/64] */
 	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec, out, out, sample_count);
 
-	const uint32_t audio_end_time = systick_get_value();
+	timestamps->audio_end = baseband_timestamp();
 
 	copy_to_audio_output(out, sample_count);
-
-	duration_decimate = systick_difference(start_time, decimate_end_time);
-	duration_channel_filter = systick_difference(decimate_end_time, channel_filter_end_time);
-	duration_demodulate = systick_difference(channel_filter_end_time, demodulate_end_time);
-	duration_audio = systick_difference(demodulate_end_time, audio_end_time);
-
-	duration_all = systick_difference(start_time, audio_end_time);
 }
 
 typedef struct rx_am_to_audio_state_t {
@@ -368,12 +352,12 @@ void rx_am_to_audio_init(void* const _state) {
 	fir_64_decim_2_real_s16_s16_init(&state->audio_dec, taps_64_lp_031_063);
 }
 
-void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out) {
+void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
 	rx_am_to_audio_state_t* const state = (rx_am_to_audio_state_t*)_state;
 
 	size_t sample_count = sample_count_in;
 
-	const uint32_t start_time = systick_get_value();
+	timestamps->start = baseband_timestamp();
 
 	/* 3.072MHz complex<int8>[N]
 	 * -> Shift by -fs/4
@@ -434,34 +418,27 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	 * -> 96kHz complex<int16>[N/32] */
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_5, out, out, sample_count);
 
-	const uint32_t decimate_end_time = systick_get_value();
+	timestamps->decimate_end = baseband_timestamp();
 
 	// TODO: Design a proper channel filter.
 
-	const uint32_t channel_filter_end_time = systick_get_value();
+	timestamps->channel_filter_end = baseband_timestamp();
 
 	/* 96kHz int16[N/32]
 	 * -> AM demodulation
 	 * -> 96kHz int16[N/32] */
 	am_demodulate_s16_s16(out, out, sample_count);
 
-	const uint32_t demodulate_end_time = systick_get_value();
+	timestamps->demodulate_end = baseband_timestamp();
 
 	/* 96kHz int16[N/32]
 	 * -> FIR filter, gain of 1
 	 * -> 48kHz int16[N/64] */
 	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec, out, out, sample_count);
 
-	const uint32_t audio_end_time = systick_get_value();
+	timestamps->audio_end = baseband_timestamp();
 
 	copy_to_audio_output(out, sample_count);
-
-	duration_decimate = systick_difference(start_time, decimate_end_time);
-	duration_channel_filter = systick_difference(decimate_end_time, channel_filter_end_time);
-	duration_demodulate = systick_difference(channel_filter_end_time, demodulate_end_time);
-	duration_audio = systick_difference(demodulate_end_time, audio_end_time);
-
-	duration_all = systick_difference(start_time, audio_end_time);
 }
 
 typedef struct specan_state_t {
@@ -472,12 +449,13 @@ void specan_init(void* const _state) {
 	(void)state;
 }
 
-void specan_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out) {
+void specan_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
 	specan_state_t* const state = (specan_state_t*)_state;
 	(void)state;
 	(void)in;
 	(void)sample_count_in;
 	(void)out;
+	(void)timestamps;
 }
 
 static volatile receiver_baseband_handler_t receiver_baseband_handler = NULL;
@@ -681,22 +659,22 @@ void dma_isr() {
 	 */
 	if( receiver_baseband_handler ) {
 		int16_t work[2048];
-		receiver_baseband_handler(receiver_state_buffer, completed_buffer, 2048, work);
+		baseband_timestamps_t timestamps;
+		receiver_baseband_handler(receiver_state_buffer, completed_buffer, 2048, work, &timestamps);
+
+		device_state->dsp_metrics.duration_decimate = systick_difference(timestamps.start, timestamps.decimate_end);
+		device_state->dsp_metrics.duration_channel_filter = systick_difference(timestamps.decimate_end, timestamps.channel_filter_end);
+		device_state->dsp_metrics.duration_demodulate = systick_difference(timestamps.channel_filter_end, timestamps.demodulate_end);
+		device_state->dsp_metrics.duration_audio = systick_difference(timestamps.demodulate_end, timestamps.audio_end);
+		device_state->dsp_metrics.duration_all = systick_difference(timestamps.start, timestamps.audio_end);
+
+		static const float cycles_per_baseband_block = (2048.0f / 3072000.0f) * 200000000.0f;
+		device_state->dsp_metrics.duration_all_millipercent = (float)device_state->dsp_metrics.duration_all / cycles_per_baseband_block * 100000.0f;
 	}
 }
 
 #include "arm_intrinsics.h"
 
-static const float cycles_per_baseband_block = (2048.0f / 3072000.0f) * 204000000.0f;
-
 void portapack_run() {
 	__WFE();
-
-	device_state->dsp_metrics.duration_decimate = duration_decimate;
-	device_state->dsp_metrics.duration_channel_filter = duration_channel_filter;
-	device_state->dsp_metrics.duration_demodulate = duration_demodulate;
-	device_state->dsp_metrics.duration_audio = duration_audio;
-	device_state->dsp_metrics.duration_all = duration_all;
-
-	device_state->dsp_metrics.duration_all_millipercent = (float)duration_all / cycles_per_baseband_block * 100000.0f;
 }

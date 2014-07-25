@@ -30,8 +30,16 @@
 #include "complex.h"
 #include "ipc.h"
 
+typedef struct baseband_timestamps_t {
+	uint32_t start;
+	uint32_t decimate_end;
+	uint32_t channel_filter_end;
+	uint32_t demodulate_end;
+	uint32_t audio_end;
+} baseband_timestamps_t;
+
 typedef void (*receiver_state_init_t)(void* const state);
-typedef void (*receiver_baseband_handler_t)(void* const state, complex_s8_t* const data, const size_t sample_count, void* const out_buffer);
+typedef void (*receiver_baseband_handler_t)(void* const state, complex_s8_t* const data, const size_t sample_count, void* const out_buffer, baseband_timestamps_t* const timestamps);
 
 typedef struct receiver_configuration_t {
 	const char* const name;
@@ -78,5 +86,7 @@ void set_rx_mode(const uint32_t new_receiver_configuration_index);
 
 complex_s8_t* wait_for_completed_baseband_buffer();
 const receiver_configuration_t* get_receiver_configuration();
+
+uint32_t baseband_timestamp();
 
 #endif/*__PORTAPACK_H__*/
