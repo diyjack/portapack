@@ -967,12 +967,37 @@ static void test_lcd_coordinate_space() {
 #include "ipc_m0.h"
 #include "ipc_m0_server.h"
 
+#include "manchester.h"
+
 void handle_command_packet_data_received(const void* const arg) {
 	const ipc_command_packet_data_received_t* const command = arg;
 
-	console_write_uint32(&console, "%08x", command->payload[0]);
-	console_write_uint32(&console, "%08x", command->payload[1]);
-	console_write_uint32(&console, " %03x", command->payload[2] >> 22);
+	uint8_t value[5];
+	uint8_t errors[5];
+	manchester_decode(command->payload, value, errors, 37);
+
+	const uint_fast8_t flag_group_1[] = {
+		(value[0] >> 7) & 1,
+		(value[0] >> 6) & 1,
+		(value[0] >> 5) & 1,
+	};
+	const uint32_t id = ((((((value[0] & 0x1f) << 8) | value[1]) << 8) | value[2]) << 3) | (value[3] >> 5);
+	const uint_fast8_t flag_group_2[] = {
+		(value[3] >> 4) & 1,
+		(value[3] >> 3) & 1,
+	};
+	const uint32_t mystery_value = ((value[3] & 0x7) << 5) | (value[4] >> 3);
+	console_write_uint32(&console, "%1u", flag_group_1[0]);
+	console_write_uint32(&console, "%1u", flag_group_1[1]);
+	console_write_uint32(&console, "%1u", flag_group_1[2]);
+	console_write_uint32(&console, " %8u ", id);
+	console_write_uint32(&console, "%1u", flag_group_2[0]);
+	console_write_uint32(&console, "%1u", flag_group_2[1]);
+	console_write_uint32(&console, " %02x", mystery_value);
+	console_write(&console, "/");
+	for(size_t i=0; i<5; i++) {
+		console_write_uint32(&console, "%02x", errors[i]);
+	}
 	console_writeln(&console, "");
 }
 

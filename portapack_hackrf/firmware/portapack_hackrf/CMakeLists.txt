@@ -87,6 +87,7 @@ set(SRC_M0
 	ipc_m0_server.c
 	rtc.c
 	sdio.c
+	manchester.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/delay.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/led.c
 )
