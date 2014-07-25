@@ -46,8 +46,12 @@
 #include "decimate.h"
 #include "demodulate.h"
 
+#include "rx_tpms.h"
+
 #include "ipc.h"
 #include "ipc_m4.h"
+#include "ipc_m0_client.h"
+
 #include "linux_stuff.h"
 
 gpdma_lli_t lli_rx[2];
@@ -105,6 +109,15 @@ static const int16_t taps_64_lp_031_063[] = {
 	  -820,   -643,   -442,   -241,    -56,     99,    215,    290,
 	   325,    325,    302,    269,    244,    255,   -254,      0,
 };
+
+static void rx_tpms_packet_handler(const void* const payload, const size_t payload_length, void* const context) {
+	(void)context;
+	ipc_command_packet_data_received(&device_state->ipc_m0, payload, payload_length);
+}
+
+static void rx_tpms_init_wrapper(void* const _state) {
+	rx_tpms_init(_state, rx_tpms_packet_handler);
+}
 
 typedef struct rx_fm_broadcast_to_audio_state_t {
 	translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_state_t dec_stage_1_state;
@@ -465,6 +478,7 @@ typedef enum {
 	RECEIVER_CONFIGURATION_NBAM = 1,
 	RECEIVER_CONFIGURATION_NBFM = 2,
 	RECEIVER_CONFIGURATION_WBFM = 3,
+	RECEIVER_CONFIGURATION_TPMS = 4,
 } receiver_configuration_id_t;
 
 const receiver_configuration_t receiver_configurations[] = {
@@ -505,6 +519,17 @@ const receiver_configuration_t receiver_configurations[] = {
 		.name = "WBFM",
 		.init = rx_fm_broadcast_to_audio_init,
 		.baseband_handler = rx_fm_broadcast_to_audio_baseband_handler,
+		.tuning_offset = -768000,
+		.sample_rate = 12288000,
+		.baseband_bandwidth = 1750000,
+		.baseband_decimation = 4,
+		.enable_audio = true,
+		.enable_spectrum = false,
+	},
+	[RECEIVER_CONFIGURATION_TPMS] = {
+		.name = "TPMS",
+		.init = rx_tpms_init_wrapper,
+		.baseband_handler = rx_tpms_baseband_handler,
 		.tuning_offset = -768000,
 		.sample_rate = 12288000,
 		.baseband_bandwidth = 1750000,
