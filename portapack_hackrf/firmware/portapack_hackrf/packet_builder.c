@@ -54,12 +54,13 @@ void packet_builder_execute(
 
 	case PACKET_BUILDER_STATE_PAYLOAD:
 		if( packet_builder->bits_received < packet_builder->payload_length ) {
-			const size_t word_index = packet_builder->bits_received >> 5;
-			const size_t bit_index = 31 - (packet_builder->bits_received & 0x1f);
+			const size_t byte_index = packet_builder->bits_received >> 3;
+			const size_t bit_index = (packet_builder->bits_received & 7) ^ 7;
+			const uint8_t bit = 1 << bit_index;
 			if( symbol ) {
-				packet_builder->payload[word_index] |= (1UL << bit_index);
+				packet_builder->payload[byte_index] |= bit;
 			} else {
-				packet_builder->payload[word_index] &= ~(1UL << bit_index);
+				packet_builder->payload[byte_index] &= ~bit;
 			}
 			packet_builder->bits_received += 1;
 		} else {

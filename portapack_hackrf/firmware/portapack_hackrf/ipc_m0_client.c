@@ -24,7 +24,7 @@
 
 #include <string.h>
 
-void ipc_command_packet_data_received(ipc_channel_t* const channel, const uint32_t* const payload, const size_t payload_length) {
+void ipc_command_packet_data_received(ipc_channel_t* const channel, const uint8_t* const payload, const size_t payload_length) {
 	ipc_command_packet_data_received_t command = {
 		.id = IPC_COMMAND_ID_PACKET_DATA_RECEIVED,
 		.payload_length = payload_length,

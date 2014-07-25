@@ -39,7 +39,7 @@ typedef struct packet_builder_t {
 	packet_builder_state_t state;
 	packet_builder_payload_handler_t payload_handler;
 	void* context;
-	uint32_t payload[8];
+	uint8_t payload[32];
 } packet_builder_t;
 
 void packet_builder_init(

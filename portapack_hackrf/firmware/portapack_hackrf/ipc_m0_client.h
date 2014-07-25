@@ -27,6 +27,6 @@
 
 #include "ipc.h"
 
-void ipc_command_packet_data_received(ipc_channel_t* const channel, const uint32_t* const payload, const size_t payload_length);
+void ipc_command_packet_data_received(ipc_channel_t* const channel, const uint8_t* const payload, const size_t payload_length);
 
 #endif/*__IPC_M0_CLIENT_H__*/

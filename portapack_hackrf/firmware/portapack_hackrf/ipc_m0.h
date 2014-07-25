@@ -30,7 +30,7 @@ typedef enum {
 typedef struct ipc_command_packet_data_received_t {
 	uint32_t id;
 	size_t payload_length;
-	uint32_t payload[8];
+	uint8_t payload[32];
 } ipc_command_packet_data_received_t;
 
 #endif/*__IPC_M0_H__*/
