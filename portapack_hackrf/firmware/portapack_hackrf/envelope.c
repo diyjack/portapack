@@ -28,7 +28,8 @@ void envelope_init(
 ) {
 	envelope->rise_factor = rise_factor;
 	envelope->fall_factor = fall_factor;
-	envelope->envelope = 0.0f;
+	envelope->envelope_minimum = 0.000001f;
+	envelope->envelope = envelope->envelope_minimum;
 }
 
 float envelope_execute(
@@ -40,6 +41,6 @@ float envelope_execute(
 	} else {
 		envelope->envelope = envelope->envelope * (1.0f - envelope->fall_factor) + magnitude * envelope->fall_factor;
 	}
-	const float out = (2.0f * magnitude / envelope->envelope) - 1.0f;
+	const float out = (2.0f * magnitude / (envelope->envelope + envelope->envelope_minimum)) - 1.0f;
 	return out;
 }

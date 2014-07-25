@@ -26,6 +26,7 @@ typedef struct envelope_t {
 	float rise_factor;
 	float fall_factor;
 	float envelope;
+	float envelope_minimum;
 } envelope_t;
 
 void envelope_init(
