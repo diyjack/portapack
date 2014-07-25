@@ -44,6 +44,8 @@
 
 #include "linux_stuff.h"
 
+//#define CPU_METRICS
+
 lcd_t lcd = {
 	.size = { .w = 240, .h = 320 },
 	.scroll = {
@@ -88,7 +90,7 @@ static void draw_mhz(int64_t value, const char* const format, uint_fast16_t x, u
 	const size_t text_len = snprintf(temp, temp_len, format, value_mhz, value_hz);
 	lcd_draw_string(&lcd, x, y, temp, min(text_len, temp_len));
 }
-#if 0
+#ifdef CPU_METRICS
 static void draw_percent(int32_t value_millipercent, const char* const format, uint_fast16_t x, uint_fast16_t y) {
 	char temp[80];
 	const size_t temp_len = 79;
@@ -1040,7 +1042,9 @@ bool numeric_entry = false;
 		draw_rtc(11 * 8, 0);
 		lcd_colors_invert(&lcd);
 
-		//draw_cycles(0, 96);
+#ifdef CPU_METRICS
+		draw_cycles(240 - (12 * 8), 96);
+#endif
 
 		touch_state_t touch_state;
 		lcd_touch_convert(&touch_state);
