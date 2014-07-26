@@ -985,19 +985,18 @@ void handle_command_packet_data_received(const void* const arg) {
 		(value[0] >> 5) & 1,
 	};
 	const uint32_t id = ((((((value[0] & 0x1f) << 8) | value[1]) << 8) | value[2]) << 3) | (value[3] >> 5);
+	const uint32_t pressure = ((value[3] & 0x1f) << 3) | (value[4] >> 5);
 	const uint_fast8_t flag_group_2[] = {
-		(value[3] >> 4) & 1,
-		(value[3] >> 3) & 1,
+		(value[4] >> 4) & 1,
+		(value[4] >> 3) & 1,
 	};
-	const uint32_t mystery_value = ((value[3] & 0x7) << 5) | (value[4] >> 3);
 	console_write_uint32(&console, "%1u", flag_group_1[0]);
 	console_write_uint32(&console, "%1u", flag_group_1[1]);
 	console_write_uint32(&console, "%1u", flag_group_1[2]);
-	console_write_uint32(&console, " %8u ", id);
-	console_write_uint32(&console, "%1u", flag_group_2[0]);
-	console_write_uint32(&console, "%1u", flag_group_2[1]);
-	console_write_uint32(&console, " %02x", mystery_value);
-	console_write(&console, "/");
+	console_write_uint32(&console, " %8u", id);
+	console_write_uint32(&console, " %3u", pressure);
+	console_write_uint32(&console, " %1u", flag_group_2[0]);
+	console_write_uint32(&console, "%1u/", flag_group_2[1]);
 	for(size_t i=0; i<5; i++) {
 		console_write_uint32(&console, "%02x", errors[i]);
 	}
