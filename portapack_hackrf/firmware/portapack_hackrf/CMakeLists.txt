@@ -33,7 +33,6 @@ set(SRC_M4
 	portapack.c
 	portapack_driver.c
 	access_code_correlator.c
-	integrator.c
 	envelope.c
 	clock_recovery.c
 	packet_builder.c

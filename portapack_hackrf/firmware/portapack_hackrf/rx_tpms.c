@@ -25,7 +25,6 @@
 
 #include "decimate.h"
 #include "demodulate.h"
-#include "integrator.h"
 #include "envelope.h"
 #include "clock_recovery.h"
 #include "access_code_correlator.h"
@@ -38,7 +37,6 @@ typedef struct rx_tpms_state_t {
 	fir_cic3_decim_2_s16_s16_state_t bb_dec_2;
 	fir_cic3_decim_2_s16_s16_state_t bb_dec_3;
 	fir_cic3_decim_2_s16_s16_state_t bb_dec_4;
-	integrator_t integrator;
 	envelope_t envelope;
 	clock_recovery_t clock_recovery;
 	access_code_correlator_t access_code_correlator;
@@ -63,7 +61,6 @@ void rx_tpms_init(void* const _state, packet_builder_payload_handler_t payload_h
 	fir_cic3_decim_2_s16_s16_init(&state->bb_dec_2);
 	fir_cic3_decim_2_s16_s16_init(&state->bb_dec_3);
 	fir_cic3_decim_2_s16_s16_init(&state->bb_dec_4);
-	integrator_init(&state->integrator, roundf(sample_rate / symbol_rate));
 	envelope_init(&state->envelope, 0.08f, 0.01f);
 	clock_recovery_init(&state->clock_recovery, symbol_rate / sample_rate, rx_tpms_clock_recovery_symbol_handler, state);
 	access_code_correlator_init(&state->access_code_correlator, 0b01010101010101010101010101011110, 32, 2);
@@ -76,8 +73,6 @@ void rx_tpms_baseband_handler(void* const _state, complex_s8_t* const in, const 
 	size_t sample_count = sample_count_in;
 
 	timestamps->start = baseband_timestamp();
-
-	complex_s16_t* const out_cs16 = (complex_s16_t*)out;
 
 	/* 3.072MHz complex<int8>[N]
 	 * -> Shift by -fs/4
@@ -125,15 +120,11 @@ void rx_tpms_baseband_handler(void* const _state, complex_s8_t* const in, const 
 
 	timestamps->decimate_end = baseband_timestamp();
 
-	timestamps->channel_filter_end = baseband_timestamp();
+	/* TODO: Some form of channel filtering. Tried symbol integration filter,
+	 * but it proved to be too narrow and didn't deal well with even slight
+	 * carrier offsets. */
 
-	/* Symbol length integrator
-	 * -> integrate and dump, gain of N/32 (N = length of integrator = 23)
-	 * -> 192kHz complex<int16>[N/16]
-	 */
-	for(uint_fast16_t i=0; i<sample_count; i++) {
-		out_cs16[i] = integrator_execute(&state->integrator, out_cs16[i]);
-	}
+	timestamps->channel_filter_end = baseband_timestamp();
 
 	/* 192kHz int16[N/16]
 	 * -> AM demodulation
