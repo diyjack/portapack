@@ -393,7 +393,7 @@ size_t fir_cic4_decim_2_real_s16_s16(
 			t += state->z[j] * tap[j];
 			state->z[j] = state->z[j+2];
 		}
-		*(dst++) = t >> 4;
+		*(dst++) = t / 16;
 	}
 
 	return sample_count / 2;
@@ -437,7 +437,7 @@ size_t fir_64_decim_2_real_s16_s16(
 			state->z[j+2] = state->z[j+2+2];
 			state->z[j+3] = state->z[j+3+2];
 		}
-		*(dst++) = t >> 16;
+		*(dst++) = t / 65536;
 	}
 
 	return sample_count / 2;
