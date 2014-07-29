@@ -28,8 +28,6 @@
 
 #include "complex.h"
 
-#include "packet_builder.h"
-
 void rx_fm_broadcast_to_audio_init(void* const _state);
 void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps);
 
