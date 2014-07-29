@@ -67,7 +67,7 @@ void rx_tpms_ask_init(void* const _state, packet_builder_payload_handler_t paylo
 	packet_builder_init(&state->packet_builder, 74, payload_handler, state);
 }
 
-void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
+void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, baseband_timestamps_t* const timestamps) {
 	rx_tpms_ask_state_t* const state = (rx_tpms_ask_state_t*)_state;
 
 	size_t sample_count = sample_count_in;
@@ -85,6 +85,8 @@ void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 768kHz complex<int16>[N/4] */
 	/* i,q: +/-1024 */
+	complex_s16_t work[512];
+	void* const out = work;
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_2, (complex_s16_t*)in, out, sample_count);
 
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */

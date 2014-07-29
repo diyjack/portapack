@@ -39,7 +39,7 @@ typedef struct baseband_timestamps_t {
 } baseband_timestamps_t;
 
 typedef void (*receiver_state_init_t)(void* const state);
-typedef void (*receiver_baseband_handler_t)(void* const state, complex_s8_t* const data, const size_t sample_count, void* const out_buffer, baseband_timestamps_t* const timestamps);
+typedef void (*receiver_baseband_handler_t)(void* const state, complex_s8_t* const data, const size_t sample_count, baseband_timestamps_t* const timestamps);
 
 typedef struct dsp_metrics_t {
 	uint32_t duration_decimate;

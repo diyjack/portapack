@@ -114,10 +114,9 @@ void specan_init(void* const _state) {
 	}
 }
 
-void specan_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
+void specan_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, baseband_timestamps_t* const timestamps) {
 	specan_state_t* const state = (specan_state_t*)_state;
 	(void)sample_count_in;
-	(void)out;
 
 	timestamps->start = timestamps->decimate_end = timestamps->channel_filter_end = timestamps->demodulate_end = baseband_timestamp();
 
@@ -415,9 +414,8 @@ void dma_isr() {
 	 * -> 3.072MHz complex<int8>[2048] == 666.667 usec/block == 136000 cycles/sec
 	 */
 	if( receiver_baseband_handler ) {
-		int16_t work[2048];
 		baseband_timestamps_t timestamps;
-		receiver_baseband_handler(receiver_state_buffer, completed_buffer, 2048, work, &timestamps);
+		receiver_baseband_handler(receiver_state_buffer, completed_buffer, 2048, &timestamps);
 
 		device_state->dsp_metrics.duration_decimate = systick_difference(timestamps.start, timestamps.decimate_end);
 		device_state->dsp_metrics.duration_channel_filter = systick_difference(timestamps.decimate_end, timestamps.channel_filter_end);

@@ -49,7 +49,7 @@ void rx_fm_narrowband_to_audio_init(void* const _state) {
 	fir_64_decim_2_real_s16_s16_init(&state->audio_dec, taps_64_lp_031_063, 64);
 }
 
-void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
+void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, baseband_timestamps_t* const timestamps) {
 	rx_fm_narrowband_to_audio_state_t* const state = (rx_fm_narrowband_to_audio_state_t*)_state;
 
 	size_t sample_count = sample_count_in;
@@ -65,6 +65,8 @@ void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t
 	/* 1.544MHz complex<int16>[N/2]
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 768kHz complex<int16>[N/4] */
+	complex_s16_t work[512];
+	void* const out = work;
 	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_2, (complex_s16_t*)in, out, sample_count);
 
 	/* TODO: Gain through five CICs will be 32768 (8 ^ 5). Incorporate gain adjustment

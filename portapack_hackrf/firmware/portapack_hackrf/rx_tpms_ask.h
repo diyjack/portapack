@@ -31,6 +31,6 @@
 #include "packet_builder.h"
 
 void rx_tpms_ask_init(void* const _state, packet_builder_payload_handler_t payload_handler);
-void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps);
+void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, baseband_timestamps_t* const timestamps);
 
 #endif/*__RX_TPMS_ASK_H__*/
