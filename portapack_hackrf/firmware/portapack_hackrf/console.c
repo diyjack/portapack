@@ -41,6 +41,10 @@ void console_init(console_t* const console, lcd_t* const lcd, const uint_fast16_
 	lcd_set_background(console->lcd, prior_background);
 }
 
+void console_set_background(console_t* const console, const lcd_color_t new_color) {
+	console->background = new_color;
+}
+
 static void console_crlf(console_t* const console) {
 	const uint_fast16_t line_height = console->lcd->font->line_height;
 	console->x = 0;
