@@ -429,7 +429,9 @@ void dma_isr() {
 		device_state->dsp_metrics.duration_audio = systick_difference(timestamps.demodulate_end, timestamps.audio_end);
 		device_state->dsp_metrics.duration_all = systick_difference(timestamps.start, timestamps.audio_end);
 
-		static const float cycles_per_baseband_block = (2048.0f / 3072000.0f) * 200000000.0f;
+		const receiver_configuration_t* const receiver_configuration = get_receiver_configuration();
+		const float decimated_sampling_rate = (float)receiver_configuration->sample_rate / receiver_configuration->baseband_decimation;
+		const float cycles_per_baseband_block = (2048.0f / decimated_sampling_rate) * 200000000.0f;
 		device_state->dsp_metrics.duration_all_millipercent = (float)device_state->dsp_metrics.duration_all / cycles_per_baseband_block * 100000.0f;
 	}
 }
