@@ -190,12 +190,12 @@ static const void* get_audio_out_gain() {
 static const void* get_receiver_configuration_name() {
 	// TODO: Pull this from a shared structure somewhere!
 	switch(device_state->receiver_configuration_index) {
-	case 0: return "SPEC";
-	case 1: return "NBAM";
-	case 2: return "NBFM";
-	case 3: return "WBFM";
-	case 4: return "TASK";
-	case 5: return "TFSK";
+	case 0: return "SPEC    ";
+	case 1: return "NBAM    ";
+	case 2: return "NBFM    ";
+	case 3: return "WBFM    ";
+	case 4: return "TPMS-ASK";
+	case 5: return "TPMS-FSK";
 	default: return "????";
 	}
 }
@@ -380,7 +380,7 @@ static ui_field_text_t fields[] = {
 	},
 	[UI_FIELD_RECEIVER_CONFIGURATION] = {
 		.position = { .x = 128, .y = 32 },
-		.size = { .w = 9 * 8, .h = 16 },
+		.size = { .w = 13 * 8, .h = 16 },
 		.navigation = {
 			.up = UI_FIELD_AUDIO_OUT_GAIN,
 			.down = UI_FIELD_TUNING_STEP_SIZE,
@@ -391,7 +391,7 @@ static ui_field_text_t fields[] = {
 			.up = ui_field_value_up_receiver_configuration,
 			.down = ui_field_value_down_receiver_configuration,
 		},
-		.format = "Mode %4s",
+		.format = "Mode %8s",
 		.getter = get_receiver_configuration_name,
 		.render = render_field_str,
 	},
