@@ -120,8 +120,8 @@ void specan_baseband_handler(void* const _state, complex_s8_t* const in, const s
 	(void)in;
 	(void)sample_count_in;
 	(void)out;
-	(void)timestamps;
 
+	timestamps->start = timestamps->decimate_end = timestamps->channel_filter_end = timestamps->demodulate_end = baseband_timestamp();
 	complex_s8_t* const completed_buffer = wait_for_completed_baseband_buffer();
 
 	complex_t spectrum[256];
@@ -186,6 +186,8 @@ void specan_baseband_handler(void* const _state, complex_s8_t* const in, const s
 		// 	frame->bin[x].peak = n;
 		// }
 	}
+
+	timestamps->audio_end = baseband_timestamp();
 }
 
 static volatile receiver_baseband_handler_t receiver_baseband_handler = NULL;
