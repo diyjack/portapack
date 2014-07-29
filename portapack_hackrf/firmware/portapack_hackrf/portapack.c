@@ -225,6 +225,18 @@ typedef enum {
 	RECEIVER_CONFIGURATION_TPMS_FSK = 5,
 } receiver_configuration_id_t;
 
+typedef struct receiver_configuration_t {
+	const char* const name;
+	receiver_state_init_t init;
+	receiver_baseband_handler_t baseband_handler;
+	int64_t tuning_offset;
+	uint32_t sample_rate;
+	uint32_t baseband_bandwidth;
+	uint32_t baseband_decimation;
+	bool enable_audio;
+	bool enable_spectrum;
+} receiver_configuration_t;
+
 const receiver_configuration_t receiver_configurations[] = {
 	[RECEIVER_CONFIGURATION_SPEC] = {
 		.name = "SPEC",

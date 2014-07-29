@@ -41,18 +41,6 @@ typedef struct baseband_timestamps_t {
 typedef void (*receiver_state_init_t)(void* const state);
 typedef void (*receiver_baseband_handler_t)(void* const state, complex_s8_t* const data, const size_t sample_count, void* const out_buffer, baseband_timestamps_t* const timestamps);
 
-typedef struct receiver_configuration_t {
-	const char* const name;
-	receiver_state_init_t init;
-	receiver_baseband_handler_t baseband_handler;
-	int64_t tuning_offset;
-	uint32_t sample_rate;
-	uint32_t baseband_bandwidth;
-	uint32_t baseband_decimation;
-	bool enable_audio;
-	bool enable_spectrum;
-} receiver_configuration_t;
-
 typedef struct dsp_metrics_t {
 	uint32_t duration_decimate;
 	uint32_t duration_channel_filter;
@@ -87,7 +75,6 @@ void set_rx_mode(const uint32_t new_receiver_configuration_index);
 void copy_to_audio_output(const int16_t* const source, const size_t sample_count);
 
 complex_s8_t* wait_for_completed_baseband_buffer();
-const receiver_configuration_t* get_receiver_configuration();
 
 uint32_t baseband_timestamp();
 
