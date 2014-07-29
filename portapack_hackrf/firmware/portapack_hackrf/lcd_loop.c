@@ -195,6 +195,7 @@ static const void* get_receiver_configuration_name() {
 	case 2: return "NBFM";
 	case 3: return "WBFM";
 	case 4: return "TPMS";
+	case 5: return "TFSK";
 	default: return "????";
 	}
 }
@@ -972,7 +973,7 @@ static void test_lcd_coordinate_space() {
 
 #include "manchester.h"
 
-void handle_command_packet_data_received(const void* const arg) {
+void handle_command_packet_data_received_ask(const void* const arg) {
 	const ipc_command_packet_data_received_t* const command = arg;
 
 	uint8_t value[5];
@@ -1001,6 +1002,40 @@ void handle_command_packet_data_received(const void* const arg) {
 		console_write_uint32(&console, "%02x", errors[i]);
 	}
 	console_writeln(&console, "");
+}
+
+void handle_command_packet_data_received_fsk(const void* const arg) {
+	const ipc_command_packet_data_received_t* const command = arg;
+
+	uint8_t value[10];
+	uint8_t errors[10];
+	manchester_decode(command->payload, value, errors, 80);
+
+	for(size_t i=0; i<10; i++) {
+		if( errors[i] >> 4 ) {
+			console_set_background(&console, color_red);
+		} else {
+			console_set_background(&console, color_black);
+		}
+		console_write_uint32(&console, "%01x", value[i] >> 4);
+		if( errors[i] & 0xf ) {
+			console_set_background(&console, color_red);
+		} else {
+			console_set_background(&console, color_black);
+		}
+		console_write_uint32(&console, "%01x", value[i] & 0xf);
+	}
+	console_set_background(&console, color_black);
+	console_writeln(&console, "");
+}
+
+void handle_command_packet_data_received(const void* const arg) {
+	// TODO: Naughty, hard-coded!
+	if( device_state->receiver_configuration_index == 5 ) {
+		handle_command_packet_data_received_fsk(arg);
+	} else {
+		handle_command_packet_data_received_ask(arg);
+	}
 }
 
 int main() {

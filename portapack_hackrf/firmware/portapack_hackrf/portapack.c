@@ -47,6 +47,7 @@
 #include "demodulate.h"
 
 #include "rx_tpms.h"
+#include "rx_tpms_fsk.h"
 
 #include "ipc.h"
 #include "ipc_m4.h"
@@ -117,6 +118,15 @@ static void rx_tpms_packet_handler(const void* const payload, const size_t paylo
 
 static void rx_tpms_init_wrapper(void* const _state) {
 	rx_tpms_init(_state, rx_tpms_packet_handler);
+}
+
+static void rx_tpms_fsk_packet_handler(const void* const payload, const size_t payload_length, void* const context) {
+	(void)context;
+	ipc_command_packet_data_received(&device_state->ipc_m0, payload, payload_length);
+}
+
+static void rx_tpms_fsk_init_wrapper(void* const _state) {
+	rx_tpms_fsk_init(_state, rx_tpms_fsk_packet_handler);
 }
 
 typedef struct rx_fm_broadcast_to_audio_state_t {
@@ -479,6 +489,7 @@ typedef enum {
 	RECEIVER_CONFIGURATION_NBFM = 2,
 	RECEIVER_CONFIGURATION_WBFM = 3,
 	RECEIVER_CONFIGURATION_TPMS = 4,
+	RECEIVER_CONFIGURATION_TPMS_FSK = 5,
 } receiver_configuration_id_t;
 
 const receiver_configuration_t receiver_configurations[] = {
@@ -532,6 +543,17 @@ const receiver_configuration_t receiver_configurations[] = {
 		.baseband_handler = rx_tpms_baseband_handler,
 		.tuning_offset = -768000,
 		.sample_rate = 12288000,
+		.baseband_bandwidth = 1750000,
+		.baseband_decimation = 4,
+		.enable_audio = true,
+		.enable_spectrum = false,
+	},
+	[RECEIVER_CONFIGURATION_TPMS_FSK] = {
+		.name = "TFSK",
+		.init = rx_tpms_fsk_init_wrapper,
+		.baseband_handler = rx_tpms_fsk_baseband_handler,
+		.tuning_offset = -614400,
+		.sample_rate = 9830400,
 		.baseband_bandwidth = 1750000,
 		.baseband_decimation = 4,
 		.enable_audio = true,

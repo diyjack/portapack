@@ -37,6 +37,7 @@ set(SRC_M4
 	clock_recovery.c
 	packet_builder.c
 	rx_tpms.c
+	rx_tpms_fsk.c
 	audio.c
 	cpld.c
 	i2s.c
