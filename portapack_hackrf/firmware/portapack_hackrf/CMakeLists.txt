@@ -42,6 +42,7 @@ set(SRC_M4
 	rx_am.c
 	rx_tpms_ask.c
 	rx_tpms_fsk.c
+	specan.c
 	audio.c
 	cpld.c
 	i2s.c
