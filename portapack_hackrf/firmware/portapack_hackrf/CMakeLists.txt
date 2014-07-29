@@ -36,6 +36,7 @@ set(SRC_M4
 	envelope.c
 	clock_recovery.c
 	packet_builder.c
+	rx_fm_broadcast.c
 	rx_tpms_ask.c
 	rx_tpms_fsk.c
 	audio.c
