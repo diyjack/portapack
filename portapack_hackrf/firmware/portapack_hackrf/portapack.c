@@ -96,33 +96,7 @@ static void rx_tpms_fsk_packet_handler(const void* const payload, const size_t p
 static void rx_tpms_fsk_init_wrapper(void* const _state) {
 	rx_tpms_fsk_init(_state, rx_tpms_fsk_packet_handler);
 }
-#if 0
-typedef void (*init_fn)(void* state);
-typedef size_t (*process_fn)(void* state, void* in, size_t in_count, void* out);
 
-typedef struct process_block_t {
-	init_fn* init;
-	process_fn* process;
-} process_block_t;
-
-typedef struct receiver_handler_chain_t {
-	channel_decimator_t* channel_decimator;
-	demodulator_t* demodulator;
-	decoder_t* decoder;
-	output_t* output;
-}
-
-typedef channel_decimator_t* 
-
-void translate_by_fs_over_4_and_decimate_by_4_to_0_065fs() {
-	/* Translate spectrum down by fs/4 (fs/4 becomes 0Hz)
-	 * Decimate by 2 with a 3rd-order CIC filter.
-	 * Decimate by 2 with a 3rd-order CIC filter.
-	 */
-	translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(&state->dec_stage_1_state, in, sample_count_in);
-	decimate_by_2_s16_s16(&state->dec_stage_2_state, (complex_s16_t*)in, out, sample_count_in / 2);
-}
-#endif
 #include <math.h>
 #include "complex.h"
 #include "window.h"
@@ -435,11 +409,8 @@ void portapack_init() {
 	set_frequency(device_state->tuned_hz);
 }
 
-static volatile uint32_t sample_frame_count = 0;
-
 void dma_isr() {
 	sgpio_dma_irq_tc_acknowledge();
-	sample_frame_count += 1;
 
 	complex_s8_t* const completed_buffer = get_completed_baseband_buffer();
 
