@@ -308,8 +308,6 @@ void portapack_init() {
 	device_state->audio_out_gain_db = 0;
 	device_state->receiver_configuration_index = RECEIVER_CONFIGURATION_SPEC;
 
-	portapack_encoder_init();
-
 	ipc_channel_init(&device_state->ipc_m4, ipc_m4_buffer, ipc_m4_buffer_size);
 	ipc_channel_init(&device_state->ipc_m0, ipc_m0_buffer, ipc_m0_buffer_size);
 

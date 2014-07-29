@@ -1043,6 +1043,7 @@ int main() {
 	sdio_init();
 	lcd_init(&lcd);
 	lcd_touch_init();
+	portapack_encoder_init();
 
 	lcd_set_background(&lcd, color_blue);
 	lcd_set_foreground(&lcd, color_white);
