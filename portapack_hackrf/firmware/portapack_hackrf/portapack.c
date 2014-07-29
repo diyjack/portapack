@@ -65,7 +65,7 @@ static uint32_t systick_difference(const uint32_t t1, const uint32_t t2) {
 	return (t1 - t2) & 0xffffff;
 }
 
-static void copy_to_audio_output(const int16_t* const source, const size_t sample_count) {
+void copy_to_audio_output(const int16_t* const source, const size_t sample_count) {
 	if( sample_count != I2S_BUFFER_SAMPLE_COUNT ) {
 		return;
 	}

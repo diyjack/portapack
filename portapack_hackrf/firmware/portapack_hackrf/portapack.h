@@ -84,6 +84,8 @@ void portapack_run();
 bool set_frequency(const int64_t new_frequency);
 void set_rx_mode(const uint32_t new_receiver_configuration_index);
 
+void copy_to_audio_output(const int16_t* const source, const size_t sample_count);
+
 complex_s8_t* wait_for_completed_baseband_buffer();
 const receiver_configuration_t* get_receiver_configuration();
 
