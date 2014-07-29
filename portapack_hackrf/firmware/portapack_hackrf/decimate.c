@@ -401,10 +401,12 @@ size_t fir_cic4_decim_2_real_s16_s16(
 
 void fir_64_decim_2_real_s16_s16_init(
 	fir_64_decim_2_real_s16_s16_state_t* const state,
-	const int16_t* const taps
+	const int16_t* const taps,
+	const size_t taps_count
 ) {
 	state->taps = taps;
-	for(uint32_t i=0; i<64 + 2; i++) {
+	state->taps_count = ((taps_count + 3) >> 2) * 4;
+	for(uint32_t i=0; i<state->taps_count + 2; i++) {
 		state->z[i] = 0;
 	}
 }
@@ -422,11 +424,11 @@ size_t fir_64_decim_2_real_s16_s16(
 
 	int32_t n = sample_count;
 	for(; n>0; n-=2) {
-		state->z[64] = *(src++);
-		state->z[65] = *(src++);
+		state->z[state->taps_count + 0] = *(src++);
+		state->z[state->taps_count + 1] = *(src++);
 
 		int64_t t = 0;
-		for(uint32_t j=0; j<64; j+=4) {
+		for(uint32_t j=0; j<state->taps_count; j+=4) {
 			t += state->z[j+0] * state->taps[j+0];
 			t += state->z[j+1] * state->taps[j+1];
 			t += state->z[j+2] * state->taps[j+2];

@@ -90,12 +90,14 @@ size_t fir_cic4_decim_2_real_s16_s16(
 
 typedef struct fir_64_decim_2_real_s16_s16_state_t {
 	const int16_t* taps;
+	size_t taps_count;
 	int16_t z[66];
 } fir_64_decim_2_real_s16_s16_state_t;
 
 void fir_64_decim_2_real_s16_s16_init(
 	fir_64_decim_2_real_s16_s16_state_t* const state,
-	const int16_t* const taps
+	const int16_t* const taps,
+	const size_t taps_count
 );
 
 size_t fir_64_decim_2_real_s16_s16(

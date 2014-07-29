@@ -138,7 +138,7 @@ void rx_fm_broadcast_to_audio_init(void* const _state) {
 	fir_cic4_decim_2_real_s16_s16_init(&state->audio_dec_1);
 	fir_cic4_decim_2_real_s16_s16_init(&state->audio_dec_2);
 	fir_cic4_decim_2_real_s16_s16_init(&state->audio_dec_3);
-	fir_64_decim_2_real_s16_s16_init(&state->audio_dec_4, taps_64_lp_156_198);
+	fir_64_decim_2_real_s16_s16_init(&state->audio_dec_4, taps_64_lp_156_198, 64);
 }
 
 #if 0
@@ -251,7 +251,7 @@ void rx_fm_narrowband_to_audio_init(void* const _state) {
 	fir_cic3_decim_2_s16_s16_init(&state->bb_dec_5);
 	// TODO: Channel filter here.
 	fm_demodulate_s16_s16_init(&state->fm_demodulate, 96000, 2500);
-	fir_64_decim_2_real_s16_s16_init(&state->audio_dec, taps_64_lp_031_063);
+	fir_64_decim_2_real_s16_s16_init(&state->audio_dec, taps_64_lp_031_063, 64);
 }
 
 void rx_fm_narrowband_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
@@ -362,7 +362,7 @@ void rx_am_to_audio_init(void* const _state) {
 	fir_cic3_decim_2_s16_s16_init(&state->bb_dec_4);
 	fir_cic3_decim_2_s16_s16_init(&state->bb_dec_5);
 	// TODO: Channel filter here.
-	fir_64_decim_2_real_s16_s16_init(&state->audio_dec, taps_64_lp_031_063);
+	fir_64_decim_2_real_s16_s16_init(&state->audio_dec, taps_64_lp_031_063, 64);
 }
 
 void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
