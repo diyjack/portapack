@@ -194,7 +194,7 @@ static const void* get_receiver_configuration_name() {
 	case 1: return "NBAM";
 	case 2: return "NBFM";
 	case 3: return "WBFM";
-	case 4: return "TPMS";
+	case 4: return "TASK";
 	case 5: return "TFSK";
 	default: return "????";
 	}

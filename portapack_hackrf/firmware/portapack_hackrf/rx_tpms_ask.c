@@ -19,7 +19,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "rx_tpms.h"
+#include "rx_tpms_ask.h"
 
 #include "i2s.h"
 
@@ -32,7 +32,7 @@
 
 #include <math.h>
 
-typedef struct rx_tpms_state_t {
+typedef struct rx_tpms_ask_state_t {
 	translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_state_t bb_dec_1;
 	fir_cic3_decim_2_s16_s16_state_t bb_dec_2;
 	fir_cic3_decim_2_s16_s16_state_t bb_dec_3;
@@ -41,18 +41,18 @@ typedef struct rx_tpms_state_t {
 	clock_recovery_t clock_recovery;
 	access_code_correlator_t access_code_correlator;
 	packet_builder_t packet_builder;
-} rx_tpms_state_t;
+} rx_tpms_ask_state_t;
 
-static void rx_tpms_clock_recovery_symbol_handler(const float value, void* const context) {
-	rx_tpms_state_t* const state = (rx_tpms_state_t*)context;
+static void rx_tpms_ask_clock_recovery_symbol_handler(const float value, void* const context) {
+	rx_tpms_ask_state_t* const state = (rx_tpms_ask_state_t*)context;
 
 	const uint_fast8_t symbol = (value >= 0.0f) ? 1 : 0;
 	const bool access_code_found = access_code_correlator_execute(&state->access_code_correlator, symbol);
 	packet_builder_execute(&state->packet_builder, symbol, access_code_found);
 }
 
-void rx_tpms_init(void* const _state, packet_builder_payload_handler_t payload_handler) {
-	rx_tpms_state_t* const state = (rx_tpms_state_t*)_state;
+void rx_tpms_ask_init(void* const _state, packet_builder_payload_handler_t payload_handler) {
+	rx_tpms_ask_state_t* const state = (rx_tpms_ask_state_t*)_state;
 
 	const float symbol_rate = 8192.0f;
 	const float sample_rate = 192000.0f;
@@ -62,13 +62,13 @@ void rx_tpms_init(void* const _state, packet_builder_payload_handler_t payload_h
 	fir_cic3_decim_2_s16_s16_init(&state->bb_dec_3);
 	fir_cic3_decim_2_s16_s16_init(&state->bb_dec_4);
 	envelope_init(&state->envelope, 0.08f, 0.01f);
-	clock_recovery_init(&state->clock_recovery, symbol_rate / sample_rate, rx_tpms_clock_recovery_symbol_handler, state);
+	clock_recovery_init(&state->clock_recovery, symbol_rate / sample_rate, rx_tpms_ask_clock_recovery_symbol_handler, state);
 	access_code_correlator_init(&state->access_code_correlator, 0b01010101010101010101010101011110, 32, 2);
 	packet_builder_init(&state->packet_builder, 74, payload_handler, state);
 }
 
-void rx_tpms_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
-	rx_tpms_state_t* const state = (rx_tpms_state_t*)_state;
+void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
+	rx_tpms_ask_state_t* const state = (rx_tpms_ask_state_t*)_state;
 
 	size_t sample_count = sample_count_in;
 

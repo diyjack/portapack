@@ -46,7 +46,7 @@
 #include "decimate.h"
 #include "demodulate.h"
 
-#include "rx_tpms.h"
+#include "rx_tpms_ask.h"
 #include "rx_tpms_fsk.h"
 
 #include "ipc.h"
@@ -111,13 +111,13 @@ static const int16_t taps_64_lp_031_063[] = {
 	   325,    325,    302,    269,    244,    255,   -254,      0,
 };
 
-static void rx_tpms_packet_handler(const void* const payload, const size_t payload_length, void* const context) {
+static void rx_tpms_ask_packet_handler(const void* const payload, const size_t payload_length, void* const context) {
 	(void)context;
 	ipc_command_packet_data_received(&device_state->ipc_m0, payload, payload_length);
 }
 
-static void rx_tpms_init_wrapper(void* const _state) {
-	rx_tpms_init(_state, rx_tpms_packet_handler);
+static void rx_tpms_ask_init_wrapper(void* const _state) {
+	rx_tpms_ask_init(_state, rx_tpms_ask_packet_handler);
 }
 
 static void rx_tpms_fsk_packet_handler(const void* const payload, const size_t payload_length, void* const context) {
@@ -538,9 +538,9 @@ const receiver_configuration_t receiver_configurations[] = {
 		.enable_spectrum = false,
 	},
 	[RECEIVER_CONFIGURATION_TPMS] = {
-		.name = "TPMS",
-		.init = rx_tpms_init_wrapper,
-		.baseband_handler = rx_tpms_baseband_handler,
+		.name = "TASK",
+		.init = rx_tpms_ask_init_wrapper,
+		.baseband_handler = rx_tpms_ask_baseband_handler,
 		.tuning_offset = -768000,
 		.sample_rate = 12288000,
 		.baseband_bandwidth = 1750000,
