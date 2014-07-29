@@ -410,8 +410,6 @@ void portapack_init() {
 }
 
 void dma_isr() {
-	sgpio_dma_irq_tc_acknowledge();
-
 	complex_s8_t* const completed_buffer = get_completed_baseband_buffer();
 
 	/* 12.288MHz
@@ -434,6 +432,13 @@ void dma_isr() {
 		const float cycles_per_baseband_block = (2048.0f / decimated_sampling_rate) * 200000000.0f;
 		device_state->dsp_metrics.duration_all_millipercent = (float)device_state->dsp_metrics.duration_all / cycles_per_baseband_block * 100000.0f;
 	}
+
+	/* Acknowledge interrupt at end. If acknowledged at the beginning of the
+	 * ISR, a long-running baseband handler could make the baseband processing
+	 * unresponsive, which could also lock up the UI. Instead, acknowledging
+	 * at the end allows us to drop baseband frames if necessary.
+	 */
+	sgpio_dma_irq_tc_acknowledge();
 }
 
 #include "arm_intrinsics.h"
