@@ -120,6 +120,7 @@ void lcd_frame_sync() {
 
 const lcd_color_t color_black = LCD_COLOR(0, 0, 0);
 const lcd_color_t color_blue  = LCD_COLOR(0, 0, 255);
+const lcd_color_t color_red   = LCD_COLOR(255, 0, 0);
 const lcd_color_t color_white = LCD_COLOR(255, 255, 255);
 
 const lcd_glyph_t* lcd_get_glyph(const lcd_t* const lcd, const char c) {

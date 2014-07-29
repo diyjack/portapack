@@ -41,6 +41,7 @@ typedef uint16_t lcd_color_t;
 
 extern const lcd_color_t color_black;
 extern const lcd_color_t color_blue;
+extern const lcd_color_t color_red;
 extern const lcd_color_t color_white;
 
 typedef struct lcd_glyph_t {
