@@ -25,23 +25,7 @@
 
 #include "decimate.h"
 #include "demodulate.h"
-
-/* Wideband audio filter */
-/* 96kHz int16_t input
- * -> FIR filter, <15kHz (0.156fs) pass, >19kHz (0.198fs) stop
- * -> 48kHz int16_t output, gain of 1.0 (I think).
- * Padded to multiple of four taps for unrolled FIR code.
- */
-static const int16_t taps_64_lp_156_198[] = {
-    -27,    166,    104,    -36,   -174,   -129,    109,    287,
-    148,   -232,   -430,   -130,    427,    597,     49,   -716,
-   -778,    137,   1131,    957,   -493,  -1740,  -1121,   1167,
-   2733,   1252,  -2633,  -4899,  -1336,   8210,  18660,  23254,
-  18660,   8210,  -1336,  -4899,  -2633,   1252,   2733,   1167,
-  -1121,  -1740,   -493,    957,   1131,    137,   -778,   -716,
-     49,    597,    427,   -130,   -430,   -232,    148,    287,
-    109,   -129,   -174,    -36,    104,    166,    -27,      0
-};
+#include "filters.h"
 
 typedef struct rx_fm_broadcast_to_audio_state_t {
 	translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_state_t dec_stage_1_state;
