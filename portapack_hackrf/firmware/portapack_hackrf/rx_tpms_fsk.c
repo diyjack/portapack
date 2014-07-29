@@ -53,7 +53,7 @@ void rx_tpms_fsk_init(void* const _state, packet_builder_payload_handler_t paylo
 	rx_tpms_fsk_state_t* const state = (rx_tpms_fsk_state_t*)_state;
 
 	const float symbol_rate = 19200.0f;
-	const float sample_rate = 153600.0f / 2.0f;
+	const float sample_rate = 76800.0f;
 
 	translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_init(&state->bb_dec_1);
 	fir_cic3_decim_2_s16_s16_init(&state->bb_dec_2);
