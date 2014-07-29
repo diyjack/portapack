@@ -69,7 +69,6 @@ typedef struct ipc_command_set_receiver_configuration_t {
 
 typedef struct ipc_command_ui_frame_sync_t {
 	uint32_t id;
-	int16_t* fft_bin;
 } ipc_command_ui_frame_sync_t;
 
 #endif/*__IPC_M4_H__*/

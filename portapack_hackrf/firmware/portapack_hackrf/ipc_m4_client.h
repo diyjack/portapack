@@ -32,6 +32,6 @@ void ipc_command_set_if_gain(ipc_channel_t* const channel, const int32_t value_d
 void ipc_command_set_bb_gain(ipc_channel_t* const channel, const int32_t value_db);
 void ipc_command_set_audio_out_gain(ipc_channel_t* const channel, const int32_t value_db);
 void ipc_command_set_receiver_configuration(ipc_channel_t* const channel, const uint32_t index);
-void ipc_command_ui_frame_sync(ipc_channel_t* const channel, int16_t* const fft_bin);
+void ipc_command_ui_frame_sync(ipc_channel_t* const channel);
 
 #endif/*__IPC_M4_CLIENT_H__*/

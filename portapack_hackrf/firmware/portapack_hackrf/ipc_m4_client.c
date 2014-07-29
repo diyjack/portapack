@@ -70,10 +70,9 @@ void ipc_command_set_receiver_configuration(ipc_channel_t* const channel, const 
 	ipc_channel_write(channel, &command, sizeof(command));
 }
 
-void ipc_command_ui_frame_sync(ipc_channel_t* const channel, int16_t* const fft_bin) {
+void ipc_command_ui_frame_sync(ipc_channel_t* const channel) {
 	ipc_command_ui_frame_sync_t command = {
 		.id = IPC_COMMAND_ID_UI_FRAME_SYNC,
-		.fft_bin = fft_bin,
 	};
 	ipc_channel_write(channel, &command, sizeof(command));
 }

@@ -857,8 +857,6 @@ blink();
 */
 }
 
-int16_t* const fft_bin = (int16_t*)0x20007100;
-
 static void touch_started(const touch_state_t* const state) {
 	const ui_field_index_t hit_index = ui_fields_hit(state->x, state->y);
 	if( hit_index < UI_FIELD_LAST ) {
@@ -1103,7 +1101,7 @@ bool numeric_entry = false;
 		handle_joysticks();
 		ipc_m0_handle();
 
-		ipc_command_ui_frame_sync(&device_state->ipc_m4, &fft_bin[0]);
+//		ipc_command_ui_frame_sync(&device_state->ipc_m4);
 		lcd_frame_sync();
 
 		const uint_fast16_t draw_y = lcd_scroll(&lcd, 1);
