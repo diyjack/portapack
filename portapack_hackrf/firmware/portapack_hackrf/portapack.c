@@ -116,13 +116,10 @@ void specan_init(void* const _state) {
 
 void specan_baseband_handler(void* const _state, complex_s8_t* const in, const size_t sample_count_in, void* const out, baseband_timestamps_t* const timestamps) {
 	specan_state_t* const state = (specan_state_t*)_state;
-	(void)state;
-	(void)in;
 	(void)sample_count_in;
 	(void)out;
 
 	timestamps->start = timestamps->decimate_end = timestamps->channel_filter_end = timestamps->demodulate_end = baseband_timestamp();
-	complex_s8_t* const completed_buffer = wait_for_completed_baseband_buffer();
 
 	complex_t spectrum[256];
 	/*int32_t sum_r = 0;
@@ -135,11 +132,11 @@ void specan_baseband_handler(void* const _state, complex_s8_t* const in, const s
 	for(uint32_t i=0; i<256; i++) {
 		const uint32_t i_rev = __RBIT(i) >> 24;
 
-		const int32_t real = completed_buffer[i].i;
+		const int32_t real = in[i].i;
 		const float real_f = (float)real;
 		spectrum[i_rev].r = real_f * window[i] * temp_scale;
 		
-		const int32_t imag = completed_buffer[i].q;
+		const int32_t imag = in[i].q;
 		const float imag_f = (float)imag;
 		spectrum[i_rev].i = imag_f * window[i] * temp_scale;
 /*
@@ -166,7 +163,6 @@ void specan_baseband_handler(void* const _state, complex_s8_t* const in, const s
 	const float spectrum_gain = 50.0f;
 
 	const float log_k = 0.00000000001f; // to prevent log10f(0), which is bad...
-	int16_t* const fft_bin = state->fft_bin;
 	for(int_fast16_t i=-120; i<120; i++) {
 		const uint_fast16_t x = i + 120;
 		const uint_fast16_t bin = (i + 256) & 0xff;
@@ -180,7 +176,7 @@ void specan_baseband_handler(void* const _state, complex_s8_t* const in, const s
 		//		 0.150515f (bin_mag=1.414..., peak I, peak Q).
 		//const int n = (int)roundf((spectrum_peak_log - bin_mag_log) * spectrum_gain + spectrum_offset_pixels);
 		int n = (int)roundf((bin_mag_log - spectrum_floor) * spectrum_gain);
-		fft_bin[x] = n;
+		state->fft_bin[x] = n;
 		// frame->bin[x].sum += n;
 		// if( n > frame->bin[x].peak ) {
 		// 	frame->bin[x].peak = n;
