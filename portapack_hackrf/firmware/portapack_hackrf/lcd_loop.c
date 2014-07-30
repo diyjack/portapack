@@ -1036,6 +1036,23 @@ void handle_command_packet_data_received(const void* const arg) {
 	}
 }
 
+void handle_command_spectrum_data(const void* const arg) {
+	const ipc_command_spectrum_data_t* const command = arg;
+
+	const uint_fast16_t draw_y = lcd_scroll(&lcd, 1);
+	const uint_fast16_t x = 0;
+	const uint_fast16_t y = draw_y;
+
+	lcd_start_drawing(x, y, lcd.size.w, 1);
+	for(size_t i=0; i<lcd.size.w; i++) {
+		const uint_fast16_t bin = (i + (128 + (256 - 240) / 2)) & 0xff;
+		const lcd_color_t color = spectrum_rgb3_lut[command->avg[bin]];
+		lcd_data_write_rgb(color);
+	}
+
+	ipc_command_spectrum_data_done(&device_state->ipc_m4);
+}
+
 int main() {
 	rtc_init();
 	sdio_init();

@@ -38,6 +38,7 @@ typedef void (*command_handler_t)(const void* const command);
 static const command_handler_t command_handler[] = {
 	[IPC_COMMAND_ID_NONE] = handle_command_none,
 	[IPC_COMMAND_ID_PACKET_DATA_RECEIVED] = handle_command_packet_data_received,
+	[IPC_COMMAND_ID_SPECTRUM_DATA] = handle_command_spectrum_data,
 };
 static const size_t command_handler_count = sizeof(command_handler) / sizeof(command_handler[0]);
 

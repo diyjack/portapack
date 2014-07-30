@@ -32,3 +32,13 @@ void ipc_command_packet_data_received(ipc_channel_t* const channel, const uint8_
 	memcpy(&command.payload, payload, sizeof(command.payload));
 	ipc_channel_write(channel, &command, sizeof(command));
 }
+
+void ipc_command_spectrum_data(ipc_channel_t* const channel, uint8_t* const avg, uint8_t* const peak, const size_t bins) {
+	ipc_command_spectrum_data_t command = {
+		.id = IPC_COMMAND_ID_SPECTRUM_DATA,
+		.avg = avg,
+		.peak = peak,
+		.bins = bins,
+	};
+	ipc_channel_write(channel, &command, sizeof(command));
+}

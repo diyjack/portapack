@@ -262,6 +262,16 @@ void set_rx_mode(const uint32_t new_receiver_configuration_index) {
 	}
 }
 
+
+void handle_command_spectrum_data_done(const void* const arg) {
+	const ipc_command_spectrum_data_done_t* const command = arg;
+	(void)command;
+
+	if( device_state->receiver_configuration_index == RECEIVER_CONFIGURATION_SPEC ) {
+		specan_acknowledge_frame(&receiver_state_buffer);
+	}
+}
+
 #include "portapack_driver.h"
 
 void portapack_init() {

@@ -34,6 +34,7 @@
 
 #include "ipc.h"
 #include "ipc_m4.h"
+#include "ipc_m4_server.h"
 
 static void handle_command_none(const void* const command) {
 	(void)command;
@@ -83,11 +84,6 @@ static void handle_command_set_receiver_configuration(const void* const arg) {
 	set_rx_mode(command->index);
 }
 
-static void handle_command_ui_frame_sync(const void* const arg) {
-	const ipc_command_ui_frame_sync_t* const command = arg;
-	(void)command;
-}
-
 typedef void (*command_handler_t)(const void* const command);
 
 static const command_handler_t command_handler[] = {
@@ -98,7 +94,7 @@ static const command_handler_t command_handler[] = {
 	[IPC_COMMAND_ID_SET_FREQUENCY] = handle_command_set_frequency,
 	[IPC_COMMAND_ID_SET_AUDIO_OUT_GAIN] = handle_command_set_audio_out_gain,
 	[IPC_COMMAND_ID_SET_RECEIVER_CONFIGURATION] = handle_command_set_receiver_configuration,
-	[IPC_COMMAND_ID_UI_FRAME_SYNC] = handle_command_ui_frame_sync,
+	[IPC_COMMAND_ID_SPECTRUM_DATA_DONE] = handle_command_spectrum_data_done,
 };
 static const size_t command_handler_count = sizeof(command_handler) / sizeof(command_handler[0]);
 

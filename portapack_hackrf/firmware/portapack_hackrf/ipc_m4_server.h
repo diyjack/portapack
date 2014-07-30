@@ -22,6 +22,6 @@
 #ifndef __IPC_M4_SERVER_H__
 #define __IPC_M4_SERVER_H__
 
-
+void handle_command_spectrum_data_done(const void* const arg);
 
 #endif/*__IPC_M4_SERVER_H__*/

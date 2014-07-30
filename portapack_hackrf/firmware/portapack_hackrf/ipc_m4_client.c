@@ -70,9 +70,9 @@ void ipc_command_set_receiver_configuration(ipc_channel_t* const channel, const 
 	ipc_channel_write(channel, &command, sizeof(command));
 }
 
-void ipc_command_ui_frame_sync(ipc_channel_t* const channel) {
-	ipc_command_ui_frame_sync_t command = {
-		.id = IPC_COMMAND_ID_UI_FRAME_SYNC,
+void ipc_command_spectrum_data_done(ipc_channel_t* const channel) {
+	ipc_command_spectrum_data_done_t command = {
+		.id = IPC_COMMAND_ID_SPECTRUM_DATA_DONE,
 	};
 	ipc_channel_write(channel, &command, sizeof(command));
 }

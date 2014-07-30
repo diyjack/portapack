@@ -34,7 +34,7 @@ typedef enum {
 	IPC_COMMAND_ID_SET_BB_GAIN = 4,
 	IPC_COMMAND_ID_SET_AUDIO_OUT_GAIN = 5,
 	IPC_COMMAND_ID_SET_RECEIVER_CONFIGURATION = 6,
-	IPC_COMMAND_ID_UI_FRAME_SYNC = 7,
+	IPC_COMMAND_ID_SPECTRUM_DATA_DONE = 7,
 } ipc_command_id_t;
 
 typedef struct ipc_command_set_frequency_t {
@@ -67,8 +67,8 @@ typedef struct ipc_command_set_receiver_configuration_t {
 	uint32_t index;
 } ipc_command_set_receiver_configuration_t;
 
-typedef struct ipc_command_ui_frame_sync_t {
+typedef struct ipc_command_spectrum_data_done_t {
 	uint32_t id;
-} ipc_command_ui_frame_sync_t;
+} ipc_command_spectrum_data_done_t;
 
 #endif/*__IPC_M4_H__*/

@@ -25,6 +25,7 @@
 typedef enum {
 	IPC_COMMAND_ID_NONE = 0,
 	IPC_COMMAND_ID_PACKET_DATA_RECEIVED = 1,
+	IPC_COMMAND_ID_SPECTRUM_DATA = 2,
 } ipc_command_id_t;
 
 typedef struct ipc_command_packet_data_received_t {
@@ -32,5 +33,12 @@ typedef struct ipc_command_packet_data_received_t {
 	size_t payload_length;
 	uint8_t payload[32];
 } ipc_command_packet_data_received_t;
+
+typedef struct ipc_command_spectrum_data_t {
+	uint32_t id;
+	uint8_t* avg;
+	uint8_t* peak;
+	size_t bins;
+} ipc_command_spectrum_data_t;
 
 #endif/*__IPC_M0_H__*/

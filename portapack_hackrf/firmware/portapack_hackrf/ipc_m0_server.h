@@ -23,6 +23,7 @@
 #define __IPC_M0_SERVER_H__
 
 void handle_command_packet_data_received(const void* const arg);
+void handle_command_spectrum_data(const void* const arg);
 
 void ipc_m0_handle();
 
