@@ -1064,8 +1064,6 @@ int main() {
 */
 	ipc_command_set_audio_out_gain(&device_state->ipc_m4, 0);
 
-	lcd_set_scroll_area(&lcd, 16 * 6, lcd.size.h);
-
 bool numeric_entry = false;
 
 	while(1) {
@@ -1101,19 +1099,7 @@ bool numeric_entry = false;
 		handle_joysticks();
 		ipc_m0_handle();
 
-//		ipc_command_ui_frame_sync(&device_state->ipc_m4);
 		lcd_frame_sync();
-
-		const uint_fast16_t draw_y = lcd_scroll(&lcd, 1);
-		const uint_fast16_t x = 0;
-		const uint_fast16_t y = draw_y;
-		lcd_start_drawing(x, y, lcd.size.w, 1);
-		for(size_t i=0; i<lcd.size.w; i++) {
-			const int v = max_t(uint_fast8_t, min_t(uint_fast8_t, fft_bin[i], 255), 0);
-			const lcd_color_t color = spectrum_rgb3_lut[v];
-			lcd_data_write_rgb(color);
-		}
-
 		ui_frame += 1;
 	}
 
