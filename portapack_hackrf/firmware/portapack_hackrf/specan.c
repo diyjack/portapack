@@ -117,12 +117,6 @@ void specan_baseband_handler(void* const _state, complex_s8_t* const in, const s
 	}
 
 	complex_t spectrum[256];
-	/*int32_t sum_r = 0;
-	int32_t sum_i = 0;
-	int32_t min_r = 0;
-	int32_t min_i = 0;
-	int32_t max_r = 0;
-	int32_t max_i = 0;*/
 	for(uint32_t i=0; i<256; i++) {
 		const uint32_t i_rev = __RBIT(i) >> 24;
 
@@ -133,19 +127,6 @@ void specan_baseband_handler(void* const _state, complex_s8_t* const in, const s
 		const int32_t imag = in[i].q;
 		const float imag_f = (float)imag;
 		spectrum[i_rev].i = imag_f * window[i];
-/*
-		int32_t real = src[i].i;
-		sum_r += real;
-		if( real > max_r ) { max_r = real; }
-		if( real < min_r ) { min_r = real; }
-		spectrum[i].r = (float)real * window[i];
-		
-		int32_t imag = src[i].q;
-		sum_i += imag;
-		if( imag > max_i ) { max_i = imag; }
-		if( imag < min_i ) { min_i = imag; }
-		spectrum[i].i = (float)imag * window[i];
-*/
 	}
 	
 	fft_c_preswapped((float*)spectrum, 256);

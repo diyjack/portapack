@@ -114,6 +114,7 @@ static void draw_cycles(const uint_fast16_t x, const uint_fast16_t y) {
 	draw_percent(metrics->duration_all_millipercent, "CPU   %3d.%01d%%", x, y + 96);
 }
 #endif
+
 struct ui_field_text_t;
 typedef struct ui_field_text_t ui_field_text_t;
 
@@ -226,21 +227,7 @@ static uint32_t get_tuning_step_size_hz() {
 static const void* get_tuning_step_size_name() {
 	return get_tuning_step_size()->name;
 }
-#if 0
-static int32_t frequency_repeat_acceleration(const uint32_t repeat_count) {
-	int32_t amount = 25000;
-	if( repeat_count >= 160 ) {
-		amount = 100000000;
-	} else if( repeat_count >= 80 ) {
-		amount = 10000000;
-	} else if( repeat_count >= 40 ) {
-		amount = 1000000;
-	} else if( repeat_count >= 20 ) {
-		amount = 100000;
-	}
-	return amount;
-}
-#endif
+
 static void ui_field_value_up_frequency(const uint32_t amount) {
 	ipc_command_set_frequency(&device_state->ipc_m4, device_state->tuned_hz + (amount * get_tuning_step_size_hz())/*frequency_repeat_acceleration(repeat_count)*/);
 }
@@ -625,97 +612,6 @@ static bool handle_joysticks() {
 }
 
 #include "lcd_touch.h"
-#if 0
-static void draw_touch_data(const touch_state_t* const state, const uint_fast16_t x, const uint_fast16_t y) {
-/*
-	lcd_colors_invert();
-	lcd_draw_string(x, y, "Touch Data", 10);
-	lcd_colors_invert();
-*/
-/*
-	int32_t X_range = max(touch_state[1].xp - touch_state[1].xn, 0);
-	int32_t X = max(touch_state[1].yp - touch_state[1].xn, 0) * 1024 / X_range;
-
-	int32_t Y_range = max(touch_state[3].yp - touch_state[3].yn, 0);
-	int32_t Y = max(touch_state[3].xp - touch_state[3].yn, 0) * 1024 / Y_range;
-
-	int32_t Z_range = max(touch_state[0].yp - touch_state[0].xn, 0);
-	int32_t Z1 = max((touch_state[0].xp - touch_state[0].xn), 0) * 1024 / Z_range;
-	int32_t Z2 = max((touch_state[0].yn - touch_state[0].xn), 0) * 1024 / Z_range;
-
-	int32_t pressure = min(X * ((Z2 * 1024) / (Z1 + 1) - 1024) / 16384, 1024);
-
-	draw_int(X, "X   %4d", x, y + 80);
-	draw_int(Y, "Y   %4d", x, y + 96);
-	draw_int(pressure, "P   %4d", x + 120, y + 80);
-*/
-/*
-	if( pressure < 200 ) {
-		int32_t px = (900 - X) * 240 / 800;
-		int32_t py = (920 - Y) * 320 / 840;
-		lcd_set_pixel(px, py);
-	}
-*/
-	//const uint32_t k = 1;
-/*
-const int32_t pressure_range = touch_state[0].xp - touch_state[0].yn;
-const int32_t pressure_value = touch_state[0].xn - touch_state[0].yp;
-const int32_t pressure = 1024 - (pressure_value * 1024 / pressure_range);
-
-const int32_t x_range_1 = touch_state[1].xp - touch_state[1].xn;
-const int32_t x_value_1 = touch_state[1].yp + touch_state[1].yn;
-const int32_t x_1 = x_value_1 * 512 / max(x_range_1, 1);
-
-const int32_t x_range_2 = touch_state[2].xn - touch_state[2].xp;
-const int32_t x_value_2 = touch_state[2].yp + touch_state[2].yn;
-const int32_t x_2 = x_value_2 * 512 / max(x_range_2, 1);
-*/
-/*
-const int32_t pressure_x = touch_state[0].xp - touch_state[0].xn;
-const int32_t pressure_y = touch_state[0].yp - touch_state[0].yn;
-const int32_t pressure = max(pressure_x, pressure_y);
-*/
-/*
-const int32_t pressure = 1023 - (touch_state[0].xn - touch_state[0].yp);
-const int32_t x_1 = (
-	(touch_state[1].yp + touch_state[1].yn) -
-	(touch_state[1].xn * 2)
-) * 512 /
-	(touch_state[1].xp - touch_state[1].xn)
-;
-*/
-	draw_int(state->pressure, "P %4d", x, y + 80);
-	draw_int(state->x, "X %3d", x + 7 * 8, y + 80);
-	draw_int(state->y, "Y %3d", x + 13 * 8, y + 80);
-
-	if( state->pressure ) {
-		lcd_set_pixel(&lcd, state->x, state->y);
-	}
-/*
-	draw_int(touch_state[0].xp, "X+ %4d", x, y + 16);
-	draw_int(touch_state[0].xn, "X- %4d", x, y + 32);
-	draw_int(touch_state[0].yp, "Y+ %4d", x, y + 48);
-	draw_int(touch_state[0].yn, "Y- %4d", x, y + 64);
-	
-	draw_int(touch_state[1].xp, " %4d", x + 7 * 8, y + 16);
-	draw_int(touch_state[1].xn, " %4d", x + 7 * 8, y + 32);
-	draw_int(touch_state[1].yp, " %4d", x + 7 * 8, y + 48);
-	draw_int(touch_state[1].yn, " %4d", x + 7 * 8, y + 64);
-
-	draw_int(touch_state[2].xp, " %4d", x + 13 * 8, y + 16);
-	draw_int(touch_state[2].xn, " %4d", x + 13 * 8, y + 32);
-	draw_int(touch_state[2].yp, " %4d", x + 13 * 8, y + 48);
-	draw_int(touch_state[2].yn, " %4d", x + 13 * 8, y + 64);
-	
-	draw_int(touch_state[3].xp, " %4d", x + 18 * 8, y + 16);
-	draw_int(touch_state[3].xn, " %4d", x + 18 * 8, y + 32);
-	draw_int(touch_state[3].yp, " %4d", x + 18 * 8, y + 48);
-	draw_int(touch_state[3].yn, " %4d", x + 18 * 8, y + 64);
-*/
-	//const uint32_t touch_x = (touch_state[0].xp + touch_state[0].xn) / 30;
-	//const uint32_t touch_y = (touch_state[2].yp + touch_state[2].yn) / 30;
-}
-#endif
 
 static void draw_rtc(const uint_fast16_t x, const uint_fast16_t y) {
 	draw_int(rtc_year(), "%04d/", x + 0*8, y);
@@ -951,20 +847,6 @@ ui_button_t* ui_numeric_entry_touched(const touch_state_t* const touch) {
 	}
 	return NULL;
 }
-#if 0
-static void test_lcd_coordinate_space() {
-	lcd_set_background(&lcd, LCD_COLOR(  0,   0,   0));
-	lcd_clear(&lcd);
-	lcd_set_foreground(&lcd, LCD_COLOR(255,   0,   0));
-	lcd_set_pixel(&lcd,   0,   0);
-	lcd_set_foreground(&lcd, LCD_COLOR(  0, 255,   0));
-	lcd_set_pixel(&lcd, 239,   0);
-	lcd_set_foreground(&lcd, LCD_COLOR(  0,   0, 255));
-	lcd_set_pixel(&lcd,   0, 319);
-	lcd_set_foreground(&lcd, LCD_COLOR(255, 255, 255));
-	lcd_set_pixel(&lcd, 239, 319);
-}
-#endif
 
 #include "ipc_m0.h"
 #include "ipc_m0_server.h"
