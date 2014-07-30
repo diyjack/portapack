@@ -72,8 +72,6 @@ void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, co
 
 	size_t sample_count = sample_count_in;
 
-	timestamps->start = baseband_timestamp();
-
 	/* 3.072MHz complex<int8>[N]
 	 * -> Shift by -fs/4
 	 * -> 3rd order CIC decimation by 2, gain of 8
@@ -147,6 +145,4 @@ void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, co
 	for(size_t i=0, j=0; i<I2S_BUFFER_SAMPLE_COUNT; i++, j++) {
 		audio_tx_buffer[i*2] = audio_tx_buffer[i*2+1] = (int16_t)out_mag[j*4];
 	}
-
-	timestamps->audio_end = baseband_timestamp();
 }

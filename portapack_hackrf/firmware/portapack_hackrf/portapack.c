@@ -328,7 +328,9 @@ void dma_isr() {
 	 */
 	if( receiver_baseband_handler ) {
 		baseband_timestamps_t timestamps;
+		timestamps.start = timestamps.decimate_end = timestamps.channel_filter_end = timestamps.demodulate_end = baseband_timestamp();
 		receiver_baseband_handler(receiver_state_buffer, completed_buffer, 2048, &timestamps);
+		timestamps.audio_end = baseband_timestamp();
 
 		device_state->dsp_metrics.duration_decimate = systick_difference(timestamps.start, timestamps.decimate_end);
 		device_state->dsp_metrics.duration_channel_filter = systick_difference(timestamps.decimate_end, timestamps.channel_filter_end);

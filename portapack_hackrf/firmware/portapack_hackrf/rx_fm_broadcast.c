@@ -54,8 +54,6 @@ void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t*
 
 	size_t sample_count = sample_count_in;
 
-	timestamps->start = baseband_timestamp();
-
 	/* 3.072MHz complex<int8>[N]
 	 * -> Shift by -fs/4
 	 * -> 3rd order CIC decimation by 2, gain of 8
@@ -106,8 +104,6 @@ void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t*
 	 * -> FIR filter, <15kHz (0.156fs) pass, >19kHz (0.198fs) stop, gain of 1
 	 * -> 48kHz int16[N/64] */
 	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec_4, out, out, sample_count);
-
-	timestamps->audio_end = baseband_timestamp();
 
 	copy_to_audio_output(out, sample_count);
 }
