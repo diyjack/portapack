@@ -34,23 +34,36 @@ void rtc_disable() {
 	RTC_CCR &= ~RTC_CCR_CLKEN(1);
 }
 
-void rtc_init() {
+static bool clock_32k768_is_running() {
+	const uint32_t creg0_masked = CREG_CREG0 & (CREG_CREG0_PD32KHZ | CREG_CREG0_RESET32KHZ);
+	const uint32_t creg0_expected = 0;
+	return (creg0_masked == creg0_expected);
+}
+
+static void clock_32k768_init() {
 	// Enable 32.768kHz oscillator
 	CREG_CREG0 &= ~CREG_CREG0_PD32KHZ;
+
+	// Clear 32.768kHz oscillator reset
+	CREG_CREG0 &= ~CREG_CREG0_RESET32KHZ;
+}
+
+void rtc_init() {
+	if( !clock_32k768_is_running() ) {
+		clock_32k768_init();
+
+		/* TODO: Call a proper 2 second delay function. */
+		volatile uint32_t ms = 2000;
+		while((ms--) > 0) {
+			delay(50000);
+		}
+	}
 
 	// Disable 32.768kHz output from 32.768kHz oscillator.
 	CREG_CREG0 &= ~CREG_CREG0_EN32KHZ;
 
 	// Enable 1kHz output from 32.768kHz oscillator
 	CREG_CREG0 |= CREG_CREG0_EN1KHZ;
-
-	// Clear 32.768kHz oscillator reset
-	CREG_CREG0 &= ~CREG_CREG0_RESET32KHZ;
-
-	volatile uint32_t ms = 2000;
-	while((ms--) > 0) {
-		delay(50000);
-	}
 
 	rtc_enable();
 }
