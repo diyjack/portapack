@@ -118,7 +118,6 @@ typedef struct receiver_configuration_t {
 	uint32_t baseband_bandwidth;
 	uint32_t baseband_decimation;
 	bool enable_audio;
-	bool enable_spectrum;
 } receiver_configuration_t;
 
 const receiver_configuration_t receiver_configurations[] = {
@@ -131,7 +130,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.baseband_bandwidth = 2500000,
 		.baseband_decimation = 3,
 		.enable_audio = false,
-		.enable_spectrum = true,
 	},
 	[RECEIVER_CONFIGURATION_NBAM] = {
 		.name = "NBAM",
@@ -142,7 +140,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.baseband_bandwidth = 1750000,
 		.baseband_decimation = 4,
 		.enable_audio = true,
-		.enable_spectrum = false,
 	},
 	[RECEIVER_CONFIGURATION_NBFM] = {
 		.name = "NBFM",
@@ -153,7 +150,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.baseband_bandwidth = 1750000,
 		.baseband_decimation = 4,
 		.enable_audio = true,
-		.enable_spectrum = false,
 	},
 	[RECEIVER_CONFIGURATION_WBFM] = {
 		.name = "WBFM",
@@ -164,7 +160,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.baseband_bandwidth = 1750000,
 		.baseband_decimation = 4,
 		.enable_audio = true,
-		.enable_spectrum = false,
 	},
 	[RECEIVER_CONFIGURATION_TPMS] = {
 		.name = "TPMS-ASK",
@@ -175,7 +170,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.baseband_bandwidth = 1750000,
 		.baseband_decimation = 4,
 		.enable_audio = true,
-		.enable_spectrum = false,
 	},
 	[RECEIVER_CONFIGURATION_TPMS_FSK] = {
 		.name = "TPMS-FSK",
@@ -186,7 +180,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.baseband_bandwidth = 1750000,
 		.baseband_decimation = 4,
 		.enable_audio = true,
-		.enable_spectrum = false,
 	},
 };
 
