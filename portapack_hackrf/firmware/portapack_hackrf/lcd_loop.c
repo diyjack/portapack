@@ -964,8 +964,15 @@ void handle_command_spectrum_data(const void* const arg) {
 	ipc_command_spectrum_data_done(&device_state->ipc_m4);
 }
 
+void rtc_isr() {
+	rtc_counter_interrupt_clear();
+}
+
 int main() {
 	rtc_init();
+	rtc_counter_interrupt_second_enable();
+	rtc_counter_interrupt_enable();
+
 	sdio_init();
 	lcd_init(&lcd);
 	lcd_touch_init();
