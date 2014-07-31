@@ -39,6 +39,7 @@ static const command_handler_t command_handler[] = {
 	[IPC_COMMAND_ID_NONE] = handle_command_none,
 	[IPC_COMMAND_ID_PACKET_DATA_RECEIVED] = handle_command_packet_data_received,
 	[IPC_COMMAND_ID_SPECTRUM_DATA] = handle_command_spectrum_data,
+	[IPC_COMMAND_ID_RTC_SECOND] = handle_command_rtc_second,
 };
 static const size_t command_handler_count = sizeof(command_handler) / sizeof(command_handler[0]);
 

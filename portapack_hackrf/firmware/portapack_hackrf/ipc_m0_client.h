@@ -29,5 +29,6 @@
 
 void ipc_command_packet_data_received(ipc_channel_t* const channel, const uint8_t* const payload, const size_t payload_length);
 void ipc_command_spectrum_data(ipc_channel_t* const channel, uint8_t* const avg, uint8_t* const peak, const size_t bins);
+void ipc_command_rtc_second(ipc_channel_t* const channel);
 
 #endif/*__IPC_M0_CLIENT_H__*/

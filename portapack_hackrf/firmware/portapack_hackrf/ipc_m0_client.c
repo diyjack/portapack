@@ -42,3 +42,10 @@ void ipc_command_spectrum_data(ipc_channel_t* const channel, uint8_t* const avg,
 	};
 	ipc_channel_write(channel, &command, sizeof(command));
 }
+
+void ipc_command_rtc_second(ipc_channel_t* const channel) {
+	ipc_command_rtc_second_t command = {
+		.id = IPC_COMMAND_ID_RTC_SECOND,
+	};
+	ipc_channel_write(channel, &command, sizeof(command));
+}
