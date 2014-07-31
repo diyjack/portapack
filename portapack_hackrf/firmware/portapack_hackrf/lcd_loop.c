@@ -36,6 +36,7 @@
 #include "console.h"
 
 #include "rtc.h"
+#include "ritimer.h"
 #include "sdio.h"
 #include <led.h>
 
@@ -966,6 +967,21 @@ void handle_command_spectrum_data(const void* const arg) {
 	ipc_command_spectrum_data_done(&device_state->ipc_m4);
 }
 
+static void ritimer_init_1khz_isr() {
+	ritimer_init();
+	ritimer_compare_set(200000); /* TODO: Blindly assuming 200MHz -> 1kHz */
+	ritimer_match_clear_enable();
+	ritimer_enable();
+
+	nvic_set_priority(NVIC_RITIMER_OR_WWDT_IRQ, 255);
+	nvic_enable_irq(NVIC_RITIMER_OR_WWDT_IRQ);
+}
+
+void ritimer_or_wwdt_isr() {
+	ritimer_interrupt_clear();
+	encoder_update();
+}
+
 void rtc_isr() {
 	rtc_counter_interrupt_clear();
 }
@@ -980,6 +996,7 @@ int main() {
 	lcd_init(&lcd);
 	lcd_touch_init();
 	portapack_encoder_init();
+	ritimer_init_1khz_isr();
 
 	lcd_set_background(&lcd, color_blue);
 	lcd_set_foreground(&lcd, color_white);
@@ -1033,7 +1050,6 @@ bool numeric_entry = false;
 
 		while( !ipc_channel_is_empty(&device_state->ipc_m4) );
 
-		encoder_update();
 		handle_joysticks();
 		ipc_m0_handle();
 

@@ -92,6 +92,7 @@ set(SRC_M0
 	ipc_m4_client.c
 	ipc_m0_server.c
 	rtc.c
+	ritimer.c
 	sdio.c
 	manchester.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/delay.c
