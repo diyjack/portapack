@@ -435,5 +435,5 @@ uint_fast16_t lcd_scroll(
 	lcd->scroll.current_position = (lcd->scroll.current_position + lcd->scroll.height - delta) % lcd->scroll.height;
 	lcd_vertical_scrolling_start_address(lcd->scroll.top_area + lcd->scroll.current_position);
 
-	return lcd_scroll_area_y(lcd, 0);
+	return lcd_scroll_area_y(lcd, 1);	// TODO: WHY DOES "1" WORK WHEN "0" SHOULD?!!
 }
