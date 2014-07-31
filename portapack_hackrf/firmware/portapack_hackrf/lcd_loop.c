@@ -21,6 +21,8 @@
 
 #include "lcd_loop.h"
 
+#include <libopencm3/cm3/nvic.h>
+
 #include <stdint.h>
 #include <string.h>
 
@@ -971,7 +973,8 @@ void rtc_isr() {
 int main() {
 	rtc_init();
 	rtc_counter_interrupt_second_enable();
-	rtc_counter_interrupt_enable();
+	nvic_set_priority(NVIC_RTC_IRQ, 255);
+	nvic_enable_irq(NVIC_RTC_IRQ);
 
 	sdio_init();
 	lcd_init(&lcd);

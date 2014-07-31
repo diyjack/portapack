@@ -21,7 +21,6 @@
 
 #include <libopencm3/lpc43xx/rtc.h>
 #include <libopencm3/lpc43xx/creg.h>
-#include <libopencm3/cm3/nvic.h>
 
 #include <delay.h>
 
@@ -123,11 +122,6 @@ uint_fast8_t rtc_second() {
 
 void rtc_counter_interrupt_second_enable() {
 	RTC_CIIR |= RTC_CIIR_IMSEC(1);
-}
-
-void rtc_counter_interrupt_enable() {
-	nvic_set_priority(NVIC_RTC_IRQ, 255);
-	nvic_enable_irq(NVIC_RTC_IRQ);
 }
 
 void rtc_counter_interrupt_clear() {
