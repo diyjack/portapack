@@ -391,9 +391,6 @@ int encoder_update() {
 	const uint32_t phase_1 = portapack_encoder_phase_1();
 	encoder_state |= phase_1;
 
-	led_set(LED3, phase_0);
-	led_set(LED2, phase_1);
-
 	const int32_t result = encoder_transition_map[encoder_state & 0xf];
 	device_state->encoder_position += result;
 
