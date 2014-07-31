@@ -884,6 +884,14 @@ void handle_command_packet_data_received_ask(const void* const arg) {
 	console_writeln(&console, "");
 }
 
+static void set_console_error_color(const uint32_t error) {
+	if( error ) {
+		console_set_background(&console, color_red);
+	} else {
+		console_set_background(&console, color_black);
+	}
+}
+
 void handle_command_packet_data_received_fsk(const void* const arg) {
 	const ipc_command_packet_data_received_t* const command = arg;
 
@@ -892,17 +900,9 @@ void handle_command_packet_data_received_fsk(const void* const arg) {
 	manchester_decode(command->payload, value, errors, 80);
 
 	for(size_t i=0; i<10; i++) {
-		if( errors[i] >> 4 ) {
-			console_set_background(&console, color_red);
-		} else {
-			console_set_background(&console, color_black);
-		}
+		set_console_error_color(errors[i] >> 4);
 		console_write_uint32(&console, "%01x", value[i] >> 4);
-		if( errors[i] & 0xf ) {
-			console_set_background(&console, color_red);
-		} else {
-			console_set_background(&console, color_black);
-		}
+		set_console_error_color(errors[i] & 0xf);
 		console_write_uint32(&console, "%01x", value[i] & 0xf);
 	}
 	console_set_background(&console, color_black);
