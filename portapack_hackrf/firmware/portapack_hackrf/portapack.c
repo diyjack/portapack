@@ -110,7 +110,6 @@ typedef enum {
 } receiver_configuration_id_t;
 
 typedef struct receiver_configuration_t {
-	const char* const name;
 	receiver_state_init_t init;
 	receiver_baseband_handler_t baseband_handler;
 	int64_t tuning_offset;
@@ -122,7 +121,6 @@ typedef struct receiver_configuration_t {
 
 const receiver_configuration_t receiver_configurations[] = {
 	[RECEIVER_CONFIGURATION_SPEC] = {
-		.name = "SPEC",
 		.init = specan_init,
 		.baseband_handler = specan_baseband_handler,
 		.tuning_offset = 0,
@@ -132,7 +130,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.enable_audio = false,
 	},
 	[RECEIVER_CONFIGURATION_NBAM] = {
-		.name = "NBAM",
 		.init = rx_am_to_audio_init,
 		.baseband_handler = rx_am_to_audio_baseband_handler,
 		.tuning_offset = -768000,
@@ -142,7 +139,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.enable_audio = true,
 	},
 	[RECEIVER_CONFIGURATION_NBFM] = {
-		.name = "NBFM",
 		.init = rx_fm_narrowband_to_audio_init,
 		.baseband_handler = rx_fm_narrowband_to_audio_baseband_handler,
 		.tuning_offset = -768000,
@@ -152,7 +148,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.enable_audio = true,
 	},
 	[RECEIVER_CONFIGURATION_WBFM] = {
-		.name = "WBFM",
 		.init = rx_fm_broadcast_to_audio_init,
 		.baseband_handler = rx_fm_broadcast_to_audio_baseband_handler,
 		.tuning_offset = -768000,
@@ -162,7 +157,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.enable_audio = true,
 	},
 	[RECEIVER_CONFIGURATION_TPMS] = {
-		.name = "TPMS-ASK",
 		.init = rx_tpms_ask_init_wrapper,
 		.baseband_handler = rx_tpms_ask_baseband_handler,
 		.tuning_offset = -768000,
@@ -172,7 +166,6 @@ const receiver_configuration_t receiver_configurations[] = {
 		.enable_audio = true,
 	},
 	[RECEIVER_CONFIGURATION_TPMS_FSK] = {
-		.name = "TPMS-FSK",
 		.init = rx_tpms_fsk_init_wrapper,
 		.baseband_handler = rx_tpms_fsk_baseband_handler,
 		.tuning_offset = -614400,
