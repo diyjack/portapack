@@ -43,6 +43,7 @@
 #include <stdio.h>
 
 #include "ipc.h"
+#include "ipc_m0_client.h"
 #include "ipc_m4_client.h"
 
 #include "linux_stuff.h"
@@ -967,6 +968,13 @@ void handle_command_spectrum_data(const void* const arg) {
 	ipc_command_spectrum_data_done(&device_state->ipc_m4);
 }
 
+void handle_command_rtc_second(const void* const arg) {
+	(void)arg;
+	lcd_colors_invert(&lcd);
+	draw_rtc(11 * 8, 0);
+	lcd_colors_invert(&lcd);
+}
+
 static void ritimer_init_1khz_isr() {
 	ritimer_init();
 	ritimer_compare_set(200000); /* TODO: Blindly assuming 200MHz -> 1kHz */
@@ -984,6 +992,7 @@ void ritimer_or_wwdt_isr() {
 
 void rtc_isr() {
 	rtc_counter_interrupt_clear();
+	ipc_command_rtc_second(&device_state->ipc_m0);
 }
 
 int main() {
@@ -1024,10 +1033,6 @@ bool numeric_entry = false;
 	while(1) {
 		const bool sd_card_present = sdio_card_is_present();
 		lcd_draw_string(&lcd, 16*8, 5*16, sd_card_present ? "SD+" : "SD-", 3);
-
-		lcd_colors_invert(&lcd);
-		draw_rtc(11 * 8, 0);
-		lcd_colors_invert(&lcd);
 
 #ifdef CPU_METRICS
 		draw_cycles(240 - (12 * 8), 96);

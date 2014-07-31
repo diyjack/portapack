@@ -90,6 +90,7 @@ set(SRC_M0
 	kfifo.c
 	ipc.c
 	ipc_m4_client.c
+	ipc_m0_client.c
 	ipc_m0_server.c
 	rtc.c
 	ritimer.c
