@@ -124,9 +124,9 @@ const receiver_configuration_t receiver_configurations[] = {
 		.init = specan_init,
 		.baseband_handler = specan_baseband_handler,
 		.tuning_offset = 0,
-		.sample_rate = 15000000,
-		.baseband_bandwidth = 2500000,
-		.baseband_decimation = 3,
+		.sample_rate = 20000000,
+		.baseband_bandwidth = 14000000,
+		.baseband_decimation = 1,
 		.enable_audio = false,
 	},
 	[RECEIVER_CONFIGURATION_NBAM] = {
