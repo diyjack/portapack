@@ -906,6 +906,35 @@ void handle_command_packet_data_received_fsk(const void* const arg) {
 		console_write_uint32(&console, "%01x", value[i] & 0xf);
 	}
 	console_set_background(&console, color_black);
+
+	if( ((value[0] >> 5) == 0b001) ) {
+		const uint_fast8_t value_1 = value[6];
+		console_write_uint32(&console, " %03d", value_1);
+		const uint_fast8_t value_2 = value[7];
+		console_write_uint32(&console, " %03d", value_2);
+	}
+
+	if( ((value[0] >> 6) == 0b01) ) {
+		const uint_fast8_t value_1 = value[5];
+		console_write_uint32(&console, " %03d", value_1);
+		const uint_fast8_t value_2 = value[6];
+		console_write_uint32(&console, " %03d", value_2);
+	}
+
+	if( ((value[0] >> 3) == 0b11001) ) {
+		const uint_fast8_t value_1 = value[4];
+		console_write_uint32(&console, " %03d", value_1);
+		const uint_fast8_t value_2 = value[5];
+		console_write_uint32(&console, " %03d", value_2);
+	}
+
+	if( ((value[0] >> 3) == 0b11110) ) {
+		const uint_fast8_t value_1 = value[5];
+		console_write_uint32(&console, " %03d", value_1);
+		const uint_fast8_t value_2 = value[6];
+		console_write_uint32(&console, " %03d", value_2);
+	}
+
 	console_writeln(&console, "");
 }
 
