@@ -21,6 +21,7 @@
 
 #include <libopencm3/lpc43xx/rtc.h>
 #include <libopencm3/lpc43xx/creg.h>
+#include <libopencm3/cm3/nvic.h>
 
 #include <delay.h>
 
@@ -64,6 +65,10 @@ void rtc_init() {
 
 	// Enable 1kHz output from 32.768kHz oscillator
 	CREG_CREG0 |= CREG_CREG0_EN1KHZ;
+
+	// Disable and clear interrupts.
+	RTC_CIIR = 0;
+	RTC_ILR = RTC_ILR_RTCCIF(1) | RTC_ILR_RTCALF(1);
 
 	rtc_enable();
 }
@@ -114,4 +119,17 @@ uint_fast8_t rtc_minute() {
 
 uint_fast8_t rtc_second() {
 	return RTC_SEC;
+}
+
+void rtc_counter_interrupt_second_enable() {
+	RTC_CIIR |= RTC_CIIR_IMSEC(1);
+}
+
+void rtc_counter_interrupt_enable() {
+	nvic_set_priority(NVIC_RTC_IRQ, 255);
+	nvic_enable_irq(NVIC_RTC_IRQ);
+}
+
+void rtc_counter_interrupt_clear() {
+	RTC_ILR = RTC_ILR_RTCCIF(1);
 }

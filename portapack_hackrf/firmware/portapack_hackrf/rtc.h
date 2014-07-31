@@ -41,4 +41,8 @@ uint_fast8_t rtc_hour();
 uint_fast8_t rtc_minute();
 uint_fast8_t rtc_second();
 
+void rtc_counter_interrupt_second_enable();
+void rtc_counter_interrupt_enable();
+void rtc_counter_interrupt_clear();
+
 #endif/*__RTC_H__*/
