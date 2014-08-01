@@ -8,6 +8,7 @@
 
 #include <libopencm3/lpc43xx/adc.h>
 
+/* TODO: Move to libopencm3! */
 #define ADC_CR_SEL(x)		((x) << 0)
 #define ADC_CR_CLKDIV(x)	((x) << 8)
 #define ADC_CR_BURST(x)		((x) << 16)
