@@ -95,6 +95,7 @@ set(SRC_M0
 	rtc.c
 	ritimer.c
 	sdio.c
+	rssi.c
 	manchester.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/delay.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/led.c

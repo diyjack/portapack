@@ -38,6 +38,7 @@
 #include "rtc.h"
 #include "ritimer.h"
 #include "sdio.h"
+#include "rssi.h"
 #include <led.h>
 
 #include <stdio.h>
@@ -985,8 +986,13 @@ static void ritimer_init_1khz_isr() {
 	nvic_enable_irq(NVIC_RITIMER_OR_WWDT_IRQ);
 }
 
+static volatile uint32_t rssi_raw_avg = 0;
+
 void ritimer_or_wwdt_isr() {
 	ritimer_interrupt_clear();
+	const uint32_t rssi_raw = rssi_read();
+	rssi_convert_start();
+	rssi_raw_avg = (rssi_raw_avg * 31 + rssi_raw) / 32;
 	encoder_update();
 }
 
@@ -1002,6 +1008,7 @@ int main() {
 	nvic_enable_irq(NVIC_RTC_IRQ);
 
 	sdio_init();
+	rssi_init();
 	lcd_init(&lcd);
 	lcd_touch_init();
 	portapack_encoder_init();
@@ -1033,6 +1040,9 @@ bool numeric_entry = false;
 	while(1) {
 		const bool sd_card_present = sdio_card_is_present();
 		lcd_draw_string(&lcd, 16*8, 5*16, sd_card_present ? "SD+" : "SD-", 3);
+		const uint32_t rssi_mdb = rssi_raw_to_millidb(rssi_raw_avg);
+		draw_int(rssi_mdb / 1000, "%2d", 16*8, 5*16);
+		draw_int((rssi_mdb / 100) % 10, ".%1d", 18*8, 5*16);
 
 #ifdef CPU_METRICS
 		draw_cycles(240 - (12 * 8), 96);
