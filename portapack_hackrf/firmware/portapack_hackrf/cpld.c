@@ -89,6 +89,15 @@ void jtag_set_end_ir_state(jtag_svf_t* const svf, const jtag_tap_state_t state) 
 #define PORTAPACK_CPLD_JTAG_TDO_GPIO_PIN (8)
 #define PORTAPACK_CPLD_JTAG_TDO_GPIO_BIT (1UL << PORTAPACK_CPLD_JTAG_TDO_GPIO_PIN)
 
+typedef struct jtag_target_t {
+	void (*init)();
+	void (*free)();
+	void (*tck)(const uint_fast8_t value);
+	void (*tdi)(const uint_fast8_t value);
+	void (*tms)(const uint_fast8_t value);
+	uint_fast8_t (*tdo)();
+} jtag_target_t;
+
 static void portapack_cpld_jtag_tck(const uint_fast8_t value) {
 	if(value) {
 		gpio_set(PORTAPACK_CPLD_JTAG_TCK_GPIO_PORT, PORTAPACK_CPLD_JTAG_TCK_GPIO_BIT);
@@ -118,23 +127,7 @@ static uint_fast8_t portapack_cpld_jtag_tdo() {
 	return gpio_get(PORTAPACK_CPLD_JTAG_TDO_GPIO_PORT, PORTAPACK_CPLD_JTAG_TDO_GPIO_BIT);
 }
 
-static uint_fast8_t portapack_cpld_jtag_clock() {
-	portapack_cpld_jtag_tck(1);
-	delay(2);
-	portapack_cpld_jtag_tck(0);
-	delay(2);
-	return portapack_cpld_jtag_tdo();
-}
-
-void portapack_cpld_jtag_reset() {
-	portapack_cpld_jtag_tms(1);
-	for(size_t i=0; i<8; i++) {
-		portapack_cpld_jtag_clock();
-	}
-	/* Test-Logic-Reset */
-}
-
-void portapack_cpld_jtag_io_init() {
+static void portapack_cpld_jtag_init() {
 	/* Configure pins to GPIO */
 	scu_pinmux(PORTAPACK_CPLD_JTAG_TDI_SCU_PIN, SCU_GPIO_PUP | PORTAPACK_CPLD_JTAG_TDI_SCU_FUNCTION);
 	scu_pinmux(PORTAPACK_CPLD_JTAG_TMS_SCU_PIN, SCU_GPIO_PUP | PORTAPACK_CPLD_JTAG_TMS_SCU_FUNCTION);
@@ -152,65 +145,95 @@ void portapack_cpld_jtag_io_init() {
 	GPIO_DIR(PORTAPACK_CPLD_JTAG_TDO_GPIO_PORT) &= ~PORTAPACK_CPLD_JTAG_TDO_GPIO_BIT;
 }
 
+static jtag_target_t jtag_target_portapack_cpld = {
+	.init = portapack_cpld_jtag_init,
+	.free = NULL,
+	.tck = portapack_cpld_jtag_tck,
+	.tdi = portapack_cpld_jtag_tdi,
+	.tms = portapack_cpld_jtag_tms,
+	.tdo = portapack_cpld_jtag_tdo,
+};
+
+static uint_fast8_t jtag_clock(const jtag_target_t* const target) {
+	target->tck(1);
+	delay(2);
+	target->tck(0);
+	delay(2);
+	return target->tdo();
+}
+
+static void jtag_reset(const jtag_target_t* const target) {
+	target->tms(1);
+	for(size_t i=0; i<8; i++) {
+		jtag_clock(target);
+	}
+	/* Test-Logic-Reset */
+}
+
+void portapack_cpld_jtag_io_init() {
+	jtag_target_portapack_cpld.init();
+	jtag_reset(&jtag_target_portapack_cpld);
+}
+
 #ifdef CPLD_PROGRAM
 
 #include "cpld_data.h"
 #include "linux_stuff.h"
 
-static uint_fast8_t portapack_cpld_jtag_tms_clock(const uint_fast8_t value) {
-	portapack_cpld_jtag_tms(value);
-	return portapack_cpld_jtag_clock();
+static uint_fast8_t jtag_tms_clock(const jtag_target_t* const target, const uint_fast8_t value) {
+	target->tms(value);
+	return jtag_clock(target);
 }
 
-static uint32_t portapack_cpld_jtag_shift(const uint_fast8_t count, uint32_t value) {
+static uint32_t jtag_shift(const jtag_target_t* const target, const uint_fast8_t count, uint32_t value) {
 	/* Scan */
-	portapack_cpld_jtag_tms_clock(0);
+	jtag_tms_clock(target, 0);
 	/* Capture */
-	portapack_cpld_jtag_tms_clock(0);
+	jtag_tms_clock(target, 0);
 	/* Shift */
 	for(size_t i=0; i<count; i++) {
-		const uint_fast8_t tdo = portapack_cpld_jtag_tdo();
-		portapack_cpld_jtag_tdi(value & 1);
+		const uint_fast8_t tdo = target->tdo();
+		target->tdi(value & 1);
 		const uint_fast8_t tms = (i == (count - 1)) ? 1 : 0;
-		portapack_cpld_jtag_tms_clock(tms);
+		jtag_tms_clock(target, tms);
 		value >>= 1;
 		value |= tdo << (count - 1);
 		/* Shift or Exit1 */
 	}
-	portapack_cpld_jtag_tms_clock(1);
+	jtag_tms_clock(target, 1);
 	/* Update */
-	portapack_cpld_jtag_tms_clock(0);
+	jtag_tms_clock(target, 0);
 	/* Run-Test/Idle */
 	return value;
 }
 
-static uint32_t portapack_cpld_jtag_shift_ir(const uint_fast8_t count, const uint32_t value) {
+static uint32_t jtag_shift_ir(const jtag_target_t* const target, const uint_fast8_t count, const uint32_t value) {
 	/* Run-Test/Idle */
-	portapack_cpld_jtag_tms_clock(1);
+	jtag_tms_clock(target, 1);
 	/* Select-DR-Scan */
-	portapack_cpld_jtag_tms_clock(1);
+	jtag_tms_clock(target, 1);
 	/* Select-IR-Scan */
-	return portapack_cpld_jtag_shift(count, value);
+	return jtag_shift(target, count, value);
 }
 
-static uint32_t portapack_cpld_jtag_shift_dr(const uint_fast8_t count, const uint32_t value) {
+static uint32_t jtag_shift_dr(const jtag_target_t* const target, const uint_fast8_t count, const uint32_t value) {
 	/* Run-Test/Idle */
-	portapack_cpld_jtag_tms_clock(1);
+	jtag_tms_clock(target, 1);
 	/* Select-DR-Scan */
-	return portapack_cpld_jtag_shift(count, value);
+	return jtag_shift(target, count, value);
 }
 
-static void portapack_cpld_jtag_program_block(const uint16_t* const data, const size_t count) {
+static void jtag_program_block(const jtag_target_t* const target, const uint16_t* const data, const size_t count) {
 	for(size_t i=0; i<count; i++) {
-		portapack_cpld_jtag_shift_dr(16, data[i]);
-		portapack_cpld_jtag_runtest_tck(1800);
+		jtag_shift_dr(target, 16, data[i]);
+		jtag_runtest_tck(target, 1800);
 	}
 }
 
-static bool portapack_cpld_jtag_verify_block(const uint16_t* const data, const size_t count) {
+static bool jtag_verify_block(const jtag_target_t* const target, const uint16_t* const data, const size_t count) {
 	bool failure = false;
 	for(size_t i=0; i<count; i++) {
-		const uint16_t from_device = portapack_cpld_jtag_shift_dr(16, 0xffff);
+		const uint16_t from_device = jtag_shift_dr(target, 16, 0xffff);
 		if( from_device != data[i] ) {
 			failure = true;
 		}
@@ -218,15 +241,15 @@ static bool portapack_cpld_jtag_verify_block(const uint16_t* const data, const s
 	return (failure == false);
 }
 
-bool portapack_cpld_jtag_program() {
+bool portapack_cpld_jtag_program(const jtag_target_t* const target) {
 	/* Unknown state */
-	portapack_cpld_jtag_reset();
+	jtag_reset(target);
 	/* Test-Logic-Reset */
-	portapack_cpld_jtag_tms_clock(0);
+	jtag_tms_clock(target, 0);
 	/* Run-Test/Idle */
 
-	portapack_cpld_jtag_shift_ir(10, 0b0000000110);
-	const uint32_t idcode = portapack_cpld_jtag_shift_dr(32, 0);
+	jtag_shift_ir(target, 10, 0b0000000110);
+	const uint32_t idcode = jtag_shift_dr(target, 32, 0);
 	if( idcode != 0x020A50DD ) {
 		return false;
 	}
@@ -235,26 +258,26 @@ bool portapack_cpld_jtag_program() {
 	 * Ensures that the I/O pins transition smoothly from user mode to ISP
 	 * mode.
 	 */
-	portapack_cpld_jtag_shift_ir(10, 0x2cc);
-	portapack_cpld_jtag_runtest_tck(18003);		// 1ms
+	jtag_shift_ir(target, 10, 0x2cc);
+	jtag_runtest_tck(target, 18003);		// 1ms
 
 	/* Check ID:
 	 * The silicon ID is checked before any Program or Verify process. The
 	 * time required to read this silicon ID is relatively small compared to
 	 * the overall programming time.
 	 */
-	portapack_cpld_jtag_shift_ir(10, 0x203);
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	portapack_cpld_jtag_shift_dr(13, 0x0089);
-	portapack_cpld_jtag_shift_ir(10, 0x205);
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
+	jtag_shift_ir(target, 10, 0x203);
+	jtag_runtest_tck(target, 93);		// 5us
+	jtag_shift_dr(target, 13, 0x0089);
+	jtag_shift_ir(target, 10, 0x205);
+	jtag_runtest_tck(target, 93);		// 5us
 
 	uint16_t silicon_id[5];
-	silicon_id[0] = portapack_cpld_jtag_shift_dr(16, 0xffff);
-	silicon_id[1] = portapack_cpld_jtag_shift_dr(16, 0xffff);
-	silicon_id[2] = portapack_cpld_jtag_shift_dr(16, 0xffff);
-	silicon_id[3] = portapack_cpld_jtag_shift_dr(16, 0xffff);
-	silicon_id[4] = portapack_cpld_jtag_shift_dr(16, 0xffff);
+	silicon_id[0] = jtag_shift_dr(target, 16, 0xffff);
+	silicon_id[1] = jtag_shift_dr(target, 16, 0xffff);
+	silicon_id[2] = jtag_shift_dr(target, 16, 0xffff);
+	silicon_id[3] = jtag_shift_dr(target, 16, 0xffff);
+	silicon_id[4] = jtag_shift_dr(target, 16, 0xffff);
 
 	if( (silicon_id[0] != 0x8232) ||
 		(silicon_id[1] != 0x2aa2) ||
@@ -271,23 +294,23 @@ bool portapack_cpld_jtag_program() {
 	 * specified erase pulse time of 500 ms for the CFM block and 500 ms for
 	 * each sector of the user flash memory (UFM) block.
 	 */
-	portapack_cpld_jtag_shift_ir(10, 0x203);	// Sector select
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	portapack_cpld_jtag_shift_dr(13, 0x0011);	// Sector ID
-	portapack_cpld_jtag_shift_ir(10, 0x2F2);	// Erase pulse
-	portapack_cpld_jtag_runtest_tck(9000003);	// 500ms
+	jtag_shift_ir(target, 10, 0x203);	// Sector select
+	jtag_runtest_tck(target, 93);		// 5us
+	jtag_shift_dr(target, 13, 0x0011);	// Sector ID
+	jtag_shift_ir(target, 10, 0x2F2);	// Erase pulse
+	jtag_runtest_tck(target, 9000003);	// 500ms
 	
-	portapack_cpld_jtag_shift_ir(10, 0x203);	// Sector select
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	portapack_cpld_jtag_shift_dr(13, 0x0001);	// Sector ID
-	portapack_cpld_jtag_shift_ir(10, 0x2F2);	// Erase pulse
-	portapack_cpld_jtag_runtest_tck(9000003);	// 500ms
+	jtag_shift_ir(target, 10, 0x203);	// Sector select
+	jtag_runtest_tck(target, 93);		// 5us
+	jtag_shift_dr(target, 13, 0x0001);	// Sector ID
+	jtag_shift_ir(target, 10, 0x2F2);	// Erase pulse
+	jtag_runtest_tck(target, 9000003);	// 500ms
 
-	portapack_cpld_jtag_shift_ir(10, 0x203);	// Sector select
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	portapack_cpld_jtag_shift_dr(13, 0x0000);	// Sector ID
-	portapack_cpld_jtag_shift_ir(10, 0x2F2);	// Erase pulse
-	portapack_cpld_jtag_runtest_tck(9000003);	// 500ms
+	jtag_shift_ir(target, 10, 0x203);	// Sector select
+	jtag_runtest_tck(target, 93);		// 5us
+	jtag_shift_dr(target, 13, 0x0000);	// Sector ID
+	jtag_shift_ir(target, 10, 0x2F2);	// Erase pulse
+	jtag_runtest_tck(target, 9000003);	// 500ms
 
 	/* Program:
 	 * involves shifting in the address, data, and program instruction and
@@ -297,46 +320,50 @@ bool portapack_cpld_jtag_program() {
 	 * is repeated for each address in the CFM and UFM blocks.
 	 */
 	/* Block 0 */
-	portapack_cpld_jtag_shift_ir(10, 0x203);	// Sector select
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	portapack_cpld_jtag_shift_dr(13, 0x0000);	// Sector ID
-	portapack_cpld_jtag_shift_ir(10, 0x2F4);	// Program
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	portapack_cpld_jtag_program_block(
+	jtag_shift_ir(target, 10, 0x203);	// Sector select
+	jtag_runtest_tck(target, 93);		// 5us
+	jtag_shift_dr(target, 13, 0x0000);	// Sector ID
+	jtag_shift_ir(target, 10, 0x2F4);	// Program
+	jtag_runtest_tck(target, 93);		// 5us
+	jtag_program_block(
+		target,
 		portapack_cpld_jtag_block_0,
 		ARRAY_SIZE(portapack_cpld_jtag_block_0)
 	);
 
 	/* Block 1 */
-	portapack_cpld_jtag_shift_ir(10, 0x203);	// Sector select
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	portapack_cpld_jtag_shift_dr(13, 0x0001);	// Sector ID
-	portapack_cpld_jtag_shift_ir(10, 0x2F4);	// Program
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	portapack_cpld_jtag_program_block(
+	jtag_shift_ir(target, 10, 0x203);	// Sector select
+	jtag_runtest_tck(target, 93);		// 5us
+	jtag_shift_dr(target, 13, 0x0001);	// Sector ID
+	jtag_shift_ir(target, 10, 0x2F4);	// Program
+	jtag_runtest_tck(target, 93);		// 5us
+	jtag_program_block(
+		target,
 		portapack_cpld_jtag_block_1,
 		ARRAY_SIZE(portapack_cpld_jtag_block_1)
 	);
 
 	/* Verify */
 	/* Block 0 */
-	portapack_cpld_jtag_shift_ir(10, 0x203);	// Sector select
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	portapack_cpld_jtag_shift_dr(13, 0x0000);	// Sector ID
-	portapack_cpld_jtag_shift_ir(10, 0x205);	// Read
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	const bool block_1_success = portapack_cpld_jtag_verify_block(
+	jtag_shift_ir(target, 10, 0x203);	// Sector select
+	jtag_runtest_tck(target, 93);		// 5us
+	jtag_shift_dr(target, 13, 0x0000);	// Sector ID
+	jtag_shift_ir(target, 10, 0x205);	// Read
+	jtag_runtest_tck(target, 93);		// 5us
+	const bool block_1_success = jtag_verify_block(
+		target,
 		portapack_cpld_jtag_block_0,
 		ARRAY_SIZE(portapack_cpld_jtag_block_0)
 	);
 
 	/* Block 1 */
-	portapack_cpld_jtag_shift_ir(10, 0x203);	// Sector select
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	portapack_cpld_jtag_shift_dr(13, 0x0001);	// Sector ID
-	portapack_cpld_jtag_shift_ir(10, 0x205);	// Read
-	portapack_cpld_jtag_runtest_tck(93);		// 5us
-	const bool block_2_success = portapack_cpld_jtag_verify_block(
+	jtag_shift_ir(target, 10, 0x203);	// Sector select
+	jtag_runtest_tck(target, 93);		// 5us
+	jtag_shift_dr(target, 13, 0x0001);	// Sector ID
+	jtag_shift_ir(target, 10, 0x205);	// Read
+	jtag_runtest_tck(target, 93);		// 5us
+	const bool block_2_success = jtag_verify_block(
+		target,
 		portapack_cpld_jtag_block_1,
 		ARRAY_SIZE(portapack_cpld_jtag_block_1)
 	);
@@ -347,28 +374,28 @@ bool portapack_cpld_jtag_program() {
 	 * verified OK, and it's OK to load and execute? And despite only
 	 * one bit changing, a write must be a multiple of a particular
 	 * length (64 bits)? */
-	portapack_cpld_jtag_shift_ir(10, 0x203);	// Sector select
-	portapack_cpld_jtag_runtest_tck(93);		// 5 us
-	portapack_cpld_jtag_shift_dr(13, 0x0000);	// Sector ID
-	portapack_cpld_jtag_shift_ir(10, 0x2F4);	// Program
-	portapack_cpld_jtag_runtest_tck(93);		// 5 us
+	jtag_shift_ir(target, 10, 0x203);	// Sector select
+	jtag_runtest_tck(target, 93);		// 5 us
+	jtag_shift_dr(target, 13, 0x0000);	// Sector ID
+	jtag_shift_ir(target, 10, 0x2F4);	// Program
+	jtag_runtest_tck(target, 93);		// 5 us
 
 	/* TODO: Use data from cpld_block_0, with appropriate bit(s) changed */
 	/* Perhaps this is the "ISP_DONE" bit? */
-	portapack_cpld_jtag_shift_dr(16, portapack_cpld_jtag_block_0[0] & 0xfbff);
-	portapack_cpld_jtag_runtest_tck(1800);		// 100us
-	portapack_cpld_jtag_shift_dr(16, portapack_cpld_jtag_block_0[1]);
-	portapack_cpld_jtag_runtest_tck(1800);		// 100us
-	portapack_cpld_jtag_shift_dr(16, portapack_cpld_jtag_block_0[2]);
-	portapack_cpld_jtag_runtest_tck(1800);		// 100us
-	portapack_cpld_jtag_shift_dr(16, portapack_cpld_jtag_block_0[3]);
-	portapack_cpld_jtag_runtest_tck(1800);		// 100us
+	jtag_shift_dr(target, 16, portapack_cpld_jtag_block_0[0] & 0xfbff);
+	jtag_runtest_tck(target, 1800);		// 100us
+	jtag_shift_dr(target, 16, portapack_cpld_jtag_block_0[1]);
+	jtag_runtest_tck(target, 1800);		// 100us
+	jtag_shift_dr(target, 16, portapack_cpld_jtag_block_0[2]);
+	jtag_runtest_tck(target, 1800);		// 100us
+	jtag_shift_dr(target, 16, portapack_cpld_jtag_block_0[3]);
+	jtag_runtest_tck(target, 1800);		// 100us
 
 	/* Exit ISP? Reset? */
-	portapack_cpld_jtag_shift_ir(10, 0x201);
-	portapack_cpld_jtag_runtest_tck(18003);		// 1ms
-	portapack_cpld_jtag_shift_ir(10, 0x3FF);
-	portapack_cpld_jtag_runtest_tck(18000);		// 1ms
+	jtag_shift_ir(target, 10, 0x201);
+	jtag_runtest_tck(target, 18003);		// 1ms
+	jtag_shift_ir(target, 10, 0x3FF);
+	jtag_runtest_tck(target, 18000);		// 1ms
 
 	if( (block_1_success == false) ||
 		(block_2_success == false) ) {

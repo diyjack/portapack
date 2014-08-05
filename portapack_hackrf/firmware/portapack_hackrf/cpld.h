@@ -23,7 +23,6 @@
 #define __CPLD_H__
 
 void portapack_cpld_jtag_io_init();
-void portapack_cpld_jtag_reset();
 
 #ifdef CPLD_PROGRAM
 bool portapack_cpld_jtag_program();

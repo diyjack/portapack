@@ -264,7 +264,6 @@ void portapack_init() {
 	cpu_clock_pll1_max_speed();
 	
 	portapack_cpld_jtag_io_init();
-	portapack_cpld_jtag_reset();
 
 	device_state->tuned_hz = 162550000;
 	device_state->lna_gain_db = 0;
