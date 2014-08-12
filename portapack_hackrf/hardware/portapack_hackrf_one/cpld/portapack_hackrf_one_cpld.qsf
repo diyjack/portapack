@@ -87,13 +87,13 @@ set_location_assignment PIN_1 -to TP_D
 set_location_assignment PIN_2 -to TP_L
 set_location_assignment PIN_64 -to TP_R
 set_location_assignment PIN_3 -to TP_U
-set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to SW_D
-set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to SW_L
-set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to SW_R
-set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to SW_ROT_A
-set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to SW_ROT_B
-set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to SW_SEL
-set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to SW_U
+set_instance_assignment -name IO_STANDARD "3.3V SCHMITT TRIGGER INPUT" -to SW_D
+set_instance_assignment -name IO_STANDARD "3.3V SCHMITT TRIGGER INPUT" -to SW_L
+set_instance_assignment -name IO_STANDARD "3.3V SCHMITT TRIGGER INPUT" -to SW_R
+set_instance_assignment -name IO_STANDARD "3.3V SCHMITT TRIGGER INPUT" -to SW_ROT_A
+set_instance_assignment -name IO_STANDARD "3.3V SCHMITT TRIGGER INPUT" -to SW_ROT_B
+set_instance_assignment -name IO_STANDARD "3.3V SCHMITT TRIGGER INPUT" -to SW_SEL
+set_instance_assignment -name IO_STANDARD "3.3V SCHMITT TRIGGER INPUT" -to SW_U
 set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to TP_D
 set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to TP_L
 set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to TP_R
