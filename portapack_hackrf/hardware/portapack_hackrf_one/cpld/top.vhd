@@ -102,7 +102,7 @@ begin
 	TP_L <= tp_q(1) when tp_q(5) = '1' else 'Z';
 	TP_R <= tp_q(0) when tp_q(4) = '1' else 'Z';
 	
-	LCD_BACKLIGHTX <= '0' when MCU_BACKLIGHT else 'Z';
+	LCD_BACKLIGHTX <= '0' when MCU_BACKLIGHT = '1' else 'Z';
 	
 	MCU_ROT_A <= not SW_ROT_A;
 	MCU_ROT_B <= not SW_ROT_B;
