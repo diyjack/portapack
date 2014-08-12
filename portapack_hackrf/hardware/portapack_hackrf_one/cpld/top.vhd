@@ -51,9 +51,7 @@ entity top is
 		LCD_RDX			:	out	std_logic;
 		LCD_DB			:	inout	std_logic_vector(15 downto 0);
 		LCD_TE			:	in		std_logic;
-		LCD_BACKLIGHTX	:	out	std_logic;
-		
-		CODEC_ENABLEX	:	out	std_logic
+		LCD_BACKLIGHTX	:	out	std_logic
 	);
 end top;
 
@@ -88,7 +86,6 @@ architecture rtl of top is
 	signal	tp_q : std_logic_vector(7 downto 0) := (others => '0');
 	
 	signal	lcd_reset_q : std_logic := '1';
-	signal	codec_enable_q : std_logic := '0';
 	
 	signal	lcd_read : boolean;
 	signal	lcd_write : boolean;
@@ -109,8 +106,6 @@ begin
 	
 	MCU_ROT_A <= not SW_ROT_A;
 	MCU_ROT_B <= not SW_ROT_B;
-	
-	CODEC_ENABLEX <= '0' when codec_enable_q else 'Z';
 	
 	-- State management
 	target <= target_lcd when MCU_MODE = '1' else target_io;
@@ -168,7 +163,6 @@ begin
 				tp_q <= mcu_data_in;
 			else
 				lcd_reset_q <= mcu_data_in(0);
-				codec_enable_q <= mcu_data_in(7);
 			end if;
 		end if;
 	end process;
