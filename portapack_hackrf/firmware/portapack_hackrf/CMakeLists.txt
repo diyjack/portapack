@@ -22,11 +22,11 @@
 #	cmake -DRUN_FROM=RAM -DPATH_HACKRF=../../../../hackrf ..
 
 cmake_minimum_required(VERSION 2.8.9)
-set(CMAKE_TOOLCHAIN_FILE ../../../../hackrf/firmware/toolchain-arm-cortex-m.cmake)
+set(CMAKE_TOOLCHAIN_FILE ${PATH_HACKRF}/firmware/toolchain-arm-cortex-m.cmake)
 
 project(portapack_hackrf)
 
-include(../../../../hackrf/firmware/hackrf-common.cmake)
+include(${PATH_HACKRF}/firmware/hackrf-common.cmake)
 
 set(SRC_M4
 	main.c
