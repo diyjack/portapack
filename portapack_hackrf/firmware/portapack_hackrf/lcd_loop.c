@@ -24,6 +24,7 @@
 #include <libopencm3/cm3/nvic.h>
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "portapack.h"
@@ -123,24 +124,6 @@ static void draw_cycles(const uint_fast16_t x, const uint_fast16_t y) {
 struct ui_field_text_t;
 typedef struct ui_field_text_t ui_field_text_t;
 
-typedef enum {
-	UI_FIELD_FREQUENCY,
-	UI_FIELD_LNA_GAIN,
-	UI_FIELD_IF_GAIN,
-	UI_FIELD_BB_GAIN,
-	UI_FIELD_RECEIVER_CONFIGURATION,
-	UI_FIELD_TUNING_STEP_SIZE,
-	UI_FIELD_AUDIO_OUT_GAIN,
-	UI_FIELD_LAST,
-} ui_field_index_t;
-
-typedef struct ui_field_navigation_t {
-	ui_field_index_t up;
-	ui_field_index_t down;
-	ui_field_index_t left;
-	ui_field_index_t right;
-} ui_field_navigation_t;
-
 typedef void (*ui_field_value_change_callback_t)(const uint32_t repeat_count);
 
 typedef struct ui_field_value_change_t {
@@ -151,7 +134,6 @@ typedef struct ui_field_value_change_t {
 struct ui_field_text_t {
 	lcd_position_t position;
 	lcd_size_t size;
-	ui_field_navigation_t navigation;
 	ui_field_value_change_t value_change;
 	const char* const format;
 	const void* (*getter)();
@@ -301,208 +283,257 @@ static void ui_field_value_down_tuning_step_size(const uint32_t amount) {
 	tuning_step_size_index = (tuning_step_size_index + ARRAY_SIZE(tuning_step_sizes) - 1) % ARRAY_SIZE(tuning_step_sizes);
 }
 
-static ui_field_text_t fields[] = {
-	[UI_FIELD_FREQUENCY] = {
-		.position = { .x = 0, .y = 32 },
-		.size = { .w = 12 * 8, .h = 16 },
-		.navigation = {
-			.up = UI_FIELD_BB_GAIN,
-			.down = UI_FIELD_LNA_GAIN,
-			.left = UI_FIELD_FREQUENCY,
-			.right = UI_FIELD_RECEIVER_CONFIGURATION,
-		},
-		.value_change = {
-			.up = ui_field_value_up_frequency,
-			.down = ui_field_value_down_frequency,
-		},
-	  	.format = "%4d.%03d MHz",
-	  	.getter = get_tuned_hz,
-	  	.render = render_field_mhz
+static const ui_field_text_t ui_field_frequency = {
+	.position = { .x = 0, .y = 32 },
+	.size = { .w = 12 * 8, .h = 16 },
+	.value_change = {
+		.up = ui_field_value_up_frequency,
+		.down = ui_field_value_down_frequency,
 	},
-	[UI_FIELD_LNA_GAIN] = {
-		.position = { .x = 0, .y = 48 },
-		.size = { .w = 9 * 8, .h = 16 },
-		.navigation = {
-			.up = UI_FIELD_FREQUENCY,
-			.down = UI_FIELD_IF_GAIN,
-			.left = UI_FIELD_LNA_GAIN,
-			.right = UI_FIELD_TUNING_STEP_SIZE,
-		},
-		.value_change = {
-			.up = ui_field_value_up_rf_gain,
-			.down = ui_field_value_down_rf_gain,
-		},
-		.format = "LNA %2d dB",
-		.getter = get_lna_gain,
-		.render = render_field_int
-	},
-	[UI_FIELD_IF_GAIN] = {
-		.position = { .x = 0, .y = 64 },
-		.size = { .w = 9 * 8, .h = 16 },
-		.navigation = {
-			.up = UI_FIELD_LNA_GAIN,
-			.down = UI_FIELD_BB_GAIN,
-			.left = UI_FIELD_IF_GAIN,
-			.right = UI_FIELD_AUDIO_OUT_GAIN,
-		},
-		.value_change = {
-			.up = ui_field_value_up_if_gain,
-			.down = ui_field_value_down_if_gain,
-		},
-		.format = "IF  %2d dB",
-		.getter = get_if_gain,
-		.render = render_field_int
-	},
-	[UI_FIELD_BB_GAIN] = {
-		.position = { .x = 0, .y = 80 },
-		.size = { .w = 9 * 8, .h = 16 },
-		.navigation = {
-			.up = UI_FIELD_IF_GAIN,
-			.down = UI_FIELD_FREQUENCY,
-			.left = UI_FIELD_BB_GAIN,
-			.right = UI_FIELD_AUDIO_OUT_GAIN,
-		},
-		.value_change = {
-			.up = ui_field_value_up_bb_gain,
-			.down = ui_field_value_down_bb_gain,
-		},
-		.format = "BB  %2d dB",
-		.getter = get_bb_gain,
-		.render = render_field_int
-	},
-	[UI_FIELD_RECEIVER_CONFIGURATION] = {
-		.position = { .x = 128, .y = 32 },
-		.size = { .w = 13 * 8, .h = 16 },
-		.navigation = {
-			.up = UI_FIELD_AUDIO_OUT_GAIN,
-			.down = UI_FIELD_TUNING_STEP_SIZE,
-			.left = UI_FIELD_FREQUENCY,
-			.right = UI_FIELD_RECEIVER_CONFIGURATION,
-		},
-		.value_change = {
-			.up = ui_field_value_up_receiver_configuration,
-			.down = ui_field_value_down_receiver_configuration,
-		},
-		.format = "Mode %8s",
-		.getter = get_receiver_configuration_name,
-		.render = render_field_str,
-	},
-	[UI_FIELD_TUNING_STEP_SIZE] = {
-		.position = { .x = 128, .y = 48 },
-		.size = { .w = 11 * 8, .h = 16 },
-		.navigation = {
-			.up = UI_FIELD_RECEIVER_CONFIGURATION,
-			.down = UI_FIELD_AUDIO_OUT_GAIN,
-			.left = UI_FIELD_LNA_GAIN,
-			.right = UI_FIELD_TUNING_STEP_SIZE,
-		},
-		.value_change = {
-			.up = ui_field_value_up_tuning_step_size,
-			.down = ui_field_value_down_tuning_step_size,
-		},
-		.format = "Step %6s",
-		.getter = get_tuning_step_size_name,
-		.render = render_field_str,
-	},
-	[UI_FIELD_AUDIO_OUT_GAIN] = {
-		.position = { .x = 128, .y = 64 },
-		.size = { .w = 10 * 8, .h = 16 },
-		.navigation = {
-			.up = UI_FIELD_TUNING_STEP_SIZE,
-			.down = UI_FIELD_RECEIVER_CONFIGURATION,
-			.left = UI_FIELD_IF_GAIN,
-			.right = UI_FIELD_AUDIO_OUT_GAIN,
-		},
-		.value_change = {
-			.up = ui_field_value_up_audio_out_gain,
-			.down = ui_field_value_down_audio_out_gain,
-		},
-		.format = "Vol %3d dB",
-		.getter = get_audio_out_gain,
-		.render = render_field_int
-	},
+  	.format = "%4d.%03d MHz",
+  	.getter = get_tuned_hz,
+  	.render = render_field_mhz,
 };
 
-static ui_field_index_t selected_field = UI_FIELD_FREQUENCY;
+static const ui_field_text_t ui_field_lna_gain = {
+	.position = { .x = 0, .y = 48 },
+	.size = { .w = 9 * 8, .h = 16 },
+	.value_change = {
+		.up = ui_field_value_up_rf_gain,
+		.down = ui_field_value_down_rf_gain,
+	},
+	.format = "LNA %2d dB",
+	.getter = get_lna_gain,
+	.render = render_field_int,
+};
 
-static void ui_field_render(const ui_field_index_t field) {
+static const ui_field_text_t ui_field_if_gain = {
+	.position = { .x = 0, .y = 64 },
+	.size = { .w = 9 * 8, .h = 16 },
+	.value_change = {
+		.up = ui_field_value_up_if_gain,
+		.down = ui_field_value_down_if_gain,
+	},
+	.format = "IF  %2d dB",
+	.getter = get_if_gain,
+	.render = render_field_int,
+};
+
+static const ui_field_text_t ui_field_bb_gain = {
+	.position = { .x = 0, .y = 80 },
+	.size = { .w = 9 * 8, .h = 16 },
+	.value_change = {
+		.up = ui_field_value_up_bb_gain,
+		.down = ui_field_value_down_bb_gain,
+	},
+	.format = "BB  %2d dB",
+	.getter = get_bb_gain,
+	.render = render_field_int,
+};
+
+static const ui_field_text_t ui_field_receiver_configuration = {
+	.position = { .x = 128, .y = 32 },
+	.size = { .w = 13 * 8, .h = 16 },
+	.value_change = {
+		.up = ui_field_value_up_receiver_configuration,
+		.down = ui_field_value_down_receiver_configuration,
+	},
+	.format = "Mode %8s",
+	.getter = get_receiver_configuration_name,
+	.render = render_field_str,
+};
+
+static const ui_field_text_t ui_field_tuning_step_size = {
+	.position = { .x = 128, .y = 48 },
+	.size = { .w = 11 * 8, .h = 16 },
+	.value_change = {
+		.up = ui_field_value_up_tuning_step_size,
+		.down = ui_field_value_down_tuning_step_size,
+	},
+	.format = "Step %6s",
+	.getter = get_tuning_step_size_name,
+	.render = render_field_str,
+};
+
+static const ui_field_text_t ui_field_audio_out_gain = {
+	.position = { .x = 128, .y = 64 },
+	.size = { .w = 10 * 8, .h = 16 },
+	.value_change = {
+		.up = ui_field_value_up_audio_out_gain,
+		.down = ui_field_value_down_audio_out_gain,
+	},
+	.format = "Vol %3d dB",
+	.getter = get_audio_out_gain,
+	.render = render_field_int,
+};
+
+
+static const ui_field_text_t* fields[] = {
+	&ui_field_frequency,
+	&ui_field_lna_gain,
+	&ui_field_if_gain,
+	&ui_field_bb_gain,
+	&ui_field_receiver_configuration,
+	&ui_field_tuning_step_size,
+	&ui_field_audio_out_gain,
+	0,
+};
+
+static const ui_field_text_t* selected_field = &ui_field_frequency;
+
+static void ui_field_render(const ui_field_text_t* const field) {
 	if( field == selected_field ) {
 		lcd_colors_invert(&lcd);
 	}
 
-	fields[field].render(&fields[field]);
+	field->render(field);
 
 	if( field == selected_field ) {
 		lcd_colors_invert(&lcd);
 	}
 }
 
-static void ui_field_lose_focus(const ui_field_index_t field) {
+static void ui_field_lose_focus(const ui_field_text_t* const field) {
 	ui_field_render(field);
 }
 
-static void ui_field_gain_focus(const ui_field_index_t field) {
+static void ui_field_gain_focus(const ui_field_text_t* const field) {
 	ui_field_render(field);
 }
 
-static void ui_field_update_focus(const ui_field_index_t focus_field) {
-	const ui_field_index_t old_field = selected_field;
+static void ui_field_update_focus(const ui_field_text_t* const focus_field) {
+	if( focus_field == 0 ) {
+		return;
+	}
+	if( focus_field == selected_field ) {
+		return;
+	}
+
+	const ui_field_text_t* const old_field = selected_field;
 	selected_field = focus_field;
 	ui_field_lose_focus(old_field);
 	ui_field_gain_focus(selected_field);
 }
 
+typedef enum {
+	UI_DIRECTION_DOWN = 0b00,
+	UI_DIRECTION_RIGHT = 0b01,
+	UI_DIRECTION_LEFT = 0b10,
+	UI_DIRECTION_UP = 0b11,
+} ui_direction_t;
+
+typedef struct ui_point_t {
+	int16_t x;
+	int16_t y;
+} ui_point_t;
+
+static ui_point_t ui_field_center(const ui_field_text_t* const field) {
+	const ui_point_t result = {
+		.x = field->position.x + (field->size.w / 2),
+		.y = field->position.y + (field->size.h / 2),
+	};
+	return result;
+}
+
+static int32_t ui_field_is_above(const ui_point_t start, const ui_point_t end) {
+	return (end.y < start.y) ? abs(end.x - start.x) : -1;
+}
+
+static int32_t ui_field_is_below(const ui_point_t start, const ui_point_t end) {
+	return (end.y > start.y) ? abs(end.x - start.x) : -1;
+}
+
+static int32_t ui_field_is_left(const ui_point_t start, const ui_point_t end) {
+	return (end.x < start.x) ? abs(end.y - start.y) : -1;
+}
+
+static int32_t ui_field_is_right(const ui_point_t start, const ui_point_t end) {
+	return (end.x > start.x) ? abs(end.y - start.y) : -1;
+}
+
+typedef int32_t (*ui_field_compare_fn)(const ui_point_t start, const ui_point_t end);
+
+static const ui_field_compare_fn nearest_field_fn[] = {
+	[UI_DIRECTION_DOWN] = &ui_field_is_below,
+	[UI_DIRECTION_RIGHT] = &ui_field_is_right,
+	[UI_DIRECTION_LEFT] = &ui_field_is_left,
+	[UI_DIRECTION_UP] = &ui_field_is_above,
+};
+
+static const ui_field_text_t* ui_field_find_nearest(const ui_field_text_t* const field, const ui_direction_t desired_direction) {
+	const ui_point_t source_point = ui_field_center(field);
+	int32_t nearest_distance = 0;
+	const ui_field_text_t* nearest_field = 0;
+	for(const ui_field_text_t** p=fields; *p != 0; p++) {
+		const ui_field_text_t* const other_field = *p;
+		if( other_field == field ) {
+			continue;
+		}
+
+		const ui_point_t target_point = ui_field_center(other_field);
+		const int32_t distance = nearest_field_fn[desired_direction](source_point, target_point);
+		if( distance > -1 ) {
+			if( (nearest_field == 0) || (distance < nearest_distance) ) {
+				nearest_distance = distance;
+				nearest_field = other_field;
+			}
+		}
+	}
+
+	return nearest_field;
+}
+
 static void ui_field_navigate_up() {
-	ui_field_update_focus(fields[selected_field].navigation.up);
+	ui_field_update_focus(ui_field_find_nearest(selected_field, UI_DIRECTION_UP));
 }
 
 static void ui_field_navigate_down() {
-	ui_field_update_focus(fields[selected_field].navigation.down);
+	ui_field_update_focus(ui_field_find_nearest(selected_field, UI_DIRECTION_DOWN));
 }
 
 static void ui_field_navigate_left() {
-	ui_field_update_focus(fields[selected_field].navigation.left);
+	ui_field_update_focus(ui_field_find_nearest(selected_field, UI_DIRECTION_LEFT));
 }
 
 static void ui_field_navigate_right() {
-	ui_field_update_focus(fields[selected_field].navigation.right);
+	ui_field_update_focus(ui_field_find_nearest(selected_field, UI_DIRECTION_RIGHT));
 }
 
 static void ui_field_value_up(const uint32_t amount) {
-	ui_field_value_change_callback_t fn = fields[selected_field].value_change.up;
+	ui_field_value_change_callback_t fn = selected_field->value_change.up;
 	if( fn != NULL ) {
 		fn(amount);
 	}
 }
 
 static void ui_field_value_down(const uint32_t amount) {
-	ui_field_value_change_callback_t fn = fields[selected_field].value_change.down;
+	ui_field_value_change_callback_t fn = selected_field->value_change.down;
 	if( fn != NULL ) {
 		fn(amount);
 	}
 }
 
-static bool ui_field_hit(const ui_field_index_t field, const uint_fast16_t x, const uint_fast16_t y) {
-	if( (x >= fields[field].position.x) && (x < (fields[field].position.x + fields[field].size.w)) &&
-		(y >= fields[field].position.y) && (y < (fields[field].position.y + fields[field].size.h)) ) {
+static bool ui_field_hit(const ui_field_text_t* const field, const uint_fast16_t x, const uint_fast16_t y) {
+	if( (x >= field->position.x) && (x < (field->position.x + field->size.w)) &&
+		(y >= field->position.y) && (y < (field->position.y + field->size.h)) ) {
 		return true;
 	} else {
 		return false;
 	}
 }
 
-static ui_field_index_t ui_fields_hit(const uint_fast16_t x, const uint_fast16_t y) {
-	for(size_t i=0; i<ARRAY_SIZE(fields); i++) {
-		if( ui_field_hit(i, x, y) ) {
-			return i;
+static const ui_field_text_t* ui_fields_hit(const uint_fast16_t x, const uint_fast16_t y) {
+	for(const ui_field_text_t** field=fields; *field != 0; field++) {
+		if( ui_field_hit(*field, x, y) ) {
+			return *field;
 		}
 	}
-	return UI_FIELD_LAST;
+	return NULL;
 }
 
 static void ui_render_fields() {
-	for(size_t i=0; i<ARRAY_SIZE(fields); i++) {
-		ui_field_render(i);
+	for(const ui_field_text_t** field=fields; *field != 0; field++) {
+		ui_field_render(*field);
 	}
 }
 
@@ -759,10 +790,8 @@ blink();
 }
 
 static void touch_started(const touch_state_t* const state) {
-	const ui_field_index_t hit_index = ui_fields_hit(state->x, state->y);
-	if( hit_index < UI_FIELD_LAST ) {
-		ui_field_update_focus(hit_index);
-	}
+	const ui_field_text_t* const hit_field = ui_fields_hit(state->x, state->y);
+	ui_field_update_focus(hit_field);
 }
 
 static void touch_ended(const touch_state_t* const state) {
