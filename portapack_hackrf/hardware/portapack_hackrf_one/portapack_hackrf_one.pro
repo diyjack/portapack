@@ -1,4 +1,4 @@
-update=Tuesday, July 01, 2014 'AMt' 09:12:34 AM
+update=Tuesday, August 19, 2014 'AMt' 09:36:02 AM
 version=1
 last_client=eeschema
 [cvpcb]
@@ -50,7 +50,7 @@ version=1
 PageLayoutDescrFile=
 SubpartIdSeparator=0
 SubpartFirstId=65
-LibDir=../../../../library/kicad
+LibDir=../../../../library-kicad
 NetFmtName=PcbnewAdvanced
 RptD_X=0
 RptD_Y=100
