@@ -34,7 +34,7 @@ typedef struct console_t {
 	uint16_t y;
 } console_t;
 
-void console_init(console_t* const console, lcd_t* const lcd, const uint_fast16_t y_top, const uint_fast16_t height);
+void console_init(console_t* const console, lcd_t* const lcd, const uint_fast16_t y_top, const uint_fast16_t y_bottom);
 void console_set_background(console_t* const console, const lcd_color_t new_color);
 
 void console_write(console_t* const console, const char* message);
