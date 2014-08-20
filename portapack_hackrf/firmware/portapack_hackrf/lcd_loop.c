@@ -67,6 +67,8 @@ lcd_t lcd = {
 	.font = &font_fixed_8x16,
 };
 
+static console_t console;
+
 void blink() {
 	while(1) {
 		led_toggle(LED3);
@@ -266,11 +268,13 @@ static void ui_field_value_down_audio_out_gain(const uint32_t amount) {
 static void ui_field_value_up_receiver_configuration(const uint32_t amount) {
 	(void)amount;
 	ipc_command_set_receiver_configuration(&device_state->ipc_m4, device_state->receiver_configuration_index + 1);
+	console_init(&console, &lcd, 16 * 6, lcd.size.h);
 }
 
 static void ui_field_value_down_receiver_configuration(const uint32_t amount) {
 	(void)amount;
 	ipc_command_set_receiver_configuration(&device_state->ipc_m4, device_state->receiver_configuration_index - 1);
+	console_init(&console, &lcd, 16 * 6, lcd.size.h);
 }
 
 static void ui_field_value_up_tuning_step_size(const uint32_t amount) {
@@ -657,8 +661,6 @@ static void draw_rtc(const uint_fast16_t x, const uint_fast16_t y) {
 	draw_int(rtc_minute(), "%02d:", x + 14*8, y);
 	draw_int(rtc_second(), "%02d", x + 17*8, y);
 }
-
-static console_t console;
 
 static void sdio_draw_error(const sdio_error_t error) {
 	switch(error) {
