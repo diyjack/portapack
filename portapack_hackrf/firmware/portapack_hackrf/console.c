@@ -35,6 +35,7 @@ void console_init(console_t* const console, lcd_t* const lcd, const uint_fast16_
 	console->x = 0;
 	console->y = 0;
 	lcd_set_scroll_area(console->lcd, y_top, y_bottom);
+	lcd_scroll_set_position(console->lcd, 0);
 
 	const lcd_color_t prior_background = lcd_set_background(console->lcd, console->background);
 	lcd_clear_rectangle(console->lcd, 0, y_top, lcd->size.w, y_bottom - y_top);
