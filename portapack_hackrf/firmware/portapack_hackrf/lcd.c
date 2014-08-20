@@ -428,12 +428,19 @@ uint_fast16_t lcd_scroll_area_y(
 	return wrapped_y + lcd->scroll.top_area;
 }
 
+uint_fast16_t lcd_scroll_set_position(
+	lcd_t* const lcd,
+	const uint_fast16_t position
+) {
+	lcd->scroll.current_position = position % lcd->scroll.height;
+	const uint_fast16_t address = lcd->scroll.top_area + lcd->scroll.current_position;
+	lcd_vertical_scrolling_start_address(address);
+	return address;
+}
+
 uint_fast16_t lcd_scroll(
 	lcd_t* const lcd,
 	const int16_t delta
 ) {
-	lcd->scroll.current_position = (lcd->scroll.current_position + lcd->scroll.height - delta) % lcd->scroll.height;
-	lcd_vertical_scrolling_start_address(lcd->scroll.top_area + lcd->scroll.current_position);
-
-	return lcd_scroll_area_y(lcd, 1);	// TODO: WHY DOES "1" WORK WHEN "0" SHOULD?!!
+	return lcd_scroll_set_position(lcd, lcd->scroll.current_position + lcd->scroll.height - delta);
 }

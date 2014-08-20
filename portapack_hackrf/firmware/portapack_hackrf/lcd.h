@@ -177,6 +177,11 @@ uint_fast16_t lcd_scroll_area_y(
 	const uint_fast16_t y
 );
 
+uint_fast16_t lcd_scroll_set_position(
+	lcd_t* const lcd,
+	const uint_fast16_t position
+);
+
 uint_fast16_t lcd_scroll(
 	lcd_t* const lcd,
 	const int16_t delta
