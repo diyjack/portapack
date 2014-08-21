@@ -141,67 +141,47 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 		state->symbol_z[8] = c[i+2];
 		state->symbol_z[9] = c[i+3];
 
-		int32_t h_i0 = state->symbol_z[0].i * t0;
-		int32_t h_q0 = state->symbol_z[0].q * t0;
-		h_i0 -= state->symbol_z[2].i * t2;
-		h_q0 -= state->symbol_z[2].q * t2;
-		h_i0 -= state->symbol_z[3].q * t3;
-		h_q0 += state->symbol_z[3].i * t3;
-		h_i0 += state->symbol_z[4].i * t4;
-		h_q0 += state->symbol_z[4].q * t4;
-		h_i0 -= state->symbol_z[6].i * t6;
-		h_q0 -= state->symbol_z[6].q * t6;
+		int32_t i0 = state->symbol_z[0].i * t0;
+		int32_t q0 = state->symbol_z[0].q * t0;
+		int32_t i1 = -state->symbol_z[2].i * t0;
+ 		int32_t q1 = -state->symbol_z[2].q * t0;
+		i0 -= state->symbol_z[2].i * t2;
+		q0 -= state->symbol_z[2].q * t2;
+ 		i1 += state->symbol_z[4].i * t2;
+		q1 += state->symbol_z[4].q * t2;
+		i0 += state->symbol_z[4].i * t4;
+		q0 += state->symbol_z[4].q * t4;
+		i1 -= state->symbol_z[6].i * t4;
+		q1 -= state->symbol_z[6].q * t4;
+		i0 -= state->symbol_z[6].i * t6;
+		q0 -= state->symbol_z[6].q * t6;
+		i1 += state->symbol_z[8].i * t6;
+		q1 += state->symbol_z[8].q * t6;
+		int32_t h_i0 = i0 - state->symbol_z[3].q * t3;
+		int32_t h_q0 = q0 + state->symbol_z[3].i * t3;
+		int32_t l_i0 = i0 + state->symbol_z[3].q * t3;
+		int32_t l_q0 = q0 - state->symbol_z[3].i * t3;
+
 		h_i0 /= 64;
 		h_q0 /= 64;
-	 	//const int32_t h0_mag = h_i0 * h_i0 + h_q0 * h_q0;
-	 	const float h0_mag = sqrtf(h_i0 * h_i0 + h_q0 * h_q0);
-
-		int32_t h_i1 = -state->symbol_z[2].i * t0;
- 		int32_t h_q1 = -state->symbol_z[2].q * t0;
- 		h_i1 += state->symbol_z[4].i * t2;
-		h_q1 += state->symbol_z[4].q * t2;
-		h_i1 += state->symbol_z[5].q * t3;
-		h_q1 -= state->symbol_z[5].i * t3;
-		h_i1 -= state->symbol_z[6].i * t4;
-		h_q1 -= state->symbol_z[6].q * t4;
-		h_i1 += state->symbol_z[8].i * t6;
-		h_q1 += state->symbol_z[8].q * t6;
-		h_i1 /= 64;
-		h_q1 /= 64;
-	 	//const int32_t h1_mag = h_i1 * h_i1 + h_q1 * h_q1;
-	 	const float h1_mag = sqrtf(h_i1 * h_i1 + h_q1 * h_q1);
-
-	 	int32_t l_i0 = state->symbol_z[0].i * t0;
-	 	int32_t l_q0 = state->symbol_z[0].q * t0;
-	 	l_i0 -= state->symbol_z[2].i * t2;
-	 	l_q0 -= state->symbol_z[2].q * t2;
-	 	l_i0 += state->symbol_z[3].q * t3;
-	 	l_q0 -= state->symbol_z[3].i * t3;
-	 	l_i0 += state->symbol_z[4].i * t4;
-	 	l_q0 += state->symbol_z[4].q * t4;
-	 	l_i0 -= state->symbol_z[6].i * t6;
-	 	l_q0 -= state->symbol_z[6].q * t6;
 	 	l_i0 /= 64;
 	 	l_q0 /= 64;
-	 	//const int32_t l0_mag = l_i0 * l_i0 + l_q0 * l_q0;
-		//const int16_t diff0 = (h0_mag - l0_mag) / 65536;
+
+	 	const float h0_mag = sqrtf(h_i0 * h_i0 + h_q0 * h_q0);
 	 	const float l0_mag = sqrtf(l_i0 * l_i0 + l_q0 * l_q0);
 	 	const float diff0 = h0_mag - l0_mag;
 
-	 	int32_t l_i1 = -state->symbol_z[2].i * t0;
-	 	int32_t l_q1 = -state->symbol_z[2].q * t0;
-	 	l_i1 += state->symbol_z[4].i * t2;
-	 	l_q1 += state->symbol_z[4].q * t2;
-	 	l_i1 -= state->symbol_z[5].q * t3;
-	 	l_q1 += state->symbol_z[5].i * t3;
-	 	l_i1 -= state->symbol_z[6].i * t4;
-	 	l_q1 -= state->symbol_z[6].q * t4;
-	 	l_i1 += state->symbol_z[8].i * t6;
-	 	l_q1 += state->symbol_z[8].q * t6;
+		int32_t h_i1 = i1 + state->symbol_z[5].q * t3;
+		int32_t h_q1 = q1 - state->symbol_z[5].i * t3;
+		int32_t l_i1 = i1 - state->symbol_z[5].q * t3;
+		int32_t l_q1 = q1 + state->symbol_z[5].i * t3;
+
+		h_i1 /= 64;
+		h_q1 /= 64;
 	 	l_i1 /= 64;
 	 	l_q1 /= 64;
-	 	//const int32_t l1_mag = l_i1 * l_i1 + l_q1 * l_q1;
-	 	//const int16_t diff1 = (h1_mag - l1_mag) / 65536;
+	 	
+	 	const float h1_mag = sqrtf(h_i1 * h_i1 + h_q1 * h_q1);
 	 	const float l1_mag = sqrtf(l_i1 * l_i1 + l_q1 * l_q1);
 	 	const float diff1 = h1_mag - l1_mag;
 
