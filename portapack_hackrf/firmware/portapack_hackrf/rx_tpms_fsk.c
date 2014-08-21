@@ -162,14 +162,17 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 		int32_t l_i0 = i0 + state->symbol_z[3].q * t3;
 		int32_t l_q0 = q0 - state->symbol_z[3].i * t3;
 
-		/* Scale to +/- 19456 */
+		/* Scale to +/- 19456, +/- 14.25 bits */
 		h_i0 /= 128;
 		h_q0 /= 128;
 	 	l_i0 /= 128;
 	 	l_q0 /= 128;
 
+	 	/* +/- 757071872, +/- 29.5 bits */
 	 	const int32_t h0_mag2 = h_i0 * h_i0 + h_q0 * h_q0;
 	 	const int32_t l0_mag2 = l_i0 * l_i0 + l_q0 * l_q0;
+
+	 	/* +/- 1514143744, +/- 30.5 bits */
 	 	const int32_t diff0 = h0_mag2 - l0_mag2;
 
 		int32_t h_i1 = i1 + state->symbol_z[5].q * t3;
@@ -177,14 +180,17 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 		int32_t l_i1 = i1 - state->symbol_z[5].q * t3;
 		int32_t l_q1 = q1 + state->symbol_z[5].i * t3;
 
-		/* Scale to +/- 19456 */
+		/* Scale to +/- 19456, +/- 14.25 bits */
 		h_i1 /= 128;
 		h_q1 /= 128;
 	 	l_i1 /= 128;
 	 	l_q1 /= 128;
 	 	
+	 	/* +/- 757071872, +/- 29.5 bits */
 	 	const int32_t h1_mag2 = h_i1 * h_i1 + h_q1 * h_q1;
 	 	const int32_t l1_mag2 = l_i1 * l_i1 + l_q1 * l_q1;
+
+	 	/* +/- 1514143744, +/- 30.5 bits */
 	 	const int32_t diff1 = h1_mag2 - l1_mag2;
 
 	 	audio_tx_buffer[(i>>2)*2+0] = audio_tx_buffer[(i>>2)*2+1] = diff0 / 65536;
