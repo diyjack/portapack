@@ -162,10 +162,11 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 		int32_t l_i0 = i0 + state->symbol_z[3].q * t3;
 		int32_t l_q0 = q0 - state->symbol_z[3].i * t3;
 
-		h_i0 /= 64;
-		h_q0 /= 64;
-	 	l_i0 /= 64;
-	 	l_q0 /= 64;
+		/* Scale to +/- 19456 */
+		h_i0 /= 128;
+		h_q0 /= 128;
+	 	l_i0 /= 128;
+	 	l_q0 /= 128;
 
 	 	const float h0_mag = sqrtf(h_i0 * h_i0 + h_q0 * h_q0);
 	 	const float l0_mag = sqrtf(l_i0 * l_i0 + l_q0 * l_q0);
@@ -176,10 +177,11 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 		int32_t l_i1 = i1 - state->symbol_z[5].q * t3;
 		int32_t l_q1 = q1 + state->symbol_z[5].i * t3;
 
-		h_i1 /= 64;
-		h_q1 /= 64;
-	 	l_i1 /= 64;
-	 	l_q1 /= 64;
+		/* Scale to +/- 19456 */
+		h_i1 /= 128;
+		h_q1 /= 128;
+	 	l_i1 /= 128;
+	 	l_q1 /= 128;
 	 	
 	 	const float h1_mag = sqrtf(h_i1 * h_i1 + h_q1 * h_q1);
 	 	const float l1_mag = sqrtf(l_i1 * l_i1 + l_q1 * l_q1);
