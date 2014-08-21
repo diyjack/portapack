@@ -168,9 +168,9 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 	l_i0 /= 128;
 	 	l_q0 /= 128;
 
-	 	const float h0_mag = sqrtf(h_i0 * h_i0 + h_q0 * h_q0);
-	 	const float l0_mag = sqrtf(l_i0 * l_i0 + l_q0 * l_q0);
-	 	const float diff0 = h0_mag - l0_mag;
+	 	const int32_t h0_mag2 = h_i0 * h_i0 + h_q0 * h_q0;
+	 	const int32_t l0_mag2 = l_i0 * l_i0 + l_q0 * l_q0;
+	 	const int32_t diff0 = h0_mag2 - l0_mag2;
 
 		int32_t h_i1 = i1 + state->symbol_z[5].q * t3;
 		int32_t h_q1 = q1 - state->symbol_z[5].i * t3;
@@ -183,11 +183,11 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 	l_i1 /= 128;
 	 	l_q1 /= 128;
 	 	
-	 	const float h1_mag = sqrtf(h_i1 * h_i1 + h_q1 * h_q1);
-	 	const float l1_mag = sqrtf(l_i1 * l_i1 + l_q1 * l_q1);
-	 	const float diff1 = h1_mag - l1_mag;
+	 	const int32_t h1_mag2 = h_i1 * h_i1 + h_q1 * h_q1;
+	 	const int32_t l1_mag2 = l_i1 * l_i1 + l_q1 * l_q1;
+	 	const int32_t diff1 = h1_mag2 - l1_mag2;
 
-	 	audio_tx_buffer[(i>>2)*2+0] = audio_tx_buffer[(i>>2)*2+1] = diff0;
+	 	audio_tx_buffer[(i>>2)*2+0] = audio_tx_buffer[(i>>2)*2+1] = diff0 / 65536;
 
 		clock_recovery_execute(&state->clock_recovery, diff0);
 		clock_recovery_execute(&state->clock_recovery, diff1);
