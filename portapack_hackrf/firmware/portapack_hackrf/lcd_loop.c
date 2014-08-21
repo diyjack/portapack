@@ -706,7 +706,7 @@ void sdio_enumerate_card_stack() {
 	sdio_cclk_set_400khz();
 	sdio_set_width_1bit();
 
-	int result_cmd0 = sdio_cmd0(1);
+	sdio_error_t result_cmd0 = sdio_cmd0(1);
 	console_write(&console, "CMD0 ");
 	sdio_draw_error(result_cmd0);
 
@@ -715,12 +715,12 @@ void sdio_enumerate_card_stack() {
 	sdio_draw_error(result_cmd0);
 
 	// Interface condition
-	int result_cmd8 = sdio_cmd8();
+	sdio_error_t result_cmd8 = sdio_cmd8();
 	console_write(&console, "CMD8 ");
 	sdio_draw_error(result_cmd8);
 
 	while(1) {
-		int result_acmd41 = sdio_acmd41(0);
+		sdio_error_t result_acmd41 = sdio_acmd41(0);
 		console_write(&console, "ACMD41 ");
 		sdio_draw_error(result_acmd41);
 		if( result_acmd41 == SDIO_OK ) {
@@ -733,32 +733,32 @@ void sdio_enumerate_card_stack() {
 	// console_write(&console, "ACMD41 ");
 	// sdio_draw_error(result_acmd41);
 /*
-	const int result_cmd2 = sdio_cmd2();
+	const sdio_error_t result_cmd2 = sdio_cmd2();
 	console_write(&console, "CMD2 ");
 	sdio_draw_error(result_cmd2);
 
-	const int result_cmd3 = sdio_cmd3();
+	const sdio_error_t result_cmd3 = sdio_cmd3();
 	console_write(&console, "CMD3 ");
 	sdio_draw_error(result_cmd3);
 */
-//	const int result_cmd9 = sdio_cmd9();
+//	const sdio_error_t result_cmd9 = sdio_cmd9();
 //	console_write(&console, "CMD9 ");
 
 blink();
 
 /*
-	const int result_cmd5 = sdio_command_no_data(SDIO_CMD5_INDEX, 0);
+	const sdio_error_t result_cmd5 = sdio_command_no_data(SDIO_CMD5_INDEX, 0);
 
 	if( result_cmd5 == SDIO_OK ) {
 		lcd_draw_string(16*8, 4*16, "CMD5=OK", 7);
 	} else {
 		if( result_cmd5 == SDIO_ERROR_RESPONSE_TIMED_OUT ) {
-			const int result_acmd41 = sdio_command_no_data(SDIO_ACMD41_INDEX, 0);
+			const sdio_error_t result_acmd41 = sdio_command_no_data(SDIO_ACMD41_INDEX, 0);
 			if( result_acmd41 == SDIO_OK ) {
 				lcd_draw_string(16*8, 4*16, "ACMD41=OK", 9);
 			} else {
 				if( result_acmd41 == SDIO_ERROR_RESPONSE_TIMED_OUT) {
-					const int result_cmd0 = sdio_command_no_data(SDIO_CMD0_INDEX, 0);
+					const sdio_error_t result_cmd0 = sdio_command_no_data(SDIO_CMD0_INDEX, 0);
 					if( result_cmd0 == SDIO_OK ) {
 						lcd_draw_string(16*8, 4*16, "CMD0=OK", 7);
 					} else {
