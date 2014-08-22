@@ -30,6 +30,8 @@
 #include "portapack_driver.h"
 #include "ipc_m0_client.h"
 
+#include "linux_stuff.h"
+
 typedef struct specan_state_t {
 	float avg[256];
 	float peak[256];
