@@ -136,7 +136,7 @@ void lcd_touch_convert(touch_state_t* const state) {
 	lcd_touch_measurements_add(&touch_values.z, &frame->z);
 
 	portapack_lcd_touch_sense_off();
-	portapack_lcd_touch_sense_x(0);
+	portapack_lcd_touch_sense_x();
 
 	//const uint32_t z_mv = max(touch_values.z.yp - touch_values.z.xn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
 	const uint32_t z_yp_mv = max(touch_values.z.yp - touch_values.z.yn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
@@ -151,7 +151,7 @@ void lcd_touch_convert(touch_state_t* const state) {
 	lcd_touch_measurements_add(&touch_values.x, &frame->x);
 
 	portapack_lcd_touch_sense_off();
-	portapack_lcd_touch_sense_y(0);
+	portapack_lcd_touch_sense_y();
 
 	const uint32_t x_mv = max(touch_values.x.xp - touch_values.x.xn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
 	const uint32_t x_ua = x_mv * 1000 / x_ohm;
