@@ -433,8 +433,8 @@ typedef struct ui_point_t {
 
 static ui_point_t ui_field_center(const ui_field_text_t* const field) {
 	const ui_point_t result = {
-		.x = field->position.x + (field->size.w / 2),
-		.y = field->position.y + (field->size.h / 2),
+		.x = (int16_t)(field->position.x + (field->size.w / 2)),
+		.y = (int16_t)(field->position.y + (field->size.h / 2)),
 	};
 	return result;
 }
@@ -890,22 +890,22 @@ ui_button_t* ui_numeric_entry_touched(const touch_state_t* const touch) {
 #include "manchester.h"
 
 void handle_command_packet_data_received_ask(const void* const arg) {
-	const ipc_command_packet_data_received_t* const command = arg;
+	const ipc_command_packet_data_received_t* const command = (ipc_command_packet_data_received_t*)arg;
 
 	uint8_t value[5];
 	uint8_t errors[5];
 	manchester_decode(command->payload, value, errors, 37);
 
 	const uint_fast8_t flag_group_1[] = {
-		(value[0] >> 7) & 1,
-		(value[0] >> 6) & 1,
-		(value[0] >> 5) & 1,
+		(uint_fast8_t)(value[0] >> 7) & 1,
+		(uint_fast8_t)(value[0] >> 6) & 1,
+		(uint_fast8_t)(value[0] >> 5) & 1,
 	};
 	const uint32_t id = ((((((value[0] & 0x1f) << 8) | value[1]) << 8) | value[2]) << 3) | (value[3] >> 5);
 	const uint32_t pressure = ((value[3] & 0x1f) << 3) | (value[4] >> 5);
 	const uint_fast8_t flag_group_2[] = {
-		(value[4] >> 4) & 1,
-		(value[4] >> 3) & 1,
+		(uint_fast8_t)(value[4] >> 4) & 1,
+		(uint_fast8_t)(value[4] >> 3) & 1,
 	};
 	console_write_uint32(&console, "%1u", flag_group_1[0]);
 	console_write_uint32(&console, "%1u", flag_group_1[1]);
@@ -929,7 +929,7 @@ static void set_console_error_color(const uint32_t error) {
 }
 
 void handle_command_packet_data_received_fsk(const void* const arg) {
-	const ipc_command_packet_data_received_t* const command = arg;
+	const ipc_command_packet_data_received_t* const command = (ipc_command_packet_data_received_t*)arg;
 
 	uint8_t value[10];
 	uint8_t errors[10];
@@ -984,8 +984,8 @@ void handle_command_packet_data_received(const void* const arg) {
 }
 
 void handle_command_spectrum_data(const void* const arg) {
-	const ipc_command_spectrum_data_t* const command = arg;
 
+	const ipc_command_spectrum_data_t* const command = (ipc_command_spectrum_data_t*)arg;
 	const uint_fast16_t draw_y = lcd_scroll(&lcd, 1);
 	const uint_fast16_t x = 0;
 	const uint_fast16_t y = draw_y;

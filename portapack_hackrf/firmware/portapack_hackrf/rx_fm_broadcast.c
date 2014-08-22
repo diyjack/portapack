@@ -59,13 +59,15 @@ void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t*
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 1.544MHz complex<int16>[N/2] */
 	sample_count = translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(&state->dec_stage_1_state, in, sample_count);
+	complex_s16_t* const in_cs16 = (complex_s16_t*)in;
 
 	/* 1.544MHz complex<int16>[N/2]
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 768kHz complex<int16>[N/4] */
 	complex_s16_t work[512];
-	void* const out = work;
-	sample_count = fir_cic3_decim_2_s16_s16(&state->dec_stage_2_state, (complex_s16_t*)in, out, sample_count);
+	complex_s16_t* const work_cs16 = work;
+	int16_t* const work_int16 = (int16_t*)work;
+	sample_count = fir_cic3_decim_2_s16_s16(&state->dec_stage_2_state, in_cs16, work_cs16, sample_count);
 
 	timestamps->decimate_end = baseband_timestamp();
 
@@ -81,29 +83,29 @@ void rx_fm_broadcast_to_audio_baseband_handler(void* const _state, complex_s8_t*
 	/* 768kHz complex<int16>[N/4]
 	 * -> FM demodulation
 	 * -> 768kHz int16[N/4] */
-	fm_demodulate_s16_s16(&state->fm_demodulate_state, out, out, sample_count);
+	fm_demodulate_s16_s16(&state->fm_demodulate_state, work_cs16, work_int16, sample_count);
 
 	timestamps->demodulate_end = baseband_timestamp();
 
 	/* 768kHz int16[N/4]
 	 * -> 4th order CIC decimation by 2, gain of 1
 	 * -> 384kHz int16[N/8] */
-	sample_count = fir_cic4_decim_2_real_s16_s16(&state->audio_dec_1, out, out, sample_count);
+	sample_count = fir_cic4_decim_2_real_s16_s16(&state->audio_dec_1, work_int16, work_int16, sample_count);
 
 	/* 384kHz int16[N/8]
 	 * -> 4th order CIC decimation by 2, gain of 1
 	 * -> 192kHz int16[N/16] */
-	sample_count = fir_cic4_decim_2_real_s16_s16(&state->audio_dec_2, out, out, sample_count);
+	sample_count = fir_cic4_decim_2_real_s16_s16(&state->audio_dec_2, work_int16, work_int16, sample_count);
 
 	/* 192kHz int16[N/16]
 	 * -> 4th order CIC decimation by 2, gain of 1
 	 * -> 96kHz int16[N/32] */
-	sample_count = fir_cic4_decim_2_real_s16_s16(&state->audio_dec_3, out, out, sample_count);
+	sample_count = fir_cic4_decim_2_real_s16_s16(&state->audio_dec_3, work_int16, work_int16, sample_count);
 
 	/* 96kHz int16[N/32]
 	 * -> FIR filter, <15kHz (0.156fs) pass, >19kHz (0.198fs) stop, gain of 1
 	 * -> 48kHz int16[N/64] */
-	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec_4, out, out, sample_count);
+	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec_4, work_int16, work_int16, sample_count);
 
-	copy_to_audio_output(out, sample_count);
+	copy_to_audio_output(work_int16, sample_count);
 }

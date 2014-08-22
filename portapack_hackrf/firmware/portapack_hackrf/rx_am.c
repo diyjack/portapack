@@ -57,13 +57,15 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 1.544MHz complex<int16>[N/2] */
 	sample_count = translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(&state->bb_dec_1, in, sample_count);
+	complex_s16_t* const in_cs16 = (complex_s16_t*)in;
 
 	/* 1.544MHz complex<int16>[N/2]
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 768kHz complex<int16>[N/4] */
 	complex_s16_t work[512];
-	void* const out = work;
-	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_2, (complex_s16_t*)in, out, sample_count);
+	complex_s16_t* const work_cs16 = work;
+	int16_t* const work_int16 = (int16_t*)work;
+	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_2, in_cs16, work_cs16, sample_count);
 
 	/* TODO: Gain through five CICs will be 32768 (8 ^ 5). Incorporate gain adjustment
 	 * somewhere in the chain.
@@ -74,8 +76,7 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	 */
 
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
-	complex_s16_t* p;
-	p = (complex_s16_t*)out;
+	complex_s16_t* p = work_cs16;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
 		p->i /= 2;
 		p->q /= 2;
@@ -85,10 +86,10 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	/* 768kHz complex<int16>[N/4]
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 384kHz complex<int16>[N/8] */
-	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_3, out, out, sample_count);
+	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_3, work_cs16, work_cs16, sample_count);
 
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
-	p = (complex_s16_t*)out;
+	p = work_cs16;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
 		p->i /= 8;
 		p->q /= 8;
@@ -98,10 +99,10 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	/* 384kHz complex<int16>[N/8]
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 192kHz complex<int16>[N/16] */
-	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_4, out, out, sample_count);
+	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_4, work_cs16, work_cs16, sample_count);
 
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
-	p = (complex_s16_t*)out;
+	p = work_cs16;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
 		p->i /= 8;
 		p->q /= 8;
@@ -111,7 +112,7 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	/* 192kHz complex<int16>[N/16]
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 96kHz complex<int16>[N/32] */
-	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_5, out, out, sample_count);
+	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_5, work_cs16, work_cs16, sample_count);
 
 	timestamps->decimate_end = baseband_timestamp();
 
@@ -122,7 +123,8 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	/* 96kHz int16[N/32]
 	 * -> AM demodulation
 	 * -> 96kHz int16[N/32] */
-	am_demodulate_s16_s16(out, out, sample_count);
+	uint16_t* const work_uint16 = (uint16_t*)work;
+	am_demodulate_s16_s16(work_cs16, work_uint16, sample_count);
 
 	/* TODO: HPF the data to remove DC offset */
 
@@ -131,7 +133,7 @@ void rx_am_to_audio_baseband_handler(void* const _state, complex_s8_t* const in,
 	/* 96kHz int16[N/32]
 	 * -> FIR filter, gain of 1
 	 * -> 48kHz int16[N/64] */
-	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec, out, out, sample_count);
+	sample_count = fir_64_decim_2_real_s16_s16(&state->audio_dec, work_int16, work_int16, sample_count);
 
-	copy_to_audio_output(out, sample_count);
+	copy_to_audio_output(work_int16, sample_count);
 }

@@ -79,19 +79,19 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 * -> 1.2288MHz complex<int16>[N/2] */
 	/* i,q: +/-128 */
 	sample_count = translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(&state->bb_dec_1, in, sample_count);
+	complex_s16_t* const in_cs16 = (complex_s16_t*)in;
 
 	/* 1.2288MHz complex<int16>[N/2]
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 614.4kHz complex<int16>[N/4] */
 	/* i,q: +/-1024 */
 	complex_s16_t work[512];
-	void* const out = work;
-	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_2, (complex_s16_t*)in, out, sample_count);
+	complex_s16_t* const work_cs16 = work;
+	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_2, in_cs16, work_cs16, sample_count);
 
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
 	/* i,q: +/-8192 */
-	complex_s16_t* p;
-	p = (complex_s16_t*)out;
+	complex_s16_t* p = work_cs16;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
 		p->i /= 2;
 		p->q /= 2;
@@ -102,11 +102,11 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 307.2kHz complex<int16>[N/8] */
 	/* i,q: +/-4096 */
-	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_3, out, out, sample_count);
+	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_3, work_cs16, work_cs16, sample_count);
 
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
 	/* i,q: +/-32768 */
-	p = (complex_s16_t*)out;
+	p = work_cs16;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
 		p->i /= 8;
 		p->q /= 8;
@@ -117,13 +117,13 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 153.6kHz complex<int16>[N/16] */
 	/* i,q: +/-4096 */
-	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_4, out, out, sample_count);
+	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_4, work_cs16, work_cs16, sample_count);
 
 	timestamps->decimate_end = baseband_timestamp();
 
 	timestamps->channel_filter_end = baseband_timestamp();
 
-	const complex_s16_t* const c = (complex_s16_t*)out;
+	const complex_s16_t* const c = work_cs16;
 	const int16_t t0 = -3, t6 = -3;
 	const int16_t t2 = 19, t4 = 19;
 	const int16_t t3 = 32;
@@ -193,7 +193,7 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 	/* +/- 1514143744, +/- 30.5 bits */
 	 	const int32_t diff1 = h1_mag2 - l1_mag2;
 
-	 	audio_tx_buffer[(i>>2)*2+0] = audio_tx_buffer[(i>>2)*2+1] = diff0 / 65536;
+	 	audio_tx_buffer[(i>>2)*2+0] = audio_tx_buffer[(i>>2)*2+1] = sqrtf(diff0);
 
 		clock_recovery_execute(&state->clock_recovery, diff0);
 		clock_recovery_execute(&state->clock_recovery, diff1);

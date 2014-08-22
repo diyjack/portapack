@@ -53,7 +53,7 @@ static void ipc_m4txevent_clear(void) {
 void ipc_m0_handle() {
 	while( !ipc_channel_is_empty(&device_state->ipc_m0) ) {
 		uint8_t command_buffer[256];
-		const ipc_command_id_t command_id = ipc_channel_read(&device_state->ipc_m0, command_buffer, sizeof(command_buffer));
+		const ipc_command_id_t command_id = (ipc_command_id_t)ipc_channel_read(&device_state->ipc_m0, command_buffer, sizeof(command_buffer));
 		if( command_id < command_handler_count) {
 			command_handler[command_id](command_buffer);
 		}

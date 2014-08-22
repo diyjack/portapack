@@ -78,19 +78,19 @@ void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 * -> 1.544MHz complex<int16>[N/2] */
 	/* i,q: +/-128 */
 	sample_count = translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16(&state->bb_dec_1, in, sample_count);
+	complex_s16_t* const in_cs16 = (complex_s16_t*)in;
 
 	/* 1.544MHz complex<int16>[N/2]
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 768kHz complex<int16>[N/4] */
 	/* i,q: +/-1024 */
 	complex_s16_t work[512];
-	void* const out = work;
-	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_2, (complex_s16_t*)in, out, sample_count);
+	complex_s16_t* const work_cs16 = work;
+	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_2, in_cs16, work_cs16, sample_count);
 
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
 	/* i,q: +/-8192 */
-	complex_s16_t* p;
-	p = (complex_s16_t*)out;
+	complex_s16_t* p = work_cs16;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
 		p->i /= 2;
 		p->q /= 2;
@@ -101,11 +101,11 @@ void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 384kHz complex<int16>[N/8] */
 	/* i,q: +/-4096 */
-	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_3, out, out, sample_count);
+	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_3, work_cs16, work_cs16, sample_count);
 
 	/* Temporary code to adjust gain in complex_s16_t samples out of CIC stages */
 	/* i,q: +/-32768 */
-	p = (complex_s16_t*)out;
+	p = work_cs16;
 	for(uint_fast16_t n=sample_count; n>0; n-=1) {
 		p->i /= 8;
 		p->q /= 8;
@@ -116,7 +116,7 @@ void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 * -> 3rd order CIC decimation by 2, gain of 8
 	 * -> 192kHz complex<int16>[N/16] */
 	/* i,q: +/-4096 */
-	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_4, out, out, sample_count);
+	sample_count = fir_cic3_decim_2_s16_s16(&state->bb_dec_4, work_cs16, work_cs16, sample_count);
 
 	timestamps->decimate_end = baseband_timestamp();
 
@@ -130,8 +130,8 @@ void rx_tpms_ask_baseband_handler(void* const _state, complex_s8_t* const in, co
 	 * -> AM demodulation
 	 * -> 192kHz int16[N/16] */
 	/* i,q: +/-23552 */
-	float* const out_mag = (float*)out;
-	am_demodulate_s16_f32(out, out_mag, sample_count);
+	float* const out_mag = (float*)work;
+	am_demodulate_s16_f32(work_cs16, out_mag, sample_count);
 	/* +33308 */
 
 	for(uint_fast16_t i=0; i<sample_count; i++) {

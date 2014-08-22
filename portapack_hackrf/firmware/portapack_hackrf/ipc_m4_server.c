@@ -41,28 +41,28 @@ static void handle_command_none(const void* const command) {
 }
 
 static void handle_command_set_rf_gain(const void* const arg) {
-	const ipc_command_set_rf_gain_t* const command = arg;
+	const ipc_command_set_rf_gain_t* const command = (ipc_command_set_rf_gain_t*)arg;
 	const bool rf_lna_enable = (command->gain_db >= 14);
 	rf_path_set_lna(rf_lna_enable);
 	device_state->lna_gain_db = rf_lna_enable ? 14 : 0;
 }
 
 static void handle_command_set_if_gain(const void* const arg) {
-	const ipc_command_set_if_gain_t* const command = arg;
+	const ipc_command_set_if_gain_t* const command = (ipc_command_set_if_gain_t*)arg;
 	if( max2837_set_lna_gain(command->gain_db) ) {
 		device_state->if_gain_db = command->gain_db;
 	}
 }
 
 static void handle_command_set_bb_gain(const void* const arg) {
-	const ipc_command_set_bb_gain_t* const command = arg;
+	const ipc_command_set_bb_gain_t* const command = (ipc_command_set_bb_gain_t*)arg;
 	if( max2837_set_vga_gain(command->gain_db) ) {
 		device_state->bb_gain_db = command->gain_db;
 	}
 }
 
 static void handle_command_set_frequency(const void* const arg) {
-	const ipc_command_set_frequency_t* const command = arg;
+	const ipc_command_set_frequency_t* const command = (ipc_command_set_frequency_t*)arg;
 	if( set_frequency(command->frequency_hz) ) {
 		device_state->tuned_hz = command->frequency_hz;
 	}
@@ -71,7 +71,7 @@ static void handle_command_set_frequency(const void* const arg) {
 static volatile bool audio_codec_initialized = false;
 
 static void handle_command_set_audio_out_gain(const void* const arg) {
-	const ipc_command_set_audio_out_gain_t* const command = arg;
+	const ipc_command_set_audio_out_gain_t* const command = (ipc_command_set_audio_out_gain_t*)arg;
 	if( !audio_codec_initialized ) {
 		portapack_codec_init();
 		audio_codec_initialized = true;
@@ -80,7 +80,7 @@ static void handle_command_set_audio_out_gain(const void* const arg) {
 }
 
 static void handle_command_set_receiver_configuration(const void* const arg) {
-	const ipc_command_set_receiver_configuration_t* const command = arg;
+	const ipc_command_set_receiver_configuration_t* const command = (ipc_command_set_receiver_configuration_t*)arg;
 	set_rx_mode(command->index);
 }
 
@@ -103,7 +103,7 @@ void m0core_isr() {
 
 	while( !ipc_channel_is_empty(&device_state->ipc_m4) ) {
 		uint8_t command_buffer[256];
-		const ipc_command_id_t command_id = ipc_channel_read(&device_state->ipc_m4, command_buffer, sizeof(command_buffer));
+		const ipc_command_id_t command_id = (ipc_command_id_t)ipc_channel_read(&device_state->ipc_m4, command_buffer, sizeof(command_buffer));
 		if( command_id < command_handler_count) {
 			command_handler[command_id](command_buffer);
 		}

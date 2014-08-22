@@ -276,7 +276,7 @@ sdio_error_t sdio_cmd8() {
 		  (voltage_supplied << 8)
 		| (check_pattern << 0)
 		;
-	const int32_t result = sdio_command_no_data(command, arg);
+	const sdio_error_t result = sdio_command_no_data(command, arg);
 	if( result != SDIO_OK ) {
 		return result;
 	}
@@ -316,7 +316,7 @@ sdio_error_t sdio_cmd55() {
 }
 
 sdio_error_t sdio_acmd41(const uint32_t vdd_voltage_window) {
-	const int result_cmd55 = sdio_cmd55();
+	const sdio_error_t result_cmd55 = sdio_cmd55();
 	if( result_cmd55 != SDIO_OK ) {
 		return result_cmd55;
 	}
@@ -352,7 +352,7 @@ sdio_error_t sdio_acmd41(const uint32_t vdd_voltage_window) {
 		| (s18r << 24)
 		| (vdd_voltage_window <<  0)
 		;
-	const int result = sdio_command_no_data(command, arg);
+	const sdio_error_t result = sdio_command_no_data(command, arg);
 	if( result != SDIO_OK ) {
 		return result;
 	}

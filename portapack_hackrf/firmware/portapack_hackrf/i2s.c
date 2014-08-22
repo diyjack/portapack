@@ -335,10 +335,10 @@ int16_t* portapack_i2s_tx_empty_buffer() {
 	const uint32_t next_lli = GPDMA_CLLI(6);
 	for(size_t i=0; i<I2S_BUFFER_COUNT; i++) {
 		if( tx_lli[i].clli == next_lli ) {
-			return tx_lli[(i + I2S_BUFFER_COUNT - 1) % I2S_BUFFER_COUNT].csrcaddr;
+			return (int16_t*)tx_lli[(i + I2S_BUFFER_COUNT - 1) % I2S_BUFFER_COUNT].csrcaddr;
 		}
 	}
-	return tx_lli[0].csrcaddr;
+	return (int16_t*)tx_lli[0].csrcaddr;
 }
 
 int16_t* portapack_i2s_rx_full_buffer() {
@@ -346,8 +346,8 @@ int16_t* portapack_i2s_rx_full_buffer() {
 	for(size_t i=0; i<I2S_BUFFER_COUNT; i++) {
 		if( rx_lli[i].clli == next_lli ) {
 			// TODO: This algorithm will go nuts if I2S_BUFFER_COUNT <= 2.
-			return rx_lli[(i + I2S_BUFFER_COUNT - 2) % I2S_BUFFER_COUNT].cdestaddr;
+			return (int16_t*)rx_lli[(i + I2S_BUFFER_COUNT - 2) % I2S_BUFFER_COUNT].cdestaddr;
 		}
 	}
-	return rx_lli[0].cdestaddr;
+	return (int16_t*)rx_lli[0].cdestaddr;
 }

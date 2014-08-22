@@ -82,7 +82,7 @@ void copy_to_audio_output(const int16_t* const source, const size_t sample_count
 
 static void rx_tpms_ask_packet_handler(const void* const payload, const size_t payload_length, void* const context) {
 	(void)context;
-	ipc_command_packet_data_received(&device_state->ipc_m0, payload, payload_length);
+	ipc_command_packet_data_received(&device_state->ipc_m0, (uint8_t*)payload, payload_length);
 }
 
 static void rx_tpms_ask_init_wrapper(void* const _state) {
@@ -91,7 +91,7 @@ static void rx_tpms_ask_init_wrapper(void* const _state) {
 
 static void rx_tpms_fsk_packet_handler(const void* const payload, const size_t payload_length, void* const context) {
 	(void)context;
-	ipc_command_packet_data_received(&device_state->ipc_m0, payload, payload_length);
+	ipc_command_packet_data_received(&device_state->ipc_m0, (uint8_t*)payload, payload_length);
 }
 
 static void rx_tpms_fsk_init_wrapper(void* const _state) {
@@ -183,7 +183,7 @@ const receiver_configuration_t* get_receiver_configuration() {
 static complex_s8_t* get_completed_baseband_buffer() {
 	const size_t current_lli_index = sgpio_dma_current_transfer_index(lli_rx, 2);
 	const size_t finished_lli_index = 1 - current_lli_index;
-	return lli_rx[finished_lli_index].cdestaddr;
+	return (complex_s8_t*)lli_rx[finished_lli_index].cdestaddr;
 }
 
 complex_s8_t* wait_for_completed_baseband_buffer() {
@@ -250,7 +250,7 @@ void set_rx_mode(const uint32_t new_receiver_configuration_index) {
 
 
 void handle_command_spectrum_data_done(const void* const arg) {
-	const ipc_command_spectrum_data_done_t* const command = arg;
+	const ipc_command_spectrum_data_done_t* const command = (ipc_command_spectrum_data_done_t*)arg;
 	(void)command;
 
 	if( device_state->receiver_configuration_index == RECEIVER_CONFIGURATION_SPEC ) {
