@@ -26,6 +26,7 @@
 
 #include "ipc.h"
 
+/* TODO: In C++, reimplement with map of some sort */
 typedef enum {
 	IPC_COMMAND_ID_NONE = 0,
 	IPC_COMMAND_ID_SET_FREQUENCY = 1,
