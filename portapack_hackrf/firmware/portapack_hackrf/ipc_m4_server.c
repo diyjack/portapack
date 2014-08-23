@@ -98,7 +98,7 @@ static const command_handler_t command_handler[] = {
 };
 static const size_t command_handler_count = sizeof(command_handler) / sizeof(command_handler[0]);
 
-void m0core_isr() {
+extern "C" void m0core_isr() {
 	ipc_m0apptxevent_clear();
 
 	while( !ipc_channel_is_empty(&device_state->ipc_m4) ) {

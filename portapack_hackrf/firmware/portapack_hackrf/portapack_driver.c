@@ -439,7 +439,7 @@ void portapack_encoder_init() {
 }
 
 #if (defined ENCODER_USE_INTERRUPTS || defined LPC43XX_M4)
-void pin_int0_isr() {
+extern "C" void pin_int0_isr() {
 	if( GPIO_PIN_INTERRUPT_IST & (1 << 0) ) {
 		encoder_update();
 		GPIO_PIN_INTERRUPT_IST = (1 << 0);
@@ -448,7 +448,7 @@ void pin_int0_isr() {
 	}
 }
 
-void pin_int1_isr() {
+extern "C" void pin_int1_isr() {
 	if( GPIO_PIN_INTERRUPT_IST & (1 << 1) ) {
 		encoder_update();
 		GPIO_PIN_INTERRUPT_RISE = (1 << 1);

@@ -314,7 +314,7 @@ void portapack_init() {
 	set_frequency(device_state->tuned_hz);
 }
 
-void dma_isr() {
+extern "C" void dma_isr() {
 	complex_s8_t* const completed_buffer = get_completed_baseband_buffer();
 
 	/* 12.288MHz

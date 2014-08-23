@@ -60,7 +60,7 @@ void ipc_m0_handle() {
 	}
 }
 
-void m4core_isr() {
+extern "C" void m4core_isr() {
 	ipc_m4txevent_clear();
 	ipc_m0_handle();
 }

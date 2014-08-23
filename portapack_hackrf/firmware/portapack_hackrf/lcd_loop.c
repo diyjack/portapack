@@ -1019,7 +1019,7 @@ static void ritimer_init_1khz_isr() {
 
 static volatile uint32_t rssi_raw_avg = 0;
 
-void ritimer_or_wwdt_isr() {
+extern "C" void ritimer_or_wwdt_isr() {
 	ritimer_interrupt_clear();
 	const uint32_t rssi_raw = rssi_read();
 	rssi_convert_start();
@@ -1027,7 +1027,7 @@ void ritimer_or_wwdt_isr() {
 	encoder_update();
 }
 
-void rtc_isr() {
+extern "C" void rtc_isr() {
 	rtc_counter_interrupt_clear();
 	ipc_command_rtc_second(&device_state->ipc_m0);
 }
