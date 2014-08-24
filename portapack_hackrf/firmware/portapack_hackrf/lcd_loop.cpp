@@ -1069,12 +1069,14 @@ int main() {
 bool numeric_entry = false;
 
 	while(1) {
+		/*
 		const bool sd_card_present = sdio_card_is_present();
 		lcd_draw_string(&lcd, 16*8, 5*16, sd_card_present ? "SD+" : "SD-", 3);
 		const uint32_t rssi_mdb = rssi_raw_to_millidb(rssi_raw_avg);
 		draw_int(rssi_mdb / 1000, "%2d", 16*8, 5*16);
 		draw_int((rssi_mdb / 100) % 10, ".%1d", 18*8, 5*16);
 
+		*/
 #ifdef CPU_METRICS
 		draw_cycles(240 - (12 * 8), 96);
 #endif

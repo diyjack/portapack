@@ -29,32 +29,32 @@ project(portapack_hackrf)
 include(${PATH_HACKRF}/firmware/hackrf-common.cmake)
 
 set(SRC_M4
-	main.c
-	portapack.c
-	portapack_driver.c
-	access_code_correlator.c
-	envelope.c
-	clock_recovery.c
-	packet_builder.c
-	filters.c
-	rx_fm_broadcast.c
-	rx_fm_narrowband.c
-	rx_am.c
-	rx_tpms_ask.c
-	rx_tpms_fsk.c
-	specan.c
-	audio.c
-	cpld.c
-	i2s.c
-	complex.c
-	fft.c
-	fxpt_atan2.c
-	decimate.c
-	demodulate.c
-	ipc.c
-	ipc_m0_client.c
-	ipc_m4_server.c
-	m0_startup.c
+	main.cpp
+	portapack.cpp
+	portapack_driver.cpp
+	access_code_correlator.cpp
+	envelope.cpp
+	clock_recovery.cpp
+	packet_builder.cpp
+	filters.cpp
+	rx_fm_broadcast.cpp
+	rx_fm_narrowband.cpp
+	rx_am.cpp
+	rx_tpms_ask.cpp
+	rx_tpms_fsk.cpp
+	specan.cpp
+	audio.cpp
+	cpld.cpp
+	i2s.cpp
+	complex.cpp
+	fft.cpp
+	fxpt_atan2.cpp
+	decimate.cpp
+	demodulate.cpp
+	ipc.cpp
+	ipc_m0_client.cpp
+	ipc_m4_server.cpp
+	m0_startup.cpp
 	${PATH_HACKRF_FIRMWARE_COMMON}/rf_path.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/tuning.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/streaming.c
@@ -79,22 +79,22 @@ set(SRC_M4
 )
 
 set(SRC_M0
-	portapack_driver.c
-	lcd.c
-	lcd_color_lut.c
-	lcd_loop.c
-	lcd_touch.c
-	font_fixed_8x16.c
-	console.c
-	ipc.c
-	ipc_m4_client.c
-	ipc_m0_client.c
-	ipc_m0_server.c
-	rtc.c
-	ritimer.c
-	sdio.c
-	rssi.c
-	manchester.c
+	portapack_driver.cpp
+	lcd.cpp
+	lcd_color_lut.cpp
+	lcd_loop.cpp
+	lcd_touch.cpp
+	font_fixed_8x16.cpp
+	console.cpp
+	ipc.cpp
+	ipc_m4_client.cpp
+	ipc_m0_client.cpp
+	ipc_m0_server.cpp
+	rtc.cpp
+	ritimer.cpp
+	sdio.cpp
+	rssi.cpp
+	manchester.cpp
 	${PATH_HACKRF_FIRMWARE_COMMON}/delay.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/led.c
 )
