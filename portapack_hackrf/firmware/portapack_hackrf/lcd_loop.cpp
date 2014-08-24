@@ -48,6 +48,7 @@
 #include "ipc_m0_client.h"
 #include "ipc_m4_client.h"
 
+#include <vector>
 #include <algorithm>
 
 //#define CPU_METRICS
@@ -371,8 +372,9 @@ static const ui_field_text_t ui_field_audio_out_gain = {
 	.render = render_field_int,
 };
 
+typedef std::vector<const ui_field_text_t*> ui_fields_t;
 
-static const ui_field_text_t* fields[] = {
+static const ui_fields_t fields = {
 	&ui_field_frequency,
 	&ui_field_lna_gain,
 	&ui_field_if_gain,
@@ -380,7 +382,6 @@ static const ui_field_text_t* fields[] = {
 	&ui_field_receiver_configuration,
 	&ui_field_tuning_step_size,
 	&ui_field_audio_out_gain,
-	0,
 };
 
 static const ui_field_text_t* selected_field = &ui_field_frequency;
@@ -468,8 +469,7 @@ static const ui_field_text_t* ui_field_find_nearest(const ui_field_text_t* const
 	const ui_point_t source_point = ui_field_center(field);
 	int32_t nearest_distance = 0;
 	const ui_field_text_t* nearest_field = 0;
-	for(const ui_field_text_t** p=fields; *p != 0; p++) {
-		const ui_field_text_t* const other_field = *p;
+	for(const auto other_field : fields) {
 		if( other_field == field ) {
 			continue;
 		}
@@ -527,17 +527,17 @@ static bool ui_field_hit(const ui_field_text_t* const field, const uint_fast16_t
 }
 
 static const ui_field_text_t* ui_fields_hit(const uint_fast16_t x, const uint_fast16_t y) {
-	for(const ui_field_text_t** field=fields; *field != 0; field++) {
-		if( ui_field_hit(*field, x, y) ) {
-			return *field;
+	for(const auto field : fields) {
+		if( ui_field_hit(field, x, y) ) {
+			return field;
 		}
 	}
 	return NULL;
 }
 
 static void ui_render_fields() {
-	for(const ui_field_text_t** field=fields; *field != 0; field++) {
-		ui_field_render(*field);
+	for(const auto field : fields) {
+		ui_field_render(field);
 	}
 }
 
