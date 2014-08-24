@@ -92,7 +92,6 @@ void console_writeln(console_t* const console, const char* message) {
 
 void console_write_uint32(console_t* const console, const char* format, const uint32_t value) {
 	char temp[80];
-	const size_t temp_len = 79;
-	snprintf(temp, temp_len, format, value);
+	sprintf(temp, format, value);
 	console_write(console, temp);
 }

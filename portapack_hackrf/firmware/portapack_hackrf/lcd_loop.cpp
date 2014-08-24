@@ -79,14 +79,14 @@ void blink() {
 static void draw_int(int32_t value, const char* const format, uint_fast16_t x, uint_fast16_t y) {
 	char temp[80];
 	const size_t temp_len = 79;
-	const size_t text_len = snprintf(temp, temp_len, format, value);
+	const size_t text_len = sprintf(temp, format, value);
 	lcd_draw_string(&lcd, x, y, temp, std::min(text_len, temp_len));
 }
 
 static void draw_str(const char* const value, const char* const format, uint_fast16_t x, uint_fast16_t y) {
 	char temp[80];
 	const size_t temp_len = 79;
-	const size_t text_len = snprintf(temp, temp_len, format, value);
+	const size_t text_len = sprintf(temp, format, value);
 	lcd_draw_string(&lcd, x, y, temp, std::min(text_len, temp_len));
 }
 
@@ -95,7 +95,7 @@ static void draw_mhz(int64_t value, const char* const format, uint_fast16_t x, u
 	const size_t temp_len = 79;
 	const int32_t value_mhz = value / 1000000;
 	const int32_t value_hz = (value - (value_mhz * 1000000ULL)) / 1000;
-	const size_t text_len = snprintf(temp, temp_len, format, value_mhz, value_hz);
+	const size_t text_len = sprintf(temp, format, value_mhz, value_hz);
 	lcd_draw_string(&lcd, x, y, temp, std::min(text_len, temp_len));
 }
 #ifdef CPU_METRICS
@@ -104,7 +104,7 @@ static void draw_percent(int32_t value_millipercent, const char* const format, u
 	const size_t temp_len = 79;
 	const int32_t value_units = value_millipercent / 1000;
 	const int32_t value_millis = (value_millipercent - (value_units * 1000)) / 100;
-	const size_t text_len = snprintf(temp, temp_len, format, value_units, value_millis);
+	const size_t text_len = sprintf(temp, format, value_units, value_millis);
 	lcd_draw_string(&lcd, x, y, temp, std::min(text_len, temp_len));
 }
 
@@ -848,7 +848,7 @@ static void ui_button_render(const ui_button_t* const button) {
 	}
 
 	lcd_draw_filled_rectangle(&lcd, button->position.x, button->position.y, button->size.w, button->size.h);
-	const size_t label_length = strnlen(button->label, button->size.w / 8);
+	const size_t label_length = strlen(button->label);
 	lcd_draw_string(&lcd, button->position.x + (button->size.w - label_length * 8) / 2, button->position.y + (button->size.h - 16) / 2, button->label, label_length);
 
 	if( button->state == UI_BUTTON_STATE_TOUCHED ) {
