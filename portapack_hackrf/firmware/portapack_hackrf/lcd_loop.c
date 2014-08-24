@@ -589,11 +589,11 @@ void switch_select(const uint32_t repeat_count) {
 }
 
 static ui_switch_t switches[] = {
-	{ .mask = SWITCH_UP,     .action = switch_up },
-	{ .mask = SWITCH_DOWN,   .action = switch_down },
-	{ .mask = SWITCH_LEFT,   .action = switch_left },
-	{ .mask = SWITCH_RIGHT,  .action = switch_right },
-	{ .mask = SWITCH_SELECT, .action = switch_select },
+	{ .mask = SWITCH_UP,     .time_on = 0, .action = switch_up },
+	{ .mask = SWITCH_DOWN,   .time_on = 0, .action = switch_down },
+	{ .mask = SWITCH_LEFT,   .time_on = 0, .action = switch_left },
+	{ .mask = SWITCH_RIGHT,  .time_on = 0, .action = switch_right },
+	{ .mask = SWITCH_SELECT, .time_on = 0, .action = switch_select },
 };
 
 static bool handle_joysticks() {
@@ -830,16 +830,16 @@ typedef struct ui_button_t {
 } ui_button_t;
 
 static ui_button_t numeric_entry[] = {
-	{ .position = { .x =   0, .y =  16 }, .size = { .w = 80, .h = 48 }, .label = "1" },
-	{ .position = { .x =  80, .y =  16 }, .size = { .w = 80, .h = 48 }, .label = "2" },
-	{ .position = { .x = 160, .y =  16 }, .size = { .w = 80, .h = 48 }, .label = "3" },
-	{ .position = { .x =   0, .y =  64 }, .size = { .w = 80, .h = 48 }, .label = "4" },
-	{ .position = { .x =  80, .y =  64 }, .size = { .w = 80, .h = 48 }, .label = "5" },
-	{ .position = { .x = 160, .y =  64 }, .size = { .w = 80, .h = 48 }, .label = "6" },
-	{ .position = { .x =   0, .y = 112 }, .size = { .w = 80, .h = 48 }, .label = "7" },
-	{ .position = { .x =  80, .y = 112 }, .size = { .w = 80, .h = 48 }, .label = "8" },
-	{ .position = { .x = 160, .y = 112 }, .size = { .w = 80, .h = 48 }, .label = "9" },
-	{ .position = { .x =  80, .y = 160 }, .size = { .w = 80, .h = 48 }, .label = "0" },
+	{ .position = { .x =   0, .y =  16 }, .size = { .w = 80, .h = 48 }, .label = "1", .state = UI_BUTTON_STATE_NORMAL },
+	{ .position = { .x =  80, .y =  16 }, .size = { .w = 80, .h = 48 }, .label = "2", .state = UI_BUTTON_STATE_NORMAL },
+	{ .position = { .x = 160, .y =  16 }, .size = { .w = 80, .h = 48 }, .label = "3", .state = UI_BUTTON_STATE_NORMAL },
+	{ .position = { .x =   0, .y =  64 }, .size = { .w = 80, .h = 48 }, .label = "4", .state = UI_BUTTON_STATE_NORMAL },
+	{ .position = { .x =  80, .y =  64 }, .size = { .w = 80, .h = 48 }, .label = "5", .state = UI_BUTTON_STATE_NORMAL },
+	{ .position = { .x = 160, .y =  64 }, .size = { .w = 80, .h = 48 }, .label = "6", .state = UI_BUTTON_STATE_NORMAL },
+	{ .position = { .x =   0, .y = 112 }, .size = { .w = 80, .h = 48 }, .label = "7", .state = UI_BUTTON_STATE_NORMAL },
+	{ .position = { .x =  80, .y = 112 }, .size = { .w = 80, .h = 48 }, .label = "8", .state = UI_BUTTON_STATE_NORMAL },
+	{ .position = { .x = 160, .y = 112 }, .size = { .w = 80, .h = 48 }, .label = "9", .state = UI_BUTTON_STATE_NORMAL },
+	{ .position = { .x =  80, .y = 160 }, .size = { .w = 80, .h = 48 }, .label = "0", .state = UI_BUTTON_STATE_NORMAL },
 };
 
 static void ui_button_render(const ui_button_t* const button) {
