@@ -57,8 +57,6 @@
 #include "ipc_m4.h"
 #include "ipc_m0_client.h"
 
-#include "linux_stuff.h"
-
 gpdma_lli_t lli_rx[2];
 
 uint32_t baseband_timestamp() {

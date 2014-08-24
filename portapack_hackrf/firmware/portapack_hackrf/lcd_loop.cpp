@@ -48,7 +48,7 @@
 #include "ipc_m0_client.h"
 #include "ipc_m4_client.h"
 
-#include "linux_stuff.h"
+#include <algorithm>
 
 //#define CPU_METRICS
 
@@ -80,14 +80,14 @@ static void draw_int(int32_t value, const char* const format, uint_fast16_t x, u
 	char temp[80];
 	const size_t temp_len = 79;
 	const size_t text_len = snprintf(temp, temp_len, format, value);
-	lcd_draw_string(&lcd, x, y, temp, min(text_len, temp_len));
+	lcd_draw_string(&lcd, x, y, temp, std::min(text_len, temp_len));
 }
 
 static void draw_str(const char* const value, const char* const format, uint_fast16_t x, uint_fast16_t y) {
 	char temp[80];
 	const size_t temp_len = 79;
 	const size_t text_len = snprintf(temp, temp_len, format, value);
-	lcd_draw_string(&lcd, x, y, temp, min(text_len, temp_len));
+	lcd_draw_string(&lcd, x, y, temp, std::min(text_len, temp_len));
 }
 
 static void draw_mhz(int64_t value, const char* const format, uint_fast16_t x, uint_fast16_t y) {
@@ -96,7 +96,7 @@ static void draw_mhz(int64_t value, const char* const format, uint_fast16_t x, u
 	const int32_t value_mhz = value / 1000000;
 	const int32_t value_hz = (value - (value_mhz * 1000000ULL)) / 1000;
 	const size_t text_len = snprintf(temp, temp_len, format, value_mhz, value_hz);
-	lcd_draw_string(&lcd, x, y, temp, min(text_len, temp_len));
+	lcd_draw_string(&lcd, x, y, temp, std::min(text_len, temp_len));
 }
 #ifdef CPU_METRICS
 static void draw_percent(int32_t value_millipercent, const char* const format, uint_fast16_t x, uint_fast16_t y) {
@@ -105,7 +105,7 @@ static void draw_percent(int32_t value_millipercent, const char* const format, u
 	const int32_t value_units = value_millipercent / 1000;
 	const int32_t value_millis = (value_millipercent - (value_units * 1000)) / 100;
 	const size_t text_len = snprintf(temp, temp_len, format, value_units, value_millis);
-	lcd_draw_string(&lcd, x, y, temp, min(text_len, temp_len));
+	lcd_draw_string(&lcd, x, y, temp, std::min(text_len, temp_len));
 }
 
 static void draw_cycles(const uint_fast16_t x, const uint_fast16_t y) {

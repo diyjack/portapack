@@ -21,7 +21,7 @@
 
 #include "packet_builder.h"
 
-#include "linux_stuff.h"
+#include "portapack.h"
 
 void packet_builder_init(
 	packet_builder_t* const packet_builder,

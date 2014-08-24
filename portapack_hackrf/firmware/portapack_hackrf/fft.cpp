@@ -19,6 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
+#include "portapack.h"
+
 #include <stdint.h>
 #include <math.h>
 

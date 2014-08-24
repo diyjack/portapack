@@ -30,7 +30,7 @@
 #include "portapack_driver.h"
 #include "ipc_m0_client.h"
 
-#include "linux_stuff.h"
+#include <algorithm>
 
 typedef struct specan_state_t {
 	float avg[256];
@@ -74,7 +74,7 @@ static void specan_calculate_averages(specan_state_t* const state) {
 		state->avg[i] = log_k;
 		const float avg_log = log10f(avg * state->mag_2_scale);
 		const int avg_log_n = (int)roundf((avg_log - state->spectrum_floor) * state->spectrum_gain);
-		const uint8_t avg_n_log_sat = max_t(int, min_t(int, avg_log_n, 255), 0);
+		const uint8_t avg_n_log_sat = std::max(std::min(avg_log_n, 255), 0);
 		state->avg_log[i] = avg_n_log_sat;
 	}
 }
@@ -85,7 +85,7 @@ static void specan_calculate_peaks(specan_state_t* const state) {
 		state->peak[i] = log_k;
 		const float peak_log = log10f(peak * state->mag_2_scale);
 		const int peak_log_n = (int)roundf((peak_log - state->spectrum_floor) * state->spectrum_gain);
-		const uint8_t peak_n_log_sat = max_t(int, min_t(int, peak_log_n, 255), 0);
+		const uint8_t peak_n_log_sat = std::max(std::min(peak_log_n, 255), 0);
 		state->peak_log[i] = peak_n_log_sat;
 	}
 }

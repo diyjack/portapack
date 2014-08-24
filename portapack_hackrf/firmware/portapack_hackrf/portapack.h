@@ -30,6 +30,9 @@
 #include "complex.h"
 #include "ipc.h"
 
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define M_PI (3.14159265358979323846264338327950f)
+
 typedef struct baseband_timestamps_t {
 	uint32_t start;
 	uint32_t decimate_end;

@@ -21,6 +21,8 @@
 
 #include "demodulate.h"
 
+#include "portapack.h"
+
 #include <stdint.h>
 #include <stddef.h>
 #include <math.h>

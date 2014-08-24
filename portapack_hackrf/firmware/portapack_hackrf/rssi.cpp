@@ -23,7 +23,7 @@
 
 #include <libopencm3/lpc43xx/adc.h>
 
-#include "linux_stuff.h"
+#include <algorithm>
 
 /* TODO: Move to libopencm3! */
 #define ADC_CR_SEL(x)		((x) << 0)
@@ -94,5 +94,5 @@ uint32_t rssi_read() {
 }
 
 int32_t rssi_raw_to_millidb(const uint32_t raw) {
-	return min_t(int32_t, RSSI_ADC_RANGE * RSSI_MILLIDB_PER_LSB, max_t(int32_t, 0, raw - RSSI_MINIMUM_VALUE) * RSSI_MILLIDB_PER_LSB);
+	return std::min((uint32_t)(RSSI_ADC_RANGE * RSSI_MILLIDB_PER_LSB), std::max((uint32_t)0, raw - RSSI_MINIMUM_VALUE) * RSSI_MILLIDB_PER_LSB);
 }

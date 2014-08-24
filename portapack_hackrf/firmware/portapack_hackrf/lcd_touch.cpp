@@ -1,6 +1,8 @@
 
 #include "lcd_touch.h"
 
+#include <algorithm>
+
 #define TOUCH_YP_ADC0_INPUT (0)
 #define TOUCH_YN_ADC0_INPUT (2)
 #define TOUCH_XP_ADC0_INPUT (5)
@@ -76,8 +78,6 @@ static uint_fast16_t sample_adc_channel(const uint_fast8_t channel_number) {
 	return (ADC0_GDR >> 6) & 0x3ff;
 }
 
-#include "linux_stuff.h"
-
 typedef struct touch_measurements_t {
 	uint16_t xp;
 	uint16_t xn;
@@ -139,9 +139,9 @@ void lcd_touch_convert(touch_state_t* const state) {
 	portapack_lcd_touch_sense_x();
 
 	//const uint32_t z_mv = max(touch_values.z.yp - touch_values.z.xn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
-	const uint32_t z_yp_mv = max(touch_values.z.yp - touch_values.z.yn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
-	const uint32_t z_xn_mv = max(touch_values.z.xp - touch_values.z.xn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
-	const uint32_t z_touch_mv = max(touch_values.z.yn - touch_values.z.xp, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
+	const uint32_t z_yp_mv = std::max(touch_values.z.yp - touch_values.z.yn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
+	const uint32_t z_xn_mv = std::max(touch_values.z.xp - touch_values.z.xn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
+	const uint32_t z_touch_mv = std::max(touch_values.z.yn - touch_values.z.xp, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
 
 	lcd_touch_measurements_subtract(&touch_values.x, &frame->x);
 	frame->x.xp = sample_adc_channel(TOUCH_XP_ADC0_INPUT);
@@ -153,9 +153,9 @@ void lcd_touch_convert(touch_state_t* const state) {
 	portapack_lcd_touch_sense_off();
 	portapack_lcd_touch_sense_y();
 
-	const uint32_t x_mv = max(touch_values.x.xp - touch_values.x.xn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
+	const uint32_t x_mv = std::max(touch_values.x.xp - touch_values.x.xn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
 	const uint32_t x_ua = x_mv * 1000 / x_ohm;
-	const uint32_t xn_mv = max(touch_values.x.yp - touch_values.x.xn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
+	const uint32_t xn_mv = std::max(touch_values.x.yp - touch_values.x.xn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
 	const uint32_t xn_mohm = xn_mv * 1000000 / x_ua;
 	//const uint32_t xp_mv = max(touch_values.x.xp - touch_values.x.yp, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
 	//const uint32_t xp_mohm = xp_mv * 1000000 / x_ua;
@@ -169,11 +169,11 @@ void lcd_touch_convert(touch_state_t* const state) {
 
 	portapack_lcd_touch_sense_off();
 
-	const uint32_t y_mv = max(touch_values.y.yp - touch_values.y.yn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
+	const uint32_t y_mv = std::max(touch_values.y.yp - touch_values.y.yn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
 	const uint32_t y_ua = y_mv * 1000 / y_ohm;
-	const uint32_t yn_mv = max(touch_values.y.xp - touch_values.y.yn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
+	const uint32_t yn_mv = std::max(touch_values.y.xp - touch_values.y.yn, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
 	const uint32_t yn_mohm = yn_mv * 1000000 / y_ua;
-	const uint32_t yp_mv = max(touch_values.y.yp - touch_values.y.xp, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
+	const uint32_t yp_mv = std::max(touch_values.y.yp - touch_values.y.xp, 0) * vref_mv / (adc_count * TOUCH_HISTORY_LENGTH);
 	const uint32_t yp_mohm = yp_mv * 1000000 / y_ua;
 
 	const uint32_t z_xn_ua = z_xn_mv * 1000000 / xn_mohm;
@@ -192,6 +192,6 @@ void lcd_touch_convert(touch_state_t* const state) {
 	state->pressure = pressure;
 
 	/* TODO: Dumb, static calibration code. */
-	state->x = max_t(uint32_t, 0, xn_mohm - (x_ohm * 1000 / 11)) * (240 + 53) / (x_ohm * 1000);
-	state->y = max_t(uint32_t, 0, yn_mohm - (y_ohm * 1000 / 11)) * (320 + 70) / (y_ohm * 1000);
+	state->x = std::max((uint32_t)0, xn_mohm - (x_ohm * 1000 / 11)) * (240 + 53) / (x_ohm * 1000);
+	state->y = std::max((uint32_t)0, yn_mohm - (y_ohm * 1000 / 11)) * (320 + 70) / (y_ohm * 1000);
 }

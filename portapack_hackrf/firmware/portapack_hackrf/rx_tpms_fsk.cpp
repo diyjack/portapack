@@ -30,8 +30,6 @@
 
 #include <math.h>
 
-#include "linux_stuff.h"
-
 typedef struct rx_tpms_fsk_state_t {
 	translate_fs_over_4_and_decimate_by_2_cic_3_s8_s16_state_t bb_dec_1;
 	fir_cic3_decim_2_s16_s16_state_t bb_dec_2;
