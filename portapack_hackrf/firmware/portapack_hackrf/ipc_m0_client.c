@@ -28,6 +28,7 @@ void ipc_command_packet_data_received(ipc_channel_t* const channel, const uint8_
 	ipc_command_packet_data_received_t command = {
 		.id = IPC_COMMAND_ID_PACKET_DATA_RECEIVED,
 		.payload_length = payload_length,
+		.payload = { 0 },
 	};
 	memcpy(&command.payload, payload, sizeof(command.payload));
 	ipc_channel_write(channel, &command, sizeof(command));
