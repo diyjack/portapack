@@ -21,6 +21,8 @@
 
 #include "specan.h"
 
+#include "arm_intrinsics.h"
+
 #include "complex.h"
 #include "window.h"
 #include "fft.h"
