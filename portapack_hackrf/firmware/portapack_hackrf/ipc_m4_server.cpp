@@ -96,7 +96,6 @@ static const command_handler_t command_handler[] = {
 	[IPC_COMMAND_ID_SET_RECEIVER_CONFIGURATION] = handle_command_set_receiver_configuration,
 	[IPC_COMMAND_ID_SPECTRUM_DATA_DONE] = handle_command_spectrum_data_done,
 };
-static const size_t command_handler_count = sizeof(command_handler) / sizeof(command_handler[0]);
 
 extern "C" void m0core_isr() {
 	ipc_m0apptxevent_clear();
@@ -104,7 +103,7 @@ extern "C" void m0core_isr() {
 	while( !ipc_channel_is_empty(&device_state->ipc_m4) ) {
 		uint8_t command_buffer[256];
 		const ipc_command_id_t command_id = (ipc_command_id_t)ipc_channel_read(&device_state->ipc_m4, command_buffer, sizeof(command_buffer));
-		if( command_id < command_handler_count) {
+		if( command_id < ARRAY_SIZE(command_handler) ) {
 			command_handler[command_id](command_buffer);
 		}
 	}
