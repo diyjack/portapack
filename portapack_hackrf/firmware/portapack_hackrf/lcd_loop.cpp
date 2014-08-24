@@ -127,6 +127,19 @@ static void draw_cycles(const uint_fast16_t x, const uint_fast16_t y) {
 struct ui_field_text_t;
 typedef struct ui_field_text_t ui_field_text_t;
 
+struct ui_widget_t {
+	constexpr ui_widget_t(
+		lcd_position_t position,
+		lcd_size_t size)
+	:
+		position(position),
+		size(size) {
+	}
+
+	lcd_position_t position;
+	lcd_size_t size;
+};
+
 typedef void (*ui_field_value_change_callback_t)(const uint32_t repeat_count);
 
 typedef struct ui_field_value_change_t {
@@ -134,9 +147,22 @@ typedef struct ui_field_value_change_t {
 	ui_field_value_change_callback_t down;
 } ui_field_value_change_t;
 
-struct ui_field_text_t {
-	lcd_position_t position;
-	lcd_size_t size;
+struct ui_field_text_t : ui_widget_t {
+	constexpr ui_field_text_t(
+		lcd_position_t position,
+		lcd_size_t size,
+		ui_field_value_change_t value_change,
+		const char* const format,
+		const void* (*getter)(),
+		void (*render)(const ui_field_text_t* const))
+	:
+		ui_widget_t(position, size),
+		value_change(value_change),
+		format(format),
+		getter(getter),
+		render(render) {
+	}
+
 	ui_field_value_change_t value_change;
 	const char* const format;
 	const void* (*getter)();
