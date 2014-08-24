@@ -87,14 +87,14 @@ static void handle_command_set_receiver_configuration(const void* const arg) {
 typedef void (*command_handler_t)(const void* const command);
 
 static const command_handler_t command_handler[] = {
-	handle_command_none,
-	handle_command_set_rf_gain,
-	handle_command_set_if_gain,
-	handle_command_set_bb_gain,
-	handle_command_set_frequency,
-	handle_command_set_audio_out_gain,
-	handle_command_set_receiver_configuration,
-	handle_command_spectrum_data_done,
+	[IPC_COMMAND_ID_NONE] = handle_command_none,
+	[IPC_COMMAND_ID_SET_FREQUENCY] = handle_command_set_frequency,
+	[IPC_COMMAND_ID_SET_RF_GAIN] = handle_command_set_rf_gain,
+	[IPC_COMMAND_ID_SET_IF_GAIN] = handle_command_set_if_gain,
+	[IPC_COMMAND_ID_SET_BB_GAIN] = handle_command_set_bb_gain,
+	[IPC_COMMAND_ID_SET_AUDIO_OUT_GAIN] = handle_command_set_audio_out_gain,
+	[IPC_COMMAND_ID_SET_RECEIVER_CONFIGURATION] = handle_command_set_receiver_configuration,
+	[IPC_COMMAND_ID_SPECTRUM_DATA_DONE] = handle_command_spectrum_data_done,
 };
 static const size_t command_handler_count = sizeof(command_handler) / sizeof(command_handler[0]);
 
