@@ -314,88 +314,88 @@ static void ui_field_value_down_tuning_step_size(const uint32_t amount) {
 	tuning_step_size_index = (tuning_step_size_index + ARRAY_SIZE(tuning_step_sizes) - 1) % ARRAY_SIZE(tuning_step_sizes);
 }
 
-static const ui_field_text_t ui_field_frequency = {
-	.position = { .x = 0, .y = 32 },
-	.size = { .w = 12 * 8, .h = 16 },
-	.value_change = {
-		.up = ui_field_value_up_frequency,
-		.down = ui_field_value_down_frequency,
+static const ui_field_text_t ui_field_frequency {
+	{ 0, 32 },
+	{ 12 * 8, 16 },
+	{
+		ui_field_value_up_frequency,
+		ui_field_value_down_frequency,
 	},
-  	.format = "%4d.%03d MHz",
-  	.getter = get_tuned_hz,
-  	.render = render_field_mhz,
+  	"%4d.%03d MHz",
+  	get_tuned_hz,
+  	render_field_mhz,
 };
 
-static const ui_field_text_t ui_field_lna_gain = {
-	.position = { .x = 0, .y = 48 },
-	.size = { .w = 9 * 8, .h = 16 },
-	.value_change = {
-		.up = ui_field_value_up_rf_gain,
-		.down = ui_field_value_down_rf_gain,
+static const ui_field_text_t ui_field_lna_gain {
+	{ 0, 48 },
+	{ 9 * 8, 16 },
+	{
+		ui_field_value_up_rf_gain,
+		ui_field_value_down_rf_gain,
 	},
-	.format = "LNA %2d dB",
-	.getter = get_lna_gain,
-	.render = render_field_int,
+	"LNA %2d dB",
+	get_lna_gain,
+	render_field_int,
 };
 
-static const ui_field_text_t ui_field_if_gain = {
-	.position = { .x = 0, .y = 64 },
-	.size = { .w = 9 * 8, .h = 16 },
-	.value_change = {
-		.up = ui_field_value_up_if_gain,
-		.down = ui_field_value_down_if_gain,
+static const ui_field_text_t ui_field_if_gain {
+	{ 0, 64 },
+	{ 9 * 8, 16 },
+	{
+		ui_field_value_up_if_gain,
+		ui_field_value_down_if_gain,
 	},
-	.format = "IF  %2d dB",
-	.getter = get_if_gain,
-	.render = render_field_int,
+	"IF  %2d dB",
+	get_if_gain,
+	render_field_int,
 };
 
-static const ui_field_text_t ui_field_bb_gain = {
-	.position = { .x = 0, .y = 80 },
-	.size = { .w = 9 * 8, .h = 16 },
-	.value_change = {
-		.up = ui_field_value_up_bb_gain,
-		.down = ui_field_value_down_bb_gain,
+static const ui_field_text_t ui_field_bb_gain {
+	{ 0, 80 },
+	{ 9 * 8, 16 },
+	{
+		ui_field_value_up_bb_gain,
+		ui_field_value_down_bb_gain,
 	},
-	.format = "BB  %2d dB",
-	.getter = get_bb_gain,
-	.render = render_field_int,
+	"BB  %2d dB",
+	get_bb_gain,
+	render_field_int,
 };
 
-static const ui_field_text_t ui_field_receiver_configuration = {
-	.position = { .x = 128, .y = 32 },
-	.size = { .w = 13 * 8, .h = 16 },
-	.value_change = {
-		.up = ui_field_value_up_receiver_configuration,
-		.down = ui_field_value_down_receiver_configuration,
+static const ui_field_text_t ui_field_receiver_configuration {
+	{ 128, 32 },
+	{ 13 * 8, 16 },
+	{
+		ui_field_value_up_receiver_configuration,
+		ui_field_value_down_receiver_configuration,
 	},
-	.format = "Mode %8s",
-	.getter = get_receiver_configuration_name,
-	.render = render_field_str,
+	"Mode %8s",
+	get_receiver_configuration_name,
+	render_field_str,
 };
 
-static const ui_field_text_t ui_field_tuning_step_size = {
-	.position = { .x = 128, .y = 48 },
-	.size = { .w = 11 * 8, .h = 16 },
-	.value_change = {
-		.up = ui_field_value_up_tuning_step_size,
-		.down = ui_field_value_down_tuning_step_size,
+static const ui_field_text_t ui_field_tuning_step_size {
+	{ 128, 48 },
+	{ 11 * 8, 16 },
+	{
+		ui_field_value_up_tuning_step_size,
+		ui_field_value_down_tuning_step_size,
 	},
-	.format = "Step %6s",
-	.getter = get_tuning_step_size_name,
-	.render = render_field_str,
+	"Step %6s",
+	get_tuning_step_size_name,
+	render_field_str,
 };
 
-static const ui_field_text_t ui_field_audio_out_gain = {
-	.position = { .x = 128, .y = 64 },
-	.size = { .w = 10 * 8, .h = 16 },
-	.value_change = {
-		.up = ui_field_value_up_audio_out_gain,
-		.down = ui_field_value_down_audio_out_gain,
+static const ui_field_text_t ui_field_audio_out_gain {
+	{ 128, 64 },
+	{ 10 * 8, 16 },
+	{
+		ui_field_value_up_audio_out_gain,
+		ui_field_value_down_audio_out_gain,
 	},
-	.format = "Vol %3d dB",
-	.getter = get_audio_out_gain,
-	.render = render_field_int,
+	"Vol %3d dB",
+	get_audio_out_gain,
+	render_field_int,
 };
 
 typedef std::vector<const ui_field_text_t*> ui_fields_t;
