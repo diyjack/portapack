@@ -51,7 +51,6 @@ set(SRC_M4
 	fxpt_atan2.c
 	decimate.c
 	demodulate.c
-	kfifo.c
 	ipc.c
 	ipc_m0_client.c
 	ipc_m4_server.c
@@ -87,7 +86,6 @@ set(SRC_M0
 	lcd_touch.c
 	font_fixed_8x16.c
 	console.c
-	kfifo.c
 	ipc.c
 	ipc_m4_client.c
 	ipc_m0_client.c

@@ -25,9 +25,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "kfifo.h"
+#include "fifo.h"
 
-typedef struct __STRUCT_KFIFO_PTR(unsigned char, 1, void) ipc_fifo_t;
+typedef FIFO<uint8_t, 8> ipc_fifo_t;
 
 typedef struct ipc_channel_t {
 	ipc_fifo_t fifo;
@@ -37,7 +37,7 @@ typedef struct ipc_command_t {
 	uint32_t id;
 } ipc_command_t;
 
-void ipc_channel_init(ipc_channel_t* const channel, void* const buffer, const size_t buffer_size);
+void ipc_channel_init(ipc_channel_t* const channel, void* const buffer);
 int ipc_channel_is_empty(ipc_channel_t* const channel);
 uint32_t ipc_channel_read(ipc_channel_t* const channel, void* buffer, const size_t buffer_length);
 void ipc_channel_write(ipc_channel_t* const channel, const void* const buffer, const size_t buffer_length);

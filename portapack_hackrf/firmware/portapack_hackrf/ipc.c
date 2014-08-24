@@ -25,16 +25,16 @@
 
 #include "arm_intrinsics.h"
 
-void ipc_channel_init(ipc_channel_t* const channel, void* const buffer, const size_t buffer_size) {
-	kfifo_init(&channel->fifo, (unsigned char*)buffer, buffer_size);
+void ipc_channel_init(ipc_channel_t* const channel, void* const buffer) {
+	new(&channel->fifo) FIFO<uint8_t, 8>((uint8_t*)buffer);
 }
 
 int ipc_channel_is_empty(ipc_channel_t* const channel) {
-	return kfifo_is_empty(&channel->fifo);
+	return channel->fifo.is_empty();
 }
 
 uint32_t ipc_channel_read(ipc_channel_t* const channel, void* buffer, const size_t buffer_length) {
-	if( kfifo_out(&channel->fifo, buffer, buffer_length) > 0 ) {
+	if( channel->fifo.out_r(buffer, buffer_length) > 0 ) {
 		const ipc_command_t* const command = (ipc_command_t*)buffer;
 		return command->id;
 	} else {
@@ -43,6 +43,6 @@ uint32_t ipc_channel_read(ipc_channel_t* const channel, void* buffer, const size
 }
 
 void ipc_channel_write(ipc_channel_t* const channel, const void* const buffer, const size_t buffer_length) {
-	kfifo_in(&channel->fifo, buffer, buffer_length);
+	channel->fifo.in_r(buffer, buffer_length);
 	__SEV();
 }
