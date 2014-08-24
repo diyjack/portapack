@@ -94,6 +94,10 @@ void usb_configuration_changed(
 //#define CPLD_PROGRAM 1
 //#define LCD_BACKLIGHT_TEST
 
+#ifdef LCD_BACKLIGHT_TEST
+#include <led.h>
+#endif
+
 #ifdef CPLD_PROGRAM
 #include "portapack_cpld.h"
 #endif
