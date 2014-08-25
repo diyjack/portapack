@@ -778,7 +778,7 @@ typedef struct ui_button_t {
 	ui_button_state_t state;
 } ui_button_t;
 
-static ui_button_t numeric_entry[] = {
+static std::array<ui_button_t, 10> numeric_entry { {
 	{ .position = { .x =   0, .y =  16 }, .size = { .w = 80, .h = 48 }, .label = "1", .state = UI_BUTTON_STATE_NORMAL },
 	{ .position = { .x =  80, .y =  16 }, .size = { .w = 80, .h = 48 }, .label = "2", .state = UI_BUTTON_STATE_NORMAL },
 	{ .position = { .x = 160, .y =  16 }, .size = { .w = 80, .h = 48 }, .label = "3", .state = UI_BUTTON_STATE_NORMAL },
@@ -789,7 +789,7 @@ static ui_button_t numeric_entry[] = {
 	{ .position = { .x =  80, .y = 112 }, .size = { .w = 80, .h = 48 }, .label = "8", .state = UI_BUTTON_STATE_NORMAL },
 	{ .position = { .x = 160, .y = 112 }, .size = { .w = 80, .h = 48 }, .label = "9", .state = UI_BUTTON_STATE_NORMAL },
 	{ .position = { .x =  80, .y = 160 }, .size = { .w = 80, .h = 48 }, .label = "0", .state = UI_BUTTON_STATE_NORMAL },
-};
+} };
 
 static void ui_button_render(const ui_button_t* const button) {
 	if( button->state == UI_BUTTON_STATE_TOUCHED ) {
@@ -806,9 +806,8 @@ static void ui_button_render(const ui_button_t* const button) {
 }
 
 void ui_render_numeric_entry() {
-	for(size_t i=0; i<ARRAY_SIZE(numeric_entry); i++) {
-		const ui_button_t* const button = &numeric_entry[i];
-		ui_button_render(button);
+	for(const auto& button : numeric_entry) {
+		ui_button_render(&button);
 	}
 }
 
@@ -823,10 +822,9 @@ bool ui_button_hit(const ui_button_t* const button, const uint_fast16_t x, const
 
 ui_button_t* ui_numeric_entry_touched(const touch_state_t* const touch) {
 	if( touch->pressure ) {
-		for(size_t i=0; i<ARRAY_SIZE(numeric_entry); i++) {
-			ui_button_t* const button = &numeric_entry[i];
-			if( ui_button_hit(button, touch->x, touch->y) ) {
-				return button;
+		for(auto& button : numeric_entry) {
+			if( ui_button_hit(&button, touch->x, touch->y) ) {
+				return &button;
 			}
 		}
 	}
