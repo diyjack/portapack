@@ -124,6 +124,11 @@ static void draw_cycles(const uint_fast16_t x, const uint_fast16_t y) {
 }
 #endif
 
+typedef struct ui_point_t {
+	int16_t x;
+	int16_t y;
+} ui_point_t;
+
 struct ui_widget_t;
 
 static const ui_widget_t* selected_widget = NULL;
@@ -133,26 +138,6 @@ enum ui_event_t {
 	UI_EVENT_VALUE_DOWN,
 };
 
-struct ui_widget_t {
-	constexpr ui_widget_t(
-		lcd_position_t position,
-		lcd_size_t size)
-	:
-		position(position),
-		size(size) {
-	}
-
-	lcd_position_t position;
-	lcd_size_t size;
-
-	virtual void render() const = 0;
-	virtual void handle_event(const ui_event_t event_id) const = 0;
-
-	bool selected() const {
-		return this == selected_widget;
-	}
-};
-
 typedef void (*ui_widget_value_change_callback_t)(const uint32_t repeat_count);
 
 typedef struct ui_widget_value_change_t {
@@ -160,28 +145,15 @@ typedef struct ui_widget_value_change_t {
 	ui_widget_value_change_callback_t down;
 } ui_widget_value_change_t;
 
-struct ui_field_text_t : ui_widget_t {
-	constexpr ui_field_text_t(
-		lcd_position_t position,
-		lcd_size_t size,
-		ui_widget_value_change_t value_change,
-		const char* const format,
-		const void* (*getter)(),
-		void (*render_fn)(const ui_field_text_t* const))
-	:
-		ui_widget_t(position, size),
-		value_change(value_change),
-		format(format),
-		getter(getter),
-		render_fn(render_fn) {
-	}
-
+struct ui_widget_t {
+	lcd_position_t position;
+	lcd_size_t size;
 	ui_widget_value_change_t value_change;
 	const char* const format;
 	const void* (*getter)();
-	void (*render_fn)(const ui_field_text_t* const);
+	void (*render_fn)(const ui_widget_t* const);
 
-	virtual void render() const {
+	void render() const {
 		if( selected() ) {
 			lcd_colors_invert(&lcd);
 		}
@@ -193,7 +165,7 @@ struct ui_field_text_t : ui_widget_t {
 		}
 	}
 
-	virtual void handle_event(const ui_event_t event) const {
+	void handle_event(const ui_event_t event) const {
 		switch(event) {
 		case UI_EVENT_VALUE_UP:
 			if( value_change.up ) {
@@ -208,21 +180,33 @@ struct ui_field_text_t : ui_widget_t {
 			break;
 		}
 	}
+
+	bool selected() const {
+		return this == selected_widget;
+	}
+
+	ui_point_t center() const {
+		const ui_point_t result = {
+			.x = (int16_t)(position.x + (size.w / 2)),
+			.y = (int16_t)(position.y + (size.h / 2)),
+		};
+		return result;
+	}
 };
 
-static void render_field_mhz(const ui_field_text_t* const field) {
-	const int64_t value = *((int64_t*)field->getter());
-	draw_mhz(value, field->format, field->position.x, field->position.y);
+static void render_field_mhz(const ui_widget_t* const widget) {
+	const int64_t value = *((int64_t*)widget->getter());
+	draw_mhz(value, widget->format, widget->position.x, widget->position.y);
 }
 
-static void render_field_int(const ui_field_text_t* const field) {
-	const int32_t value = *((int32_t*)field->getter());
-	draw_int(value, field->format, field->position.x, field->position.y);
+static void render_field_int(const ui_widget_t* const widget) {
+	const int32_t value = *((int32_t*)widget->getter());
+	draw_int(value, widget->format, widget->position.x, widget->position.y);
 }
 
-static void render_field_str(const ui_field_text_t* const field) {
-	const char* const value = (char*)field->getter();
-	draw_str(value, field->format, field->position.x, field->position.y);
+static void render_field_str(const ui_widget_t* const widget) {
+	const char* const value = (char*)widget->getter();
+	draw_str(value, widget->format, widget->position.x, widget->position.y);
 }
 
 static const void* get_tuned_hz() {
@@ -355,7 +339,7 @@ static void ui_field_value_down_tuning_step_size(const uint32_t amount) {
 	tuning_step_size_index = (tuning_step_size_index + ARRAY_SIZE(tuning_step_sizes) - 1) % ARRAY_SIZE(tuning_step_sizes);
 }
 
-static const ui_field_text_t ui_field_frequency {
+static const ui_widget_t ui_field_frequency {
 	{ 0, 32 },
 	{ 12 * 8, 16 },
 	{
@@ -367,7 +351,7 @@ static const ui_field_text_t ui_field_frequency {
   	render_field_mhz,
 };
 
-static const ui_field_text_t ui_field_lna_gain {
+static const ui_widget_t ui_field_lna_gain {
 	{ 0, 48 },
 	{ 9 * 8, 16 },
 	{
@@ -379,7 +363,7 @@ static const ui_field_text_t ui_field_lna_gain {
 	render_field_int,
 };
 
-static const ui_field_text_t ui_field_if_gain {
+static const ui_widget_t ui_field_if_gain {
 	{ 0, 64 },
 	{ 9 * 8, 16 },
 	{
@@ -391,7 +375,7 @@ static const ui_field_text_t ui_field_if_gain {
 	render_field_int,
 };
 
-static const ui_field_text_t ui_field_bb_gain {
+static const ui_widget_t ui_field_bb_gain {
 	{ 0, 80 },
 	{ 9 * 8, 16 },
 	{
@@ -403,7 +387,7 @@ static const ui_field_text_t ui_field_bb_gain {
 	render_field_int,
 };
 
-static const ui_field_text_t ui_field_receiver_configuration {
+static const ui_widget_t ui_field_receiver_configuration {
 	{ 128, 32 },
 	{ 13 * 8, 16 },
 	{
@@ -415,7 +399,7 @@ static const ui_field_text_t ui_field_receiver_configuration {
 	render_field_str,
 };
 
-static const ui_field_text_t ui_field_tuning_step_size {
+static const ui_widget_t ui_field_tuning_step_size {
 	{ 128, 48 },
 	{ 11 * 8, 16 },
 	{
@@ -427,7 +411,7 @@ static const ui_field_text_t ui_field_tuning_step_size {
 	render_field_str,
 };
 
-static const ui_field_text_t ui_field_audio_out_gain {
+static const ui_widget_t ui_field_audio_out_gain {
 	{ 128, 64 },
 	{ 10 * 8, 16 },
 	{
@@ -451,14 +435,6 @@ static const ui_widgets_t widgets = {
 	&ui_field_audio_out_gain,
 };
 
-static void ui_widget_lose_focus(const ui_widget_t* const widget) {
-	widget->render();
-}
-
-static void ui_widget_gain_focus(const ui_widget_t* const widget) {
-	widget->render();
-}
-
 static void ui_widget_update_focus(const ui_widget_t* const focus_widget) {
 	if( focus_widget == 0 ) {
 		return;
@@ -469,8 +445,8 @@ static void ui_widget_update_focus(const ui_widget_t* const focus_widget) {
 
 	const ui_widget_t* const old_widget = selected_widget;
 	selected_widget = focus_widget;
-	ui_widget_lose_focus(old_widget);
-	ui_widget_gain_focus(selected_widget);
+	old_widget->render();
+	selected_widget->render();
 }
 
 typedef enum {
@@ -479,19 +455,6 @@ typedef enum {
 	UI_DIRECTION_LEFT = 0b10,
 	UI_DIRECTION_UP = 0b11,
 } ui_direction_t;
-
-typedef struct ui_point_t {
-	int16_t x;
-	int16_t y;
-} ui_point_t;
-
-static ui_point_t ui_widget_center(const ui_widget_t* const widget) {
-	const ui_point_t result = {
-		.x = (int16_t)(widget->position.x + (widget->size.w / 2)),
-		.y = (int16_t)(widget->position.y + (widget->size.h / 2)),
-	};
-	return result;
-}
 
 static int32_t ui_widget_is_above(const ui_point_t start, const ui_point_t end) {
 	return (end.y < start.y) ? abs(end.x - start.x) : -1;
@@ -519,7 +482,7 @@ static const ui_widget_compare_fn nearest_widget_fn[] = {
 };
 
 static const ui_widget_t* ui_widget_find_nearest(const ui_widget_t* const widget, const ui_direction_t desired_direction) {
-	const ui_point_t source_point = ui_widget_center(widget);
+	const ui_point_t source_point = widget->center();
 	int32_t nearest_distance = 0;
 	const ui_widget_t* nearest_widget = 0;
 	for(const auto other_widget : widgets) {
@@ -527,7 +490,7 @@ static const ui_widget_t* ui_widget_find_nearest(const ui_widget_t* const widget
 			continue;
 		}
 
-		const ui_point_t target_point = ui_widget_center(other_widget);
+		const ui_point_t target_point = other_widget->center();
 		const int32_t distance = nearest_widget_fn[desired_direction](source_point, target_point);
 		if( distance > -1 ) {
 			if( (nearest_widget == 0) || (distance < nearest_distance) ) {
