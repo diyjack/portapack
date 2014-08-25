@@ -138,7 +138,7 @@ enum ui_event_t {
 	UI_EVENT_VALUE_DOWN,
 };
 
-typedef void (*ui_widget_value_change_callback_t)(const uint32_t repeat_count);
+typedef void (*ui_widget_value_change_callback_t)();
 
 typedef struct ui_widget_value_change_t {
 	ui_widget_value_change_callback_t up;
@@ -169,13 +169,13 @@ struct ui_widget_t {
 		switch(event) {
 		case UI_EVENT_VALUE_UP:
 			if( value_change.up ) {
-				value_change.up(1);
+				value_change.up();
 			}
 			break;
 
 		case UI_EVENT_VALUE_DOWN:
 			if( value_change.down ) {
-				value_change.down(1);
+				value_change.down();
 			}
 			break;
 		}
@@ -269,73 +269,61 @@ static const void* get_tuning_step_size_name() {
 	return get_tuning_step_size()->name;
 }
 
-static void ui_field_value_up_frequency(const uint32_t amount) {
-	ipc_command_set_frequency(&device_state->ipc_m4, device_state->tuned_hz + (amount * get_tuning_step_size_hz())/*frequency_repeat_acceleration(repeat_count)*/);
+static void ui_field_value_up_frequency() {
+	ipc_command_set_frequency(&device_state->ipc_m4, device_state->tuned_hz + get_tuning_step_size_hz());
 }
 
-static void ui_field_value_down_frequency(const uint32_t amount) {
-	ipc_command_set_frequency(&device_state->ipc_m4, device_state->tuned_hz - (amount * get_tuning_step_size_hz())/*frequency_repeat_acceleration(repeat_count)*/);
+static void ui_field_value_down_frequency() {
+	ipc_command_set_frequency(&device_state->ipc_m4, device_state->tuned_hz - get_tuning_step_size_hz());
 }
 
-static void ui_field_value_up_rf_gain(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_up_rf_gain() {
 	ipc_command_set_rf_gain(&device_state->ipc_m4, device_state->lna_gain_db + 14);
 }
 
-static void ui_field_value_down_rf_gain(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_down_rf_gain() {
 	ipc_command_set_rf_gain(&device_state->ipc_m4, device_state->lna_gain_db - 14);
 }
 
-static void ui_field_value_up_if_gain(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_up_if_gain() {
 	ipc_command_set_if_gain(&device_state->ipc_m4, device_state->if_gain_db + 8);
 }
 
-static void ui_field_value_down_if_gain(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_down_if_gain() {
 	ipc_command_set_if_gain(&device_state->ipc_m4, device_state->if_gain_db - 8);
 }
 
-static void ui_field_value_up_bb_gain(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_up_bb_gain() {
 	ipc_command_set_bb_gain(&device_state->ipc_m4, device_state->bb_gain_db + 2);
 }
 
-static void ui_field_value_down_bb_gain(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_down_bb_gain() {
 	ipc_command_set_bb_gain(&device_state->ipc_m4, device_state->bb_gain_db - 2);
 }
 
-static void ui_field_value_up_audio_out_gain(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_up_audio_out_gain() {
 	ipc_command_set_audio_out_gain(&device_state->ipc_m4, device_state->audio_out_gain_db + 1);
 }
 
-static void ui_field_value_down_audio_out_gain(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_down_audio_out_gain() {
 	ipc_command_set_audio_out_gain(&device_state->ipc_m4, device_state->audio_out_gain_db - 1);
 }
 
-static void ui_field_value_up_receiver_configuration(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_up_receiver_configuration() {
 	ipc_command_set_receiver_configuration(&device_state->ipc_m4, device_state->receiver_configuration_index + 1);
 	console_init(&console, &lcd, 16 * 6, lcd.size.h);
 }
 
-static void ui_field_value_down_receiver_configuration(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_down_receiver_configuration() {
 	ipc_command_set_receiver_configuration(&device_state->ipc_m4, device_state->receiver_configuration_index - 1);
 	console_init(&console, &lcd, 16 * 6, lcd.size.h);
 }
 
-static void ui_field_value_up_tuning_step_size(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_up_tuning_step_size() {
 	tuning_step_size_index = (tuning_step_size_index + 1) % tuning_step_sizes.size();
 }
 
-static void ui_field_value_down_tuning_step_size(const uint32_t amount) {
-	(void)amount;
+static void ui_field_value_down_tuning_step_size() {
 	tuning_step_size_index = (tuning_step_size_index + tuning_step_sizes.size() - 1) % tuning_step_sizes.size();
 }
 
@@ -517,11 +505,11 @@ static void ui_widget_navigate_right() {
 	ui_widget_update_focus(ui_widget_find_nearest(selected_widget, UI_DIRECTION_RIGHT));
 }
 
-static void ui_widget_value_up(const uint32_t amount) {
+static void ui_widget_value_up() {
 	selected_widget->handle_event(UI_EVENT_VALUE_UP);
 }
 
-static void ui_widget_value_down(const uint32_t amount) {
+static void ui_widget_value_down() {
 	selected_widget->handle_event(UI_EVENT_VALUE_DOWN);
 }
 
@@ -549,59 +537,44 @@ static void ui_render_widgets() {
 	}
 }
 
-static uint32_t ui_frame = 0;
-
-static uint32_t ui_frame_difference(const uint32_t frame1, const uint32_t frame2) {
-	return frame2 - frame1;
-}
-
-static const uint32_t ui_switch_repeat_after = 30;
-static const uint32_t ui_switch_repeat_rate = 10;
-
 typedef struct ui_switch_t {
 	uint32_t mask;
-	uint32_t time_on;
-	void (*action)(const uint32_t repeat_count);
+	void (*action)();
 } ui_switch_t;
 
-void switch_increment(const uint32_t amount) {
-	ui_widget_value_up(amount);
+void switch_increment() {
+	ui_widget_value_up();
 }
 
-void switch_decrement(const uint32_t amount) {
-	ui_widget_value_down(amount);
+void switch_decrement() {
+	ui_widget_value_down();
 }
 
-void switch_up(const uint32_t repeat_count) {
-	(void)repeat_count;
+void switch_up() {
 	ui_widget_navigate_up();
 }
 
-void switch_down(const uint32_t repeat_count) {
-	(void)repeat_count;
+void switch_down() {
 	ui_widget_navigate_down();
 }
 
-void switch_left(const uint32_t repeat_count) {
-	(void)repeat_count;
+void switch_left() {
 	ui_widget_navigate_left();
 }
 
-void switch_right(const uint32_t repeat_count) {
-	(void)repeat_count;
+void switch_right() {
 	ui_widget_navigate_right();
 }
 
-void switch_select(const uint32_t repeat_count) {
-	(void)repeat_count;
+void switch_select() {
 }
 
 static ui_switch_t switches[] = {
-	{ .mask = SWITCH_UP,     .time_on = 0, .action = switch_up },
-	{ .mask = SWITCH_DOWN,   .time_on = 0, .action = switch_down },
-	{ .mask = SWITCH_LEFT,   .time_on = 0, .action = switch_left },
-	{ .mask = SWITCH_RIGHT,  .time_on = 0, .action = switch_right },
-	{ .mask = SWITCH_SELECT, .time_on = 0, .action = switch_select },
+	{ .mask = SWITCH_UP,     .action = switch_up },
+	{ .mask = SWITCH_DOWN,   .action = switch_down },
+	{ .mask = SWITCH_LEFT,   .action = switch_left },
+	{ .mask = SWITCH_RIGHT,  .action = switch_right },
+	{ .mask = SWITCH_SELECT, .action = switch_select },
 };
 
 static bool handle_joysticks() {
@@ -625,11 +598,11 @@ static bool handle_joysticks() {
 	bool event_occurred = false;
 
 	if( encoder_inc > 0 ) {
-		switch_increment(encoder_inc);
+		switch_increment();
 		event_occurred = true;
 	}
 	if( encoder_inc < 0 ) {
-		switch_decrement(-encoder_inc);
+		switch_decrement();
 		event_occurred = true;
 	}
 
@@ -637,21 +610,8 @@ static bool handle_joysticks() {
 		ui_switch_t* const sw = &switches[i];
 		if( sw->action != NULL ) {
 			if( switches_event_on & sw->mask ) {
-				sw->time_on = ui_frame;
-				sw->action(0);
+				sw->action();
 				event_occurred = true;
-			}
-
-			if( switches_now & sw->mask ) {
-				const uint32_t frames_since_on = ui_frame_difference(sw->time_on, ui_frame);
-				if( frames_since_on >= ui_switch_repeat_after ) {
-					const uint32_t frames_since_first_repeat = frames_since_on - ui_switch_repeat_after;
-					if( (frames_since_first_repeat % ui_switch_repeat_rate) == 0 ) {
-						const uint32_t repeat_count = frames_since_first_repeat / ui_switch_repeat_rate;
-						sw->action(repeat_count);
-						event_occurred = true;
-					}
-				}
 			}
 		}
 	}
@@ -1112,7 +1072,6 @@ bool numeric_entry = false;
 		ipc_m0_handle();
 
 		lcd_frame_sync();
-		ui_frame += 1;
 	}
 
 	return 0;
