@@ -554,6 +554,16 @@ static bool handle_joysticks() {
 	const int32_t current_encoder_position = device_state->encoder_position;
 	const int32_t encoder_inc = current_encoder_position - last_encoder_position;
 	last_encoder_position = current_encoder_position;
+
+	bool event_occurred = false;
+	if( encoder_inc > 0 ) {
+		ui_widget_value_up();
+		event_occurred = true;
+	}
+	if( encoder_inc < 0 ) {
+		ui_widget_value_down();
+		event_occurred = true;
+	}
 	
 	const uint32_t switches_raw = portapack_read_switches();
 	const uint32_t switches_now = switches_raw & switches_history[0] & switches_history[1] & switches_history[2];
@@ -564,16 +574,6 @@ static bool handle_joysticks() {
 	const uint32_t switches_event = switches_now ^ switches_last;
 	const uint32_t switches_event_on = switches_event & switches_now;
 	switches_last = switches_now;
-	bool event_occurred = false;
-
-	if( encoder_inc > 0 ) {
-		ui_widget_value_up();
-		event_occurred = true;
-	}
-	if( encoder_inc < 0 ) {
-		ui_widget_value_down();
-		event_occurred = true;
-	}
 
 	for(const auto& sw : switches) {
 		if( switches_event_on & sw.mask ) {
