@@ -124,8 +124,14 @@ static void draw_cycles(const uint_fast16_t x, const uint_fast16_t y) {
 }
 #endif
 
-struct ui_field_text_t;
-typedef struct ui_field_text_t ui_field_text_t;
+struct ui_widget_t;
+
+static const ui_widget_t* selected_widget = NULL;
+
+enum ui_event_t {
+	UI_EVENT_VALUE_UP,
+	UI_EVENT_VALUE_DOWN,
+};
 
 struct ui_widget_t {
 	constexpr ui_widget_t(
@@ -138,35 +144,70 @@ struct ui_widget_t {
 
 	lcd_position_t position;
 	lcd_size_t size;
+
+	virtual void render() const = 0;
+	virtual void handle_event(const ui_event_t event_id) const = 0;
+
+	bool selected() const {
+		return this == selected_widget;
+	}
 };
 
-typedef void (*ui_field_value_change_callback_t)(const uint32_t repeat_count);
+typedef void (*ui_widget_value_change_callback_t)(const uint32_t repeat_count);
 
-typedef struct ui_field_value_change_t {
-	ui_field_value_change_callback_t up;
-	ui_field_value_change_callback_t down;
-} ui_field_value_change_t;
+typedef struct ui_widget_value_change_t {
+	ui_widget_value_change_callback_t up;
+	ui_widget_value_change_callback_t down;
+} ui_widget_value_change_t;
 
 struct ui_field_text_t : ui_widget_t {
 	constexpr ui_field_text_t(
 		lcd_position_t position,
 		lcd_size_t size,
-		ui_field_value_change_t value_change,
+		ui_widget_value_change_t value_change,
 		const char* const format,
 		const void* (*getter)(),
-		void (*render)(const ui_field_text_t* const))
+		void (*render_fn)(const ui_field_text_t* const))
 	:
 		ui_widget_t(position, size),
 		value_change(value_change),
 		format(format),
 		getter(getter),
-		render(render) {
+		render_fn(render_fn) {
 	}
 
-	ui_field_value_change_t value_change;
+	ui_widget_value_change_t value_change;
 	const char* const format;
 	const void* (*getter)();
-	void (*render)(const ui_field_text_t* const);
+	void (*render_fn)(const ui_field_text_t* const);
+
+	virtual void render() const {
+		if( selected() ) {
+			lcd_colors_invert(&lcd);
+		}
+
+		render_fn(this);
+
+		if( selected() ) {
+			lcd_colors_invert(&lcd);
+		}
+	}
+
+	virtual void handle_event(const ui_event_t event) const {
+		switch(event) {
+		case UI_EVENT_VALUE_UP:
+			if( value_change.up ) {
+				value_change.up(1);
+			}
+			break;
+
+		case UI_EVENT_VALUE_DOWN:
+			if( value_change.down ) {
+				value_change.down(1);
+			}
+			break;
+		}
+	}
 };
 
 static void render_field_mhz(const ui_field_text_t* const field) {
@@ -398,9 +439,9 @@ static const ui_field_text_t ui_field_audio_out_gain {
 	render_field_int,
 };
 
-typedef std::vector<const ui_field_text_t*> ui_fields_t;
+typedef std::vector<const ui_widget_t*> ui_widgets_t;
 
-static const ui_fields_t fields = {
+static const ui_widgets_t widgets = {
 	&ui_field_frequency,
 	&ui_field_lna_gain,
 	&ui_field_if_gain,
@@ -410,40 +451,26 @@ static const ui_fields_t fields = {
 	&ui_field_audio_out_gain,
 };
 
-static const ui_field_text_t* selected_field = &ui_field_frequency;
-
-static void ui_field_render(const ui_field_text_t* const field) {
-	if( field == selected_field ) {
-		lcd_colors_invert(&lcd);
-	}
-
-	field->render(field);
-
-	if( field == selected_field ) {
-		lcd_colors_invert(&lcd);
-	}
+static void ui_widget_lose_focus(const ui_widget_t* const widget) {
+	widget->render();
 }
 
-static void ui_field_lose_focus(const ui_field_text_t* const field) {
-	ui_field_render(field);
+static void ui_widget_gain_focus(const ui_widget_t* const widget) {
+	widget->render();
 }
 
-static void ui_field_gain_focus(const ui_field_text_t* const field) {
-	ui_field_render(field);
-}
-
-static void ui_field_update_focus(const ui_field_text_t* const focus_field) {
-	if( focus_field == 0 ) {
+static void ui_widget_update_focus(const ui_widget_t* const focus_widget) {
+	if( focus_widget == 0 ) {
 		return;
 	}
-	if( focus_field == selected_field ) {
+	if( focus_widget == selected_widget ) {
 		return;
 	}
 
-	const ui_field_text_t* const old_field = selected_field;
-	selected_field = focus_field;
-	ui_field_lose_focus(old_field);
-	ui_field_gain_focus(selected_field);
+	const ui_widget_t* const old_widget = selected_widget;
+	selected_widget = focus_widget;
+	ui_widget_lose_focus(old_widget);
+	ui_widget_gain_focus(selected_widget);
 }
 
 typedef enum {
@@ -458,112 +485,106 @@ typedef struct ui_point_t {
 	int16_t y;
 } ui_point_t;
 
-static ui_point_t ui_field_center(const ui_field_text_t* const field) {
+static ui_point_t ui_widget_center(const ui_widget_t* const widget) {
 	const ui_point_t result = {
-		.x = (int16_t)(field->position.x + (field->size.w / 2)),
-		.y = (int16_t)(field->position.y + (field->size.h / 2)),
+		.x = (int16_t)(widget->position.x + (widget->size.w / 2)),
+		.y = (int16_t)(widget->position.y + (widget->size.h / 2)),
 	};
 	return result;
 }
 
-static int32_t ui_field_is_above(const ui_point_t start, const ui_point_t end) {
+static int32_t ui_widget_is_above(const ui_point_t start, const ui_point_t end) {
 	return (end.y < start.y) ? abs(end.x - start.x) : -1;
 }
 
-static int32_t ui_field_is_below(const ui_point_t start, const ui_point_t end) {
+static int32_t ui_widget_is_below(const ui_point_t start, const ui_point_t end) {
 	return (end.y > start.y) ? abs(end.x - start.x) : -1;
 }
 
-static int32_t ui_field_is_left(const ui_point_t start, const ui_point_t end) {
+static int32_t ui_widget_is_left(const ui_point_t start, const ui_point_t end) {
 	return (end.x < start.x) ? abs(end.y - start.y) : -1;
 }
 
-static int32_t ui_field_is_right(const ui_point_t start, const ui_point_t end) {
+static int32_t ui_widget_is_right(const ui_point_t start, const ui_point_t end) {
 	return (end.x > start.x) ? abs(end.y - start.y) : -1;
 }
 
-typedef int32_t (*ui_field_compare_fn)(const ui_point_t start, const ui_point_t end);
+typedef int32_t (*ui_widget_compare_fn)(const ui_point_t start, const ui_point_t end);
 
-static const ui_field_compare_fn nearest_field_fn[] = {
-	[UI_DIRECTION_DOWN] = &ui_field_is_below,
-	[UI_DIRECTION_RIGHT] = &ui_field_is_right,
-	[UI_DIRECTION_LEFT] = &ui_field_is_left,
-	[UI_DIRECTION_UP] = &ui_field_is_above,
+static const ui_widget_compare_fn nearest_widget_fn[] = {
+	[UI_DIRECTION_DOWN] = &ui_widget_is_below,
+	[UI_DIRECTION_RIGHT] = &ui_widget_is_right,
+	[UI_DIRECTION_LEFT] = &ui_widget_is_left,
+	[UI_DIRECTION_UP] = &ui_widget_is_above,
 };
 
-static const ui_field_text_t* ui_field_find_nearest(const ui_field_text_t* const field, const ui_direction_t desired_direction) {
-	const ui_point_t source_point = ui_field_center(field);
+static const ui_widget_t* ui_widget_find_nearest(const ui_widget_t* const widget, const ui_direction_t desired_direction) {
+	const ui_point_t source_point = ui_widget_center(widget);
 	int32_t nearest_distance = 0;
-	const ui_field_text_t* nearest_field = 0;
-	for(const auto other_field : fields) {
-		if( other_field == field ) {
+	const ui_widget_t* nearest_widget = 0;
+	for(const auto other_widget : widgets) {
+		if( other_widget == widget ) {
 			continue;
 		}
 
-		const ui_point_t target_point = ui_field_center(other_field);
-		const int32_t distance = nearest_field_fn[desired_direction](source_point, target_point);
+		const ui_point_t target_point = ui_widget_center(other_widget);
+		const int32_t distance = nearest_widget_fn[desired_direction](source_point, target_point);
 		if( distance > -1 ) {
-			if( (nearest_field == 0) || (distance < nearest_distance) ) {
+			if( (nearest_widget == 0) || (distance < nearest_distance) ) {
 				nearest_distance = distance;
-				nearest_field = other_field;
+				nearest_widget = other_widget;
 			}
 		}
 	}
 
-	return nearest_field;
+	return nearest_widget;
 }
 
-static void ui_field_navigate_up() {
-	ui_field_update_focus(ui_field_find_nearest(selected_field, UI_DIRECTION_UP));
+static void ui_widget_navigate_up() {
+	ui_widget_update_focus(ui_widget_find_nearest(selected_widget, UI_DIRECTION_UP));
 }
 
-static void ui_field_navigate_down() {
-	ui_field_update_focus(ui_field_find_nearest(selected_field, UI_DIRECTION_DOWN));
+static void ui_widget_navigate_down() {
+	ui_widget_update_focus(ui_widget_find_nearest(selected_widget, UI_DIRECTION_DOWN));
 }
 
-static void ui_field_navigate_left() {
-	ui_field_update_focus(ui_field_find_nearest(selected_field, UI_DIRECTION_LEFT));
+static void ui_widget_navigate_left() {
+	ui_widget_update_focus(ui_widget_find_nearest(selected_widget, UI_DIRECTION_LEFT));
 }
 
-static void ui_field_navigate_right() {
-	ui_field_update_focus(ui_field_find_nearest(selected_field, UI_DIRECTION_RIGHT));
+static void ui_widget_navigate_right() {
+	ui_widget_update_focus(ui_widget_find_nearest(selected_widget, UI_DIRECTION_RIGHT));
 }
 
-static void ui_field_value_up(const uint32_t amount) {
-	ui_field_value_change_callback_t fn = selected_field->value_change.up;
-	if( fn != NULL ) {
-		fn(amount);
-	}
+static void ui_widget_value_up(const uint32_t amount) {
+	selected_widget->handle_event(UI_EVENT_VALUE_UP);
 }
 
-static void ui_field_value_down(const uint32_t amount) {
-	ui_field_value_change_callback_t fn = selected_field->value_change.down;
-	if( fn != NULL ) {
-		fn(amount);
-	}
+static void ui_widget_value_down(const uint32_t amount) {
+	selected_widget->handle_event(UI_EVENT_VALUE_DOWN);
 }
 
-static bool ui_field_hit(const ui_field_text_t* const field, const uint_fast16_t x, const uint_fast16_t y) {
-	if( (x >= field->position.x) && (x < (field->position.x + field->size.w)) &&
-		(y >= field->position.y) && (y < (field->position.y + field->size.h)) ) {
+static bool ui_widget_hit(const ui_widget_t* const widget, const uint_fast16_t x, const uint_fast16_t y) {
+	if( (x >= widget->position.x) && (x < (widget->position.x + widget->size.w)) &&
+		(y >= widget->position.y) && (y < (widget->position.y + widget->size.h)) ) {
 		return true;
 	} else {
 		return false;
 	}
 }
 
-static const ui_field_text_t* ui_fields_hit(const uint_fast16_t x, const uint_fast16_t y) {
-	for(const auto field : fields) {
-		if( ui_field_hit(field, x, y) ) {
-			return field;
+static const ui_widget_t* ui_widgets_hit(const uint_fast16_t x, const uint_fast16_t y) {
+	for(const auto widget : widgets) {
+		if( ui_widget_hit(widget, x, y) ) {
+			return widget;
 		}
 	}
 	return NULL;
 }
 
-static void ui_render_fields() {
-	for(const auto field : fields) {
-		ui_field_render(field);
+static void ui_render_widgets() {
+	for(const auto widget : widgets) {
+		widget->render();
 	}
 }
 
@@ -583,31 +604,31 @@ typedef struct ui_switch_t {
 } ui_switch_t;
 
 void switch_increment(const uint32_t amount) {
-	ui_field_value_up(amount);
+	ui_widget_value_up(amount);
 }
 
 void switch_decrement(const uint32_t amount) {
-	ui_field_value_down(amount);
+	ui_widget_value_down(amount);
 }
 
 void switch_up(const uint32_t repeat_count) {
 	(void)repeat_count;
-	ui_field_navigate_up();
+	ui_widget_navigate_up();
 }
 
 void switch_down(const uint32_t repeat_count) {
 	(void)repeat_count;
-	ui_field_navigate_down();
+	ui_widget_navigate_down();
 }
 
 void switch_left(const uint32_t repeat_count) {
 	(void)repeat_count;
-	ui_field_navigate_left();
+	ui_widget_navigate_left();
 }
 
 void switch_right(const uint32_t repeat_count) {
 	(void)repeat_count;
-	ui_field_navigate_right();
+	ui_widget_navigate_right();
 }
 
 void switch_select(const uint32_t repeat_count) {
@@ -818,8 +839,8 @@ blink();
 }
 
 static void touch_started(const touch_state_t* const state) {
-	const ui_field_text_t* const hit_field = ui_fields_hit(state->x, state->y);
-	ui_field_update_focus(hit_field);
+	const ui_widget_t* const hit_widget = ui_widgets_hit(state->x, state->y);
+	ui_widget_update_focus(hit_widget);
 }
 
 static void touch_ended(const touch_state_t* const state) {
@@ -1092,6 +1113,8 @@ int main() {
 */
 	ipc_command_set_audio_out_gain(&device_state->ipc_m4, 0);
 
+	selected_widget = &ui_field_frequency;
+
 bool numeric_entry = false;
 
 	while(1) {
@@ -1119,7 +1142,7 @@ bool numeric_entry = false;
 				ui_button_render(button_touched);
 			}
 		} else {
-			ui_render_fields();
+			ui_render_widgets();
 		}
 
 		while( !ipc_channel_is_empty(&device_state->ipc_m4) );
