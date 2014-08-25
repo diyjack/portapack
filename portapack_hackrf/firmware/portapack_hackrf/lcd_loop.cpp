@@ -49,7 +49,6 @@
 #include "ipc_m4_client.h"
 
 #include <array>
-#include <vector>
 #include <algorithm>
 
 //#define CPU_METRICS
@@ -424,9 +423,7 @@ static const ui_widget_t ui_field_audio_out_gain {
 	render_field_int,
 };
 
-typedef std::vector<const ui_widget_t*> ui_widgets_t;
-
-static const ui_widgets_t widgets = {
+static const std::array<const ui_widget_t*, 7> widgets {
 	&ui_field_frequency,
 	&ui_field_lna_gain,
 	&ui_field_if_gain,
