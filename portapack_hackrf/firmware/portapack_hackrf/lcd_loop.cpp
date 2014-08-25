@@ -70,13 +70,6 @@ lcd_t lcd = {
 
 static console_t console;
 
-void blink() {
-	while(1) {
-		led_toggle(LED3);
-		delay(2000000);
-	}
-}
-
 static void draw_int(int32_t value, const char* const format, uint_fast16_t x, uint_fast16_t y) {
 	char temp[80];
 	const size_t temp_len = 79;
@@ -684,8 +677,6 @@ void sdio_enumerate_card_stack() {
 */
 //	const sdio_error_t result_cmd9 = sdio_cmd9();
 //	console_write(&console, "CMD9 ");
-
-blink();
 
 /*
 	const sdio_error_t result_cmd5 = sdio_command_no_data(SDIO_CMD5_INDEX, 0);
