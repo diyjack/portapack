@@ -550,32 +550,16 @@ void switch_decrement() {
 	ui_widget_value_down();
 }
 
-void switch_up() {
-	ui_widget_navigate_up();
-}
-
-void switch_down() {
-	ui_widget_navigate_down();
-}
-
-void switch_left() {
-	ui_widget_navigate_left();
-}
-
-void switch_right() {
-	ui_widget_navigate_right();
-}
-
 void switch_select() {
 }
 
-static ui_switch_t switches[] = {
-	{ .mask = SWITCH_UP,     .action = switch_up },
-	{ .mask = SWITCH_DOWN,   .action = switch_down },
-	{ .mask = SWITCH_LEFT,   .action = switch_left },
-	{ .mask = SWITCH_RIGHT,  .action = switch_right },
-	{ .mask = SWITCH_SELECT, .action = switch_select },
-};
+static const std::array<ui_switch_t, 5> switches { {
+	{ SWITCH_UP,     ui_widget_navigate_up },
+	{ SWITCH_DOWN,   ui_widget_navigate_down },
+	{ SWITCH_LEFT,   ui_widget_navigate_left },
+	{ SWITCH_RIGHT,  ui_widget_navigate_right },
+	{ SWITCH_SELECT, switch_select },
+} };
 
 static bool handle_joysticks() {
 	static uint32_t switches_history[3] = { 0, 0, 0 };
@@ -606,13 +590,10 @@ static bool handle_joysticks() {
 		event_occurred = true;
 	}
 
-	for(size_t i=0; i<ARRAY_SIZE(switches); i++) {
-		ui_switch_t* const sw = &switches[i];
-		if( sw->action != NULL ) {
-			if( switches_event_on & sw->mask ) {
-				sw->action();
-				event_occurred = true;
-			}
+	for(const auto& sw : switches) {
+		if( switches_event_on & sw.mask ) {
+			sw.action();
+			event_occurred = true;
 		}
 	}
 
