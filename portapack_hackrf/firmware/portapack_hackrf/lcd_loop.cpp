@@ -48,6 +48,7 @@
 #include "ipc_m0_client.h"
 #include "ipc_m4_client.h"
 
+#include <array>
 #include <vector>
 #include <algorithm>
 
@@ -242,18 +243,18 @@ static const void* get_receiver_configuration_name() {
 	}
 }
 
-typedef struct tuning_step_size_t {
-	uint32_t step_hz;
-	const char* name;
-} tuning_step_size_t;
-
-tuning_step_size_t tuning_step_sizes[] = {
-	{ .step_hz =    10000, .name = " 10kHz" },
-	{ .step_hz =    25000, .name = " 25kHz" },
-	{ .step_hz =   100000, .name = "100kHz" },
-	{ .step_hz =  1000000, .name = "  1MHz" },
-	{ .step_hz = 10000000, .name = " 10MHz" },
+struct tuning_step_size_t {
+	const uint32_t step_hz;
+	const char* const name;
 };
+
+static const std::array<tuning_step_size_t, 5> tuning_step_sizes { {
+	{    10000, " 10kHz" },
+	{    25000, " 25kHz" },
+	{   100000, "100kHz" },
+	{  1000000, "  1MHz" },
+	{ 10000000, " 10MHz" },
+} };
 
 size_t tuning_step_size_index = 1;
 
@@ -331,12 +332,12 @@ static void ui_field_value_down_receiver_configuration(const uint32_t amount) {
 
 static void ui_field_value_up_tuning_step_size(const uint32_t amount) {
 	(void)amount;
-	tuning_step_size_index = (tuning_step_size_index + 1) % ARRAY_SIZE(tuning_step_sizes);
+	tuning_step_size_index = (tuning_step_size_index + 1) % tuning_step_sizes.size();
 }
 
 static void ui_field_value_down_tuning_step_size(const uint32_t amount) {
 	(void)amount;
-	tuning_step_size_index = (tuning_step_size_index + ARRAY_SIZE(tuning_step_sizes) - 1) % ARRAY_SIZE(tuning_step_sizes);
+	tuning_step_size_index = (tuning_step_size_index + tuning_step_sizes.size() - 1) % tuning_step_sizes.size();
 }
 
 static const ui_widget_t ui_field_frequency {
