@@ -542,14 +542,6 @@ typedef struct ui_switch_t {
 	void (*action)();
 } ui_switch_t;
 
-void switch_increment() {
-	ui_widget_value_up();
-}
-
-void switch_decrement() {
-	ui_widget_value_down();
-}
-
 void switch_select() {
 }
 
@@ -582,11 +574,11 @@ static bool handle_joysticks() {
 	bool event_occurred = false;
 
 	if( encoder_inc > 0 ) {
-		switch_increment();
+		ui_widget_value_up();
 		event_occurred = true;
 	}
 	if( encoder_inc < 0 ) {
-		switch_decrement();
+		ui_widget_value_down();
 		event_occurred = true;
 	}
 
