@@ -326,7 +326,7 @@ static void ui_field_value_down_tuning_step_size() {
 }
 
 static const ui_widget_t ui_field_frequency {
-	{ 0, 32 },
+	{ 0 * 8, 2 * 16 },
 	{ 12 * 8, 16 },
 	UI_WIDGET_FLAGS_FOCUS,
 	{
@@ -339,7 +339,7 @@ static const ui_widget_t ui_field_frequency {
 };
 
 static const ui_widget_t ui_field_lna_gain {
-	{ 0, 48 },
+	{ 21 * 8, 1 * 16 },
 	{ 9 * 8, 16 },
 	UI_WIDGET_FLAGS_FOCUS,
 	{
@@ -352,7 +352,7 @@ static const ui_widget_t ui_field_lna_gain {
 };
 
 static const ui_widget_t ui_field_if_gain {
-	{ 0, 64 },
+	{ 21 * 8, 2 * 16 },
 	{ 9 * 8, 16 },
 	UI_WIDGET_FLAGS_FOCUS,
 	{
@@ -365,7 +365,7 @@ static const ui_widget_t ui_field_if_gain {
 };
 
 static const ui_widget_t ui_field_bb_gain {
-	{ 0, 80 },
+	{ 21 * 8, 4 * 16 },
 	{ 9 * 8, 16 },
 	UI_WIDGET_FLAGS_FOCUS,
 	{
@@ -378,7 +378,7 @@ static const ui_widget_t ui_field_bb_gain {
 };
 
 static const ui_widget_t ui_field_receiver_configuration {
-	{ 128, 32 },
+	{ 0 * 8, 1 * 16 },
 	{ 13 * 8, 16 },
 	UI_WIDGET_FLAGS_FOCUS,
 	{
@@ -391,7 +391,7 @@ static const ui_widget_t ui_field_receiver_configuration {
 };
 
 static const ui_widget_t ui_field_tuning_step_size {
-	{ 128, 48 },
+	{ 0 * 8, 3 * 16 },
 	{ 11 * 8, 16 },
 	UI_WIDGET_FLAGS_FOCUS,
 	{
@@ -404,7 +404,7 @@ static const ui_widget_t ui_field_tuning_step_size {
 };
 
 static const ui_widget_t ui_field_audio_out_gain {
-	{ 128, 64 },
+	{ 20 * 8, 5 * 16 },
 	{ 10 * 8, 16 },
 	UI_WIDGET_FLAGS_FOCUS,
 	{
