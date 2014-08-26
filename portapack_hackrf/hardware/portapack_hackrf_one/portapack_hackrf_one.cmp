@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2014-03-01 BZR 4730)-product date = Thursday, July 17, 2014 'AMt' 08:44:29 AM
+Cmp-Mod V01 Created by CvPcb (2014-03-01 BZR 4730)-product date = Tuesday, August 26, 2014 'AMt' 09:05:06 AM
 
 BeginCmp
 TimeStamp = /53A8C780/53A8D535;
@@ -494,21 +494,21 @@ BeginCmp
 TimeStamp = /53A8C780/53A8CDAE;
 Reference = P20;
 ValeurCmp = HACKRF_ONE_P20;
-IdModule  = header:HEADER_11X2_REV_SM_254;
+IdModule  = header:HEADER_11X2_REV_SM_254_AP;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A8C780/53A8CDB6;
 Reference = P22;
 ValeurCmp = HACKRF_ONE_P22;
-IdModule  = header:HEADER_13X2_REV_SM_254;
+IdModule  = header:HEADER_13X2_REV_SM_254_AP;
 EndCmp
 
 BeginCmp
 TimeStamp = /53A8C780/53A8CDBE;
 Reference = P28;
 ValeurCmp = HACKRF_ONE_P28;
-IdModule  = header:HEADER_11X2_REV_SM_254;
+IdModule  = header:HEADER_11X2_REV_SM_254_AP;
 EndCmp
 
 BeginCmp
