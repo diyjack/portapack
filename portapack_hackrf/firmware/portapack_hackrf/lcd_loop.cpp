@@ -53,6 +53,8 @@
 
 //#define CPU_METRICS
 
+static volatile uint32_t rssi_raw_avg = 0;
+
 lcd_t lcd = {
 	.size = { .w = 240, .h = 320 },
 	.scroll = {
@@ -210,6 +212,20 @@ static void render_field_str(const ui_widget_t* const widget) {
 static void render_field_cpu(const ui_widget_t* const widget) {
 	const dsp_metrics_t* const metrics = &device_state->dsp_metrics;
 	const int32_t bar_x = std::min(metrics->duration_all_millipercent / 1000, (uint32_t)widget->size.w);
+	lcd_fill_rectangle(&lcd,
+		widget->position.x, widget->position.y,
+		bar_x, widget->size.h
+	);
+	const lcd_color_t old_foreground = lcd_set_foreground(&lcd, color_black);
+	lcd_fill_rectangle(&lcd,
+		widget->position.x + bar_x, widget->position.y,
+		widget->size.w - bar_x, widget->size.h
+	);
+	lcd_set_foreground(&lcd, old_foreground);
+}
+
+static void render_field_rssi(const ui_widget_t* const widget) {
+	const int32_t bar_x = rssi_raw_avg / 16;
 	lcd_fill_rectangle(&lcd,
 		widget->position.x, widget->position.y,
 		bar_x, widget->size.h
@@ -444,7 +460,20 @@ static const ui_widget_t ui_cpu_bar {
 	render_field_cpu,
 };
 
-static const std::array<const ui_widget_t*, 8> widgets {
+static const ui_widget_t ui_rssi_bar {
+	{ 21 * 8, 3 * 16 },
+	{ 9 * 8, 16 },
+	(ui_widget_flags_t)0,
+	{
+		nullptr,
+		nullptr,
+	},
+	nullptr,
+	nullptr,
+	render_field_rssi,
+};
+
+static const std::array<const ui_widget_t*, 9> widgets {
 	&ui_field_frequency,
 	&ui_field_lna_gain,
 	&ui_field_if_gain,
@@ -453,6 +482,7 @@ static const std::array<const ui_widget_t*, 8> widgets {
 	&ui_field_tuning_step_size,
 	&ui_field_audio_out_gain,
 	&ui_cpu_bar,
+	&ui_rssi_bar,
 };
 
 static void ui_widget_update_focus(const ui_widget_t* const focus_widget) {
@@ -991,8 +1021,6 @@ static void ritimer_init_1khz_isr() {
 	nvic_enable_irq(NVIC_RITIMER_OR_WWDT_IRQ);
 }
 
-static volatile uint32_t rssi_raw_avg = 0;
-
 extern "C" void ritimer_or_wwdt_isr() {
 	ritimer_interrupt_clear();
 	const uint32_t rssi_raw = rssi_read();
@@ -1048,10 +1076,6 @@ bool numeric_entry = false;
 		/*
 		const bool sd_card_present = sdio_card_is_present();
 		lcd_draw_string(&lcd, 16*8, 5*16, sd_card_present ? "SD+" : "SD-", 3);
-		const uint32_t rssi_mdb = rssi_raw_to_millidb(rssi_raw_avg);
-		draw_int(rssi_mdb / 1000, "%2d", 16*8, 5*16);
-		draw_int((rssi_mdb / 100) % 10, ".%1d", 18*8, 5*16);
-
 		*/
 #ifdef CPU_METRICS
 		draw_cycles(240 - (12 * 8), 96);
