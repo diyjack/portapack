@@ -207,6 +207,21 @@ static void render_field_str(const ui_widget_t* const widget) {
 	draw_str(value, widget->format, widget->position.x, widget->position.y);
 }
 
+static void render_field_cpu(const ui_widget_t* const widget) {
+	const dsp_metrics_t* const metrics = &device_state->dsp_metrics;
+	const int32_t bar_x = std::min(metrics->duration_all_millipercent / 1000, (uint32_t)widget->size.w);
+	lcd_fill_rectangle(&lcd,
+		widget->position.x, widget->position.y,
+		bar_x, widget->size.h
+	);
+	const lcd_color_t old_foreground = lcd_set_foreground(&lcd, color_black);
+	lcd_fill_rectangle(&lcd,
+		widget->position.x + bar_x, widget->position.y,
+		widget->size.w - bar_x, widget->size.h
+	);
+	lcd_set_foreground(&lcd, old_foreground);
+}
+
 static const void* get_tuned_hz() {
 	return &device_state->tuned_hz;
 }
@@ -416,7 +431,20 @@ static const ui_widget_t ui_field_audio_out_gain {
 	render_field_int,
 };
 
-static const std::array<const ui_widget_t*, 7> widgets {
+static const ui_widget_t ui_cpu_bar {
+	{ 0 * 8, 4 * 16 },
+	{ 13 * 8, 16 },
+	(ui_widget_flags_t)0,
+	{
+		nullptr,
+		nullptr
+	},
+	nullptr,
+	nullptr,
+	render_field_cpu,
+};
+
+static const std::array<const ui_widget_t*, 8> widgets {
 	&ui_field_frequency,
 	&ui_field_lna_gain,
 	&ui_field_if_gain,
@@ -424,6 +452,7 @@ static const std::array<const ui_widget_t*, 7> widgets {
 	&ui_field_receiver_configuration,
 	&ui_field_tuning_step_size,
 	&ui_field_audio_out_gain,
+	&ui_cpu_bar,
 };
 
 static void ui_widget_update_focus(const ui_widget_t* const focus_widget) {
