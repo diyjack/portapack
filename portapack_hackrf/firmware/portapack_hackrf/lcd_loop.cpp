@@ -138,9 +138,14 @@ typedef struct ui_widget_value_change_t {
 	ui_widget_value_change_callback_t down;
 } ui_widget_value_change_t;
 
+enum ui_widget_flags_t {
+	UI_WIDGET_FLAGS_FOCUS = 1,
+};
+
 struct ui_widget_t {
 	lcd_position_t position;
 	lcd_size_t size;
+	ui_widget_flags_t flags;
 	ui_widget_value_change_t value_change;
 	const char* const format;
 	const void* (*getter)();
@@ -323,6 +328,7 @@ static void ui_field_value_down_tuning_step_size() {
 static const ui_widget_t ui_field_frequency {
 	{ 0, 32 },
 	{ 12 * 8, 16 },
+	UI_WIDGET_FLAGS_FOCUS,
 	{
 		ui_field_value_up_frequency,
 		ui_field_value_down_frequency,
@@ -335,6 +341,7 @@ static const ui_widget_t ui_field_frequency {
 static const ui_widget_t ui_field_lna_gain {
 	{ 0, 48 },
 	{ 9 * 8, 16 },
+	UI_WIDGET_FLAGS_FOCUS,
 	{
 		ui_field_value_up_rf_gain,
 		ui_field_value_down_rf_gain,
@@ -347,6 +354,7 @@ static const ui_widget_t ui_field_lna_gain {
 static const ui_widget_t ui_field_if_gain {
 	{ 0, 64 },
 	{ 9 * 8, 16 },
+	UI_WIDGET_FLAGS_FOCUS,
 	{
 		ui_field_value_up_if_gain,
 		ui_field_value_down_if_gain,
@@ -359,6 +367,7 @@ static const ui_widget_t ui_field_if_gain {
 static const ui_widget_t ui_field_bb_gain {
 	{ 0, 80 },
 	{ 9 * 8, 16 },
+	UI_WIDGET_FLAGS_FOCUS,
 	{
 		ui_field_value_up_bb_gain,
 		ui_field_value_down_bb_gain,
@@ -371,6 +380,7 @@ static const ui_widget_t ui_field_bb_gain {
 static const ui_widget_t ui_field_receiver_configuration {
 	{ 128, 32 },
 	{ 13 * 8, 16 },
+	UI_WIDGET_FLAGS_FOCUS,
 	{
 		ui_field_value_up_receiver_configuration,
 		ui_field_value_down_receiver_configuration,
@@ -383,6 +393,7 @@ static const ui_widget_t ui_field_receiver_configuration {
 static const ui_widget_t ui_field_tuning_step_size {
 	{ 128, 48 },
 	{ 11 * 8, 16 },
+	UI_WIDGET_FLAGS_FOCUS,
 	{
 		ui_field_value_up_tuning_step_size,
 		ui_field_value_down_tuning_step_size,
@@ -395,6 +406,7 @@ static const ui_widget_t ui_field_tuning_step_size {
 static const ui_widget_t ui_field_audio_out_gain {
 	{ 128, 64 },
 	{ 10 * 8, 16 },
+	UI_WIDGET_FLAGS_FOCUS,
 	{
 		ui_field_value_up_audio_out_gain,
 		ui_field_value_down_audio_out_gain,
@@ -466,6 +478,9 @@ static const ui_widget_t* ui_widget_find_nearest(const ui_widget_t* const widget
 	const ui_widget_t* nearest_widget = 0;
 	for(const auto other_widget : widgets) {
 		if( other_widget == widget ) {
+			continue;
+		}
+		if( (other_widget->flags & UI_WIDGET_FLAGS_FOCUS) == 0 ) {
 			continue;
 		}
 
