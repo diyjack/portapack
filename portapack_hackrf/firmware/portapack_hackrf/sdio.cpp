@@ -134,7 +134,7 @@ static bool sdio_response_timed_out(const uint32_t status) {
 }
 
 static sdio_error_t sdio_command_no_data(const uint32_t command, const uint32_t command_argument) {
-	SDIO_RINTSTS = 0xffffffff;
+	sdio_clear_interrupts();
 
 	SDIO_CMDARG = command_argument;
 	SDIO_CMD = command;
@@ -374,9 +374,9 @@ void sdio_init() {
 	sdio_controller_reset();
 
 	SDIO_INTMASK = 0;
-	SDIO_RINTSTS = 0xffffffff;
 	SDIO_TMOUT = 0xffffffff;
 	SDIO_CLKENA = 0;
+	sdio_clear_interrupts();
 	SDIO_CLKSRC = 0;
 
 	sdio_clear_interrupts();
