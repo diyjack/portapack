@@ -24,9 +24,13 @@
 cmake_minimum_required(VERSION 2.8.9)
 set(CMAKE_TOOLCHAIN_FILE ${PATH_HACKRF}/firmware/toolchain-arm-cortex-m.cmake)
 
+set(PATH_FATFS fatfs)
+set(PATH_FATFS_SRC ${PATH_FATFS}/src/)
+
 project(portapack_hackrf)
 
 include(${PATH_HACKRF}/firmware/hackrf-common.cmake)
+include_directories(${PATH_FATFS_SRC})
 
 set(SRC_M4
 	main.cpp
@@ -95,6 +99,7 @@ set(SRC_M0
 	sdio.cpp
 	rssi.cpp
 	manchester.cpp
+	${PATH_FATFS_SRC}/ff.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/delay.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/led.c
 )
