@@ -141,6 +141,65 @@ static bool sdio_response_timed_out(const uint32_t status) {
 	return (status & SDIO_RINTSTS_RTO_BAR(1)) ? true : false;
 }
 
+static sdio_error_t sdio_status(const uint32_t intsts) {
+	/* TODO: This is terrible. Make a map or something. */
+	/*
+	const uint32_t errors_mask =
+		  SDIO_RINTSTS_RE_MASK
+		| SDIO_RINTSTS_RCRC_MASK
+		| SDIO_RINTSTS_DCRC_MASK
+		| SDIO_RINTSTS_RTO_BAR_MASK
+		| SDIO_RINTSTS_DRTO_BDS_MASK
+		| SDIO_RINTSTS_HTO_MASK
+		| SDIO_RINTSTS_FRUN_MASK
+		| SDIO_RINTSTS_HLE_MASK
+		| SDIO_RINTSTS_SBE_MASK
+		| SDIO_RINTSTS_EBE_MASK
+		;
+	*/
+	if( intsts & SDIO_RINTSTS_RE_MASK ) {
+		return SDIO_ERROR_RESPONSE_ERROR;
+	}
+
+	if( intsts & SDIO_RINTSTS_RCRC_MASK ) {
+		return SDIO_ERROR_RESPONSE_CRC_ERROR;
+	}
+
+	if( intsts & SDIO_RINTSTS_DCRC_MASK ) {
+		return SDIO_ERROR_DATA_CRC_ERROR;
+	}
+
+	if( intsts & SDIO_RINTSTS_RTO_BAR_MASK ) {
+		return SDIO_ERROR_RESPONSE_TIMED_OUT;
+	}
+
+	if( intsts & SDIO_RINTSTS_DRTO_BDS_MASK ) {
+		return SDIO_ERROR_DATA_READ_TIMED_OUT;
+	}
+
+	if( intsts & SDIO_RINTSTS_HTO_MASK ) {
+		return SDIO_ERROR_DATA_STARVATION_BY_HOST_TIMEOUT;
+	}
+
+	if( intsts & SDIO_RINTSTS_FRUN_MASK ) {
+		return SDIO_ERROR_FIFO_OVER_UNDERRUN_ERROR;
+	}
+
+	if( intsts & SDIO_RINTSTS_HLE_MASK ) {
+		return SDIO_ERROR_HARDWARE_IS_LOCKED;
+	}
+
+	if( intsts & SDIO_RINTSTS_SBE_MASK ) {
+		return SDIO_ERROR_START_BIT;
+	}
+
+	if( intsts & SDIO_RINTSTS_EBE_MASK ) {
+		return SDIO_ERROR_END_BIT;
+	}
+
+	return SDIO_OK;
+}
+
 static sdio_error_t sdio_command_no_data(const uint32_t command, const uint32_t command_argument) {
 	sdio_clear_interrupts();
 
@@ -161,19 +220,13 @@ static sdio_error_t sdio_command_no_data(const uint32_t command, const uint32_t 
 	const uint32_t status_after_command_complete = SDIO_RINTSTS;
 	SDIO_RINTSTS = status_after_command_complete;
 
-	if( sdio_response_timed_out(status_after_command_complete) ) {
-		return SDIO_ERROR_RESPONSE_TIMED_OUT;
+	return sdio_status(SDIO_RINTSTS);
 	}
 
-	if( sdio_response_crc_error(status_after_command_complete) ) {
-		return SDIO_ERROR_RESPONSE_CRC_ERROR;
 	}
 
-	if( sdio_response_error(status_after_command_complete) ) {
-		return SDIO_ERROR_RESPONSE_ERROR;
 	}
 
-	return SDIO_OK;
 }
 
 sdio_error_t sdio_cmd0(const uint_fast8_t init) {
