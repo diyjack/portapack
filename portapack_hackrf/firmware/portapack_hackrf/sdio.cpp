@@ -38,6 +38,8 @@
 #define SDIO_CMD5_IO_OCR(x) ((x) << 0)
 #define SDIO_CMD5_IO_OCR_BIT(n) SDIO_CMD5_IO_OCR((1 << (n)))
 
+#define SDIO_CMD7_INDEX (0b000111)
+
 #define SDIO_CMD8_INDEX (0b001000)
 
 #define SDIO_CMD55_INDEX (0b110111)
@@ -294,6 +296,36 @@ sdio_error_t sdio_cmd3() {
 		| SDIO_CMD_START_CMD(1)
 		;
 	return sdio_command_no_data(command, 0);
+}
+
+sdio_error_t sdio_cmd7(const uint32_t rca) {
+	const uint32_t command =
+		  SDIO_CMD_CMD_INDEX(SDIO_CMD7_INDEX)
+		| SDIO_CMD_RESPONSE_EXPECT(1)
+		| SDIO_CMD_RESPONSE_LENGTH(0)
+		| SDIO_CMD_CHECK_RESPONSE_CRC(1)
+		| SDIO_CMD_DATA_EXPECTED(0)
+		| SDIO_CMD_READ_WRITE(0)
+		| SDIO_CMD_TRANSFER_MODE(0)
+		| SDIO_CMD_SEND_AUTO_STOP(0)
+		| SDIO_CMD_WAIT_PRVDATA_COMPLETE(1)
+		| SDIO_CMD_STOP_ABORT_CMD(0)
+		| SDIO_CMD_SEND_INITIALIZATION(0)
+		| SDIO_CMD_UPDATE_CLOCK_REGISTERS_ONLY(0)
+		| SDIO_CMD_READ_CEATA_DEVICE(0)
+		| SDIO_CMD_CCS_EXPECTED(0)
+		| SDIO_CMD_ENABLE_BOOT(0)
+		| SDIO_CMD_EXPECT_BOOT_ACK(0)
+		| SDIO_CMD_DISABLE_BOOT(0)
+		| SDIO_CMD_BOOT_MODE(0)
+		| SDIO_CMD_VOLT_SWITCH(0)
+		| SDIO_CMD_START_CMD(1)
+		;
+	const uint32_t arg =
+		  (rca << 16)
+		| (  0 <<  0)
+		;
+	return sdio_command_no_data(command, arg);
 }
 
 sdio_error_t sdio_cmd8() {
