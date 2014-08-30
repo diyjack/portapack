@@ -62,6 +62,22 @@ extern "C" {
 #include <diskio.h>
 }
 
+#if 0
+#define DEBUG_SDIO_RESULT(__s, __result) \
+	console_write_uint32(&console, __s, __result);
+#define DEBUG_FATFS_FRESULT(__s, __fresult) \
+	console_write_uint32(&console, __s, __fresult);
+#define DEBUG_FATFS_FSIZE(__s, __fsize);
+	console_write_uint32(&console, __s, __fsize);
+#else
+#define DEBUG_SDIO_RESULT(__x, __result)
+#define DEBUG_FATFS_FRESULT(__x, __fresult)
+#define DEBUG_FATFS_FSIZE(__s, __fsize)
+#endif
+
+static FATFS fatfs_sd;
+static FIL f_log;
+
 static volatile uint32_t rssi_raw_avg = 0;
 
 lcd_t lcd = {
@@ -877,6 +893,82 @@ sdio_error_t sdio_enumerate_card_stack() {
 */
 }
 
+DSTATUS disk_initialize(BYTE pdrv) {	
+	(void)pdrv;
+
+	sdio_enumerate_card_stack();
+	DEBUG_SDIO_RESULT("[i%x]", sdio_status);
+	return sdio_status;
+}
+
+DSTATUS disk_status(BYTE pdrv) {
+	(void)pdrv;
+
+	return sdio_status;
+}
+
+static bool sdio_write_activity = false;
+static bool sdio_read_activity = false;
+
+DRESULT disk_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
+	(void)pdrv;
+
+	if( count > 1 ) {
+		return RES_ERROR;
+	}
+
+	sdio_read_activity = true;
+	sdio_error_t result = sdio_read(sector, (uint32_t*)buff, count);
+	DEBUG_SDIO_RESULT("[r%d]", result);
+
+	return (result == SDIO_OK) ? RES_OK : RES_ERROR;
+}
+
+DRESULT disk_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
+	(void)pdrv;
+
+	if( count > 1 ) {
+		return RES_ERROR;
+	}
+
+	sdio_write_activity = true;
+	sdio_error_t result = sdio_write(sector, (uint32_t*)buff, count);
+	DEBUG_SDIO_RESULT("[w%d]", result);
+
+	return (result == SDIO_OK) ? RES_OK : RES_ERROR;
+}
+
+DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
+	(void)pdrv;
+	(void)buff;
+
+	switch(cmd) {
+	case CTRL_SYNC:
+		/* At present, no cached data */
+		return RES_OK;
+
+	default:
+		console_write_uint32(&console, "[c%d]", cmd);
+		return RES_ERROR;
+	}
+}
+
+DWORD get_fattime(void) {
+	uint32_t fattime = 0;
+	fattime |= std::max(0L, (int32_t)rtc_year() - 1980);
+	fattime <<= 4;
+	fattime |= rtc_month();
+	fattime <<= 5;
+	fattime |= rtc_day_of_month();
+	fattime <<= 5;
+	fattime |= rtc_hour();
+	fattime <<= 6;
+	fattime |= rtc_minute();
+	fattime <<= 5;
+	fattime |= rtc_second() >> 1;
+	return fattime;
+}
+
 static void touch_started(const touch_state_t* const state) {
 	const ui_widget_t* const hit_widget = ui_widgets_hit(state->x, state->y);
 	ui_widget_update_focus(hit_widget);
@@ -1159,6 +1251,10 @@ bool numeric_entry = false;
 			sdio_status |= STA_NODISK;
 		}
 		lcd_draw_string(&lcd, 16*8, 1*16, sd_card_present ? "SD+" : "SD-", 3);
+		lcd_draw_string(&lcd, 16*8, 2*16, sdio_read_activity ? "R" : " ", 1);
+		sdio_read_activity = false;
+		lcd_draw_string(&lcd, 17*8, 2*16, sdio_write_activity ? "W" : " ", 1);
+		sdio_write_activity = false;
 #ifdef CPU_METRICS
 		draw_cycles(240 - (12 * 8), 96);
 #endif
