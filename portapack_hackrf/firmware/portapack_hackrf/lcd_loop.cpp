@@ -53,6 +53,15 @@
 
 //#define CPU_METRICS
 
+extern "C" {
+#include <libopencm3/lpc43xx/sdio.h>
+}
+
+extern "C" {
+#include <ff.h>
+#include <diskio.h>
+}
+
 static volatile uint32_t rssi_raw_avg = 0;
 
 lcd_t lcd = {
@@ -710,31 +719,102 @@ static void sdio_draw_error(const sdio_error_t error) {
 	}
 }
 
-void sdio_enumerate_card_stack() {
+static DSTATUS sdio_status = STA_NODISK | STA_NOINIT;
+
+static sdio_error_t sdio_try_sd_version_2() {
+	sdio_error_t result_acmd41;
+	for(size_t i=0; i<10; i++) {
+		const uint32_t hcs = 1;
+		result_acmd41 = sdio_acmd41(hcs);
+		console_write_uint32(&console, "ACMD41(hcs=%d)", hcs);
+		console_write_uint32(&console, " %08x ", SDIO_RESP0);
+		sdio_draw_error(result_acmd41);
+		
+		if( result_acmd41 == SDIO_OK ) {
+			const bool ccs = (SDIO_RESP0 >> 30) & 1;
+			if( ccs ) {
+				// High- or Extended-capacity
+				console_writeln(&console, "Density: HC/XC");
+			} else {
+				// Standard capacity
+				console_writeln(&console, "Density: SD");
+			}
+			// Ignore S18R/S18A, we can't switch voltage.
+
+			sdio_cclk_set_20mhz();
+
+			sdio_error_t result_cmd2 = sdio_cmd2();
+			console_write(&console, "CMD2 ");
+			sdio_draw_error(result_cmd2);
+			if( result_cmd2 == SDIO_OK ) {
+				console_write_uint32(&console, "%08x", SDIO_RESP3);
+				console_write_uint32(&console, " %08x", SDIO_RESP2);
+				console_writeln(&console, "");
+				console_write_uint32(&console, "%08x", SDIO_RESP1);
+				console_write_uint32(&console, " %08x", SDIO_RESP0);
+				console_writeln(&console, "");
+
+				sdio_error_t result_cmd3 = sdio_cmd3();
+				console_write(&console, "CMD3 ");
+				sdio_draw_error(result_cmd3);
+				if( result_cmd3 == SDIO_OK ) {
+					const uint32_t rca = SDIO_RESP0 >> 16;
+					const uint32_t status = SDIO_RESP0 & 0xffff;
+					console_write_uint32(&console, "RCA: %04x ", rca);
+					console_writeln(&console, "");
+					console_write_uint32(&console, "Status: %04x ", status);
+					console_writeln(&console, "");
+
+					sdio_error_t result_cmd7 = sdio_cmd7(rca);
+					console_write(&console, "CMD7 ");
+					sdio_draw_error(result_cmd7);
+					if( result_cmd7 == SDIO_OK ) {
+						sdio_status &= ~STA_NOINIT;
+					}
+					return result_cmd7;
+				}
+				return result_cmd3;
+			} else {
+				return result_cmd2;
+			}
+		}
+		delay(10000000);
+	}
+	return result_acmd41;
+}
+
+static sdio_error_t sdio_try_sd_version_1() {
+	/* TODO: Unimplemented */
+	return SDIO_ERROR_RESPONSE_ERROR;
+}
+
+sdio_error_t sdio_enumerate_card_stack() {
+	sdio_status |= STA_NOINIT;
+
 	sdio_cclk_set_400khz();
 	sdio_set_width_1bit();
 
 	sdio_error_t result_cmd0 = sdio_cmd0(1);
-	console_write(&console, "CMD0 ");
-	sdio_draw_error(result_cmd0);
-
-	result_cmd0 = sdio_cmd0(0);
-	console_write(&console, "CMD0 ");
+	console_write(&console, "CMD0(1)");
+	console_write_uint32(&console, " %08x ", SDIO_RESP0);
 	sdio_draw_error(result_cmd0);
 
 	// Interface condition
 	sdio_error_t result_cmd8 = sdio_cmd8();
-	console_write(&console, "CMD8 ");
+	console_write(&console, "CMD8");
+	console_write_uint32(&console, " %08x ", SDIO_RESP0);
 	sdio_draw_error(result_cmd8);
 
-	while(1) {
-		sdio_error_t result_acmd41 = sdio_acmd41(0);
-		console_write(&console, "ACMD41 ");
-		sdio_draw_error(result_acmd41);
-		if( result_acmd41 == SDIO_OK ) {
-			break;
-		}
-		delay(10000000);
+	switch(result_cmd8) {
+	case SDIO_OK:
+		return sdio_try_sd_version_2();
+
+	case SDIO_ERROR_RESPONSE_CHECK_PATTERN_INCORRECT:
+		console_writeln(&console, "Unknown card");
+		return result_cmd8;
+
+	default:
+		return sdio_try_sd_version_1();
 	}
 
 	// result_acmd41 = sdio_acmd41((1 << 20) | (1 << 21));
@@ -1056,16 +1136,15 @@ int main() {
 	lcd_colors_invert(&lcd);
 
 	console_init(&console, &lcd, 16 * 6, lcd.size.h);
-/*
+
 	if( sdio_card_is_present() ) {
+		sdio_status &= ~STA_NODISK;
 		for(size_t n=0; n<1000; n++) {
 			delay(51000);
 		}
-		sdio_enumerate_card_stack();
+
 	}
 
-	blink();
-*/
 	ipc_command_set_audio_out_gain(&device_state->ipc_m4, 0);
 
 	selected_widget = &ui_field_frequency;
@@ -1073,10 +1152,13 @@ int main() {
 bool numeric_entry = false;
 
 	while(1) {
-		/*
 		const bool sd_card_present = sdio_card_is_present();
-		lcd_draw_string(&lcd, 16*8, 5*16, sd_card_present ? "SD+" : "SD-", 3);
-		*/
+		if( sd_card_present ) {
+			sdio_status &= ~STA_NODISK;
+		} else {
+			sdio_status |= STA_NODISK;
+		}
+		lcd_draw_string(&lcd, 16*8, 1*16, sd_card_present ? "SD+" : "SD-", 3);
 #ifdef CPU_METRICS
 		draw_cycles(240 - (12 * 8), 96);
 #endif
