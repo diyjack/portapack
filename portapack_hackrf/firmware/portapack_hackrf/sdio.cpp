@@ -42,6 +42,8 @@
 
 #define SDIO_CMD8_INDEX (0b001000)
 
+#define SDIO_CMD17_INDEX (0b010001)
+
 #define SDIO_CMD55_INDEX (0b110111)
 
 #define SDIO_ACMD41_INDEX (0b101001)
@@ -209,6 +211,69 @@ static sdio_error_t sdio_command_no_data(const uint32_t command, const uint32_t 
 
 	const uint32_t status_after_command_complete = SDIO_RINTSTS;
 	SDIO_RINTSTS = status_after_command_complete;
+
+	return sdio_status(SDIO_RINTSTS);
+}
+
+static const size_t sdio_sector_size = 512;
+static const bool sdio_sdhc_or_sdxc = false;
+
+sdio_error_t sdio_read(const uint32_t sector, uint32_t* buffer, const size_t sector_count) {
+	sdio_clear_interrupts();
+
+	SDIO_BYTCNT = SDIO_BYTCNT_BYTE_COUNT(sector_count * sdio_sector_size);
+	SDIO_BLKSIZ = SDIO_BLKSIZ_BLOCK_SIZE(sdio_sector_size);
+
+	SDIO_CMDARG = sdio_sdhc_or_sdxc ? sector : (sector * sdio_sector_size);
+	SDIO_CMD =
+		  SDIO_CMD_CMD_INDEX(SDIO_CMD17_INDEX)
+		| SDIO_CMD_RESPONSE_EXPECT(1)
+		| SDIO_CMD_RESPONSE_LENGTH(0)
+		| SDIO_CMD_CHECK_RESPONSE_CRC(1)
+		| SDIO_CMD_DATA_EXPECTED(1)
+		| SDIO_CMD_READ_WRITE(0)
+		| SDIO_CMD_TRANSFER_MODE(0)
+		| SDIO_CMD_SEND_AUTO_STOP(0)
+		| SDIO_CMD_WAIT_PRVDATA_COMPLETE(1)
+		| SDIO_CMD_STOP_ABORT_CMD(0)
+		| SDIO_CMD_SEND_INITIALIZATION(0)
+		| SDIO_CMD_UPDATE_CLOCK_REGISTERS_ONLY(0)
+		| SDIO_CMD_READ_CEATA_DEVICE(0)
+		| SDIO_CMD_CCS_EXPECTED(0)
+		| SDIO_CMD_ENABLE_BOOT(0)
+		| SDIO_CMD_EXPECT_BOOT_ACK(0)
+		| SDIO_CMD_DISABLE_BOOT(0)
+		| SDIO_CMD_BOOT_MODE(0)
+		| SDIO_CMD_VOLT_SWITCH(0)
+		| SDIO_CMD_START_CMD(1)
+		;
+	sdio_wait_for_command_accepted();
+
+	while( !sdio_command_is_complete(SDIO_RINTSTS) );
+	SDIO_RINTSTS = SDIO_RINTSTS_CDONE(1);
+
+	sdio_error_t status = sdio_status(SDIO_RINTSTS);
+	if( status != SDIO_OK ) {
+		return status;
+	}
+
+	const uint32_t data_transfer_over_mask =
+		  SDIO_RINTSTS_DTO_MASK
+		| SDIO_RINTSTS_DCRC_MASK
+		| SDIO_RINTSTS_DRTO_BDS_MASK
+		| SDIO_RINTSTS_HTO_MASK
+		| SDIO_RINTSTS_SBE_MASK
+		| SDIO_RINTSTS_EBE_MASK
+		;
+	while( (SDIO_RINTSTS & data_transfer_over_mask) == 0 ) {
+		while( (SDIO_STATUS & SDIO_STATUS_FIFO_EMPTY_MASK) == 0 ) {
+			*(buffer++) = SDIO_DATA;
+		}
+	}
+
+	while( (SDIO_STATUS & SDIO_STATUS_FIFO_EMPTY_MASK) == 0 ) {
+		*(buffer++) = SDIO_DATA;
+	}
 
 	return sdio_status(SDIO_RINTSTS);
 	}

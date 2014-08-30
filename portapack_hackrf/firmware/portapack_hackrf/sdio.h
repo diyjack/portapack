@@ -23,6 +23,7 @@
 #define __SDIO_H__
 
 #include <stdint.h>
+#include <stddef.h>
 #include <stdbool.h>
 
 typedef enum {
@@ -51,6 +52,7 @@ void sdio_cclk_set_400khz();
 void sdio_cclk_set_20mhz();
 void sdio_set_width_1bit();
 
+sdio_error_t sdio_read(const uint32_t sector, uint32_t* buffer, const size_t sector_count);
 sdio_error_t sdio_cmd0(const uint_fast8_t init);
 sdio_error_t sdio_cmd7(const uint32_t rca);
 sdio_error_t sdio_cmd8();
