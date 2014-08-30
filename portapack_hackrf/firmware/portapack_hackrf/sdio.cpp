@@ -364,7 +364,7 @@ sdio_error_t sdio_cmd55() {
 	return sdio_command_no_data(command, 0);
 }
 
-sdio_error_t sdio_acmd41(const uint32_t vdd_voltage_window) {
+sdio_error_t sdio_acmd41(const uint32_t hcs) {
 	const sdio_error_t result_cmd55 = sdio_cmd55();
 	if( result_cmd55 != SDIO_OK ) {
 		return result_cmd55;
@@ -392,14 +392,14 @@ sdio_error_t sdio_acmd41(const uint32_t vdd_voltage_window) {
 		| SDIO_CMD_VOLT_SWITCH(0)
 		| SDIO_CMD_START_CMD(1)
 		;
-	const uint32_t hcs = 1;		// SDSC-only host
 	const uint32_t xpc = 0;		// Power saving
 	const uint32_t s18r = 0;	// Use current voltage
+	const uint32_t vdd_voltage_window = 0xff8000;
 	const uint32_t arg =
 		  (hcs << 30)
 		| (xpc << 28)
 		| (s18r << 24)
-		| (vdd_voltage_window <<  0)
+		| (vdd_voltage_window << 0)
 		;
 	const sdio_error_t result = sdio_command_no_data(command, arg);
 	if( result != SDIO_OK ) {

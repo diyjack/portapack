@@ -47,6 +47,6 @@ void sdio_set_width_1bit();
 
 sdio_error_t sdio_cmd0(const uint_fast8_t init);
 sdio_error_t sdio_cmd8();
-sdio_error_t sdio_acmd41(const uint32_t vdd_voltage_window);
+sdio_error_t sdio_acmd41(const uint32_t hcs);
 
 #endif/*__SDIO_H__*/
