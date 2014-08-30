@@ -44,6 +44,8 @@
 
 #define SDIO_CMD17_INDEX (0b010001)
 
+#define SDIO_CMD24_INDEX (0b011000)
+
 #define SDIO_CMD55_INDEX (0b110111)
 
 #define SDIO_ACMD41_INDEX (0b101001)
@@ -276,12 +278,75 @@ sdio_error_t sdio_read(const uint32_t sector, uint32_t* buffer, const size_t sec
 	}
 
 	return sdio_status(SDIO_RINTSTS);
+}
+
+sdio_error_t sdio_write(const uint32_t sector, const uint32_t* buffer, const size_t sector_count) {
+	sdio_clear_interrupts();
+
+	const uint32_t bytes_to_send = sector_count * sdio_sector_size;
+	SDIO_BYTCNT = SDIO_BYTCNT_BYTE_COUNT(bytes_to_send);
+	uint32_t words_to_send = bytes_to_send / sizeof(uint32_t);
+	SDIO_BLKSIZ = SDIO_BLKSIZ_BLOCK_SIZE(sdio_sector_size);
+
+	SDIO_CMDARG = sdio_sdhc_or_sdxc ? sector : (sector * sdio_sector_size);
+
+	while( (words_to_send > 0) && ((SDIO_STATUS & SDIO_STATUS_FIFO_FULL_MASK) == 0) ) {
+		SDIO_DATA = *(buffer++);
+		words_to_send--;
 	}
 
+	SDIO_CMD =
+		  SDIO_CMD_CMD_INDEX(SDIO_CMD24_INDEX)
+		| SDIO_CMD_RESPONSE_EXPECT(1)
+		| SDIO_CMD_RESPONSE_LENGTH(0)
+		| SDIO_CMD_CHECK_RESPONSE_CRC(1)
+		| SDIO_CMD_DATA_EXPECTED(1)
+		| SDIO_CMD_READ_WRITE(1)
+		| SDIO_CMD_TRANSFER_MODE(0)
+		| SDIO_CMD_SEND_AUTO_STOP(0)
+		| SDIO_CMD_WAIT_PRVDATA_COMPLETE(1)
+		| SDIO_CMD_STOP_ABORT_CMD(0)
+		| SDIO_CMD_SEND_INITIALIZATION(0)
+		| SDIO_CMD_UPDATE_CLOCK_REGISTERS_ONLY(0)
+		| SDIO_CMD_READ_CEATA_DEVICE(0)
+		| SDIO_CMD_CCS_EXPECTED(0)
+		| SDIO_CMD_ENABLE_BOOT(0)
+		| SDIO_CMD_EXPECT_BOOT_ACK(0)
+		| SDIO_CMD_DISABLE_BOOT(0)
+		| SDIO_CMD_BOOT_MODE(0)
+		| SDIO_CMD_VOLT_SWITCH(0)
+		| SDIO_CMD_START_CMD(1)
+		;
+	sdio_wait_for_command_accepted();
+
+	while( !sdio_command_is_complete(SDIO_RINTSTS) );
+	SDIO_RINTSTS = SDIO_RINTSTS_CDONE(1);
+
+	sdio_error_t status = sdio_status(SDIO_RINTSTS);
+	if( status != SDIO_OK ) {
+		return status;
 	}
 
+	const uint32_t data_transfer_over_mask =
+		  SDIO_RINTSTS_DTO_MASK
+		| SDIO_RINTSTS_DCRC_MASK
+		| SDIO_RINTSTS_DRTO_BDS_MASK
+		| SDIO_RINTSTS_HTO_MASK
+		| SDIO_RINTSTS_SBE_MASK
+		| SDIO_RINTSTS_EBE_MASK
+		;
+	while( (SDIO_RINTSTS & data_transfer_over_mask) == 0 ) {
+		while( (words_to_send > 0) && ((SDIO_STATUS & SDIO_STATUS_FIFO_FULL_MASK) == 0) ) {
+			SDIO_DATA = *(buffer++);
+			words_to_send--;
+		}
 	}
 
+	while( SDIO_STATUS & SDIO_STATUS_DATA_BUSY_MASK ) {
+		// Wait for card not busy.
+	}
+
+	return sdio_status(SDIO_RINTSTS);
 }
 
 sdio_error_t sdio_cmd0(const uint_fast8_t init) {
