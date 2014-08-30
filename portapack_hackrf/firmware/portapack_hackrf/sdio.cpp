@@ -590,9 +590,9 @@ void sdio_init() {
 	sdio_controller_reset();
 
 	SDIO_INTMASK = 0;
-	SDIO_TMOUT = 0xffffffff;
 	SDIO_CLKENA = 0;
 	sdio_clear_interrupts();
+	SDIO_TMOUT = 0xffffff40;
 	SDIO_CLKSRC = 0;
 
 	sdio_clear_interrupts();
