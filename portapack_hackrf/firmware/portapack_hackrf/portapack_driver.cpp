@@ -397,66 +397,9 @@ int encoder_update() {
 	return result;
 }
 
-#if (defined ENCODER_USE_INTERRUPTS || defined LPC43XX_M4)
-#include <libopencm3/lpc43xx/m4/nvic.h>
-#endif
-
 void portapack_encoder_init() {
 	device_state->encoder_position = 0;
-
-#if (defined ENCODER_USE_INTERRUPTS || defined LPC43XX_M4)
-	/* PortaPack rotary encoder is read from the M4, since the M0 can't
-	 * receive multiple GPIO pin interrupts, and polling would be a pain
-	 * if done properly (fast), or would work poorly if done slowly.
-	 */
-	SCU_PINTSEL0 =
-		  (PORTAPACK_ROT_B_GPIO_PORT_NUM << 13)
-		| (PORTAPACK_ROT_B_GPIO_PIN << 8)
-		| (PORTAPACK_ROT_A_GPIO_PORT_NUM << 5)
-		| (PORTAPACK_ROT_A_GPIO_PIN << 0)
-		;
-
-	GPIO_PIN_INTERRUPT_ISEL =
-		  (0 << 1)	// 1: edge-sensitive
-		| (0 << 0)	// 0: edge-sensitive
-		;
-
-	GPIO_PIN_INTERRUPT_IENR =
-		  (1 << 1)	// 1: enable rising-edge interrupt
-		| (1 << 0) 	// 0: enable rising-edge interrupt
-		;
-
-	GPIO_PIN_INTERRUPT_IENF =
-		  (1 << 1)	// 1: enable falling-edge interrupt
-		| (1 << 0)	// 0: enable falling-edge interrupt
-		;
-
-	nvic_set_priority(NVIC_PIN_INT0_IRQ, 255);
-	nvic_enable_irq(NVIC_PIN_INT0_IRQ);
-	nvic_set_priority(NVIC_PIN_INT1_IRQ, 255);
-	nvic_enable_irq(NVIC_PIN_INT1_IRQ);
-#endif
 }
-
-#if (defined ENCODER_USE_INTERRUPTS || defined LPC43XX_M4)
-extern "C" void pin_int0_isr() {
-	if( GPIO_PIN_INTERRUPT_IST & (1 << 0) ) {
-		encoder_update();
-		GPIO_PIN_INTERRUPT_IST = (1 << 0);
-		GPIO_PIN_INTERRUPT_RISE = (1 << 0);
-		GPIO_PIN_INTERRUPT_FALL = (1 << 0);
-	}
-}
-
-extern "C" void pin_int1_isr() {
-	if( GPIO_PIN_INTERRUPT_IST & (1 << 1) ) {
-		encoder_update();
-		GPIO_PIN_INTERRUPT_RISE = (1 << 1);
-		GPIO_PIN_INTERRUPT_FALL = (1 << 1);
-		GPIO_PIN_INTERRUPT_IST = (1 << 1);
-	}
-}
-#endif
 
 void portapack_driver_init() {
 	GPIO_MASK(PORTAPACK_DATA_PORT) = ~PORTAPACK_DATA_MASK;
