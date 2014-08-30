@@ -75,7 +75,7 @@ static void sdio_update_clock_registers_only() {
 	sdio_wait_for_command_accepted();
 }
 
-void sdio_cclk_set_400khz() {
+static void sdio_cclk_set(const uint32_t divider_index) {
 	/* "Before issuing a new data transfer command, the software should
 	 * ensure that the card is not busy due to any previous data
 	 * transfer command. Before changing the card clock frequency, the
@@ -87,12 +87,12 @@ void sdio_cclk_set_400khz() {
 	 * clock frequency:"
 	 */
 	SDIO_CLKENA &= ~SDIO_CLKENA_CCLK_ENABLE(1);
-	SDIO_CLKSRC = SDIO_CLKSRC_CLK_SOURCE(0);
+	SDIO_CLKSRC = SDIO_CLKSRC_CLK_SOURCE(divider_index);
 	sdio_update_clock_registers_only();
 
 	SDIO_CLKDIV =
 		  SDIO_CLKDIV_CLK_DIVIDER0(0xff)
-		| SDIO_CLKDIV_CLK_DIVIDER1(0)
+		| SDIO_CLKDIV_CLK_DIVIDER1(0x5)
 		| SDIO_CLKDIV_CLK_DIVIDER2(0)
 		| SDIO_CLKDIV_CLK_DIVIDER3(0)
 		;
@@ -100,6 +100,14 @@ void sdio_cclk_set_400khz() {
 
 	SDIO_CLKENA |= SDIO_CLKENA_CCLK_ENABLE(1);
 	sdio_update_clock_registers_only();
+}
+
+void sdio_cclk_set_400khz() {
+	sdio_cclk_set(0);
+}
+
+void sdio_cclk_set_20mhz() {
+	sdio_cclk_set(1);
 }
 
 void sdio_set_width_1bit() {

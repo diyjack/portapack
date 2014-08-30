@@ -42,6 +42,7 @@ void sdio_init();
 bool sdio_card_is_present();
 
 void sdio_cclk_set_400khz();
+void sdio_cclk_set_20mhz();
 void sdio_set_width_1bit();
 
 sdio_error_t sdio_cmd0(const uint_fast8_t init);
