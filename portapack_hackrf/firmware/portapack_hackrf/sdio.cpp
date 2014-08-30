@@ -118,27 +118,15 @@ void sdio_set_width_1bit() {
 }
 
 bool sdio_card_is_present() {
-	return (SDIO_CDETECT & SDIO_CDETECT_CARD_DETECT(1)) ? false : true;
+	return (SDIO_CDETECT & SDIO_CDETECT_CARD_DETECT_MASK) ? false : true;
 }
 
 static bool sdio_error_hardware_is_locked(const uint32_t status) {
-	return (status & SDIO_RINTSTS_HLE(1)) ? true : false;
+	return (status & SDIO_RINTSTS_HLE_MASK) ? true : false;
 }
 
 static bool sdio_command_is_complete(const uint32_t status) {
-	return (status & SDIO_RINTSTS_CDONE(1)) ? true : false;
-}
-
-static bool sdio_response_error(const uint32_t status) {
-	return (status & SDIO_RINTSTS_RE(1)) ? true : false;
-}
-
-static bool sdio_response_crc_error(const uint32_t status) {
-	return (status & SDIO_RINTSTS_RCRC(1)) ? true : false;
-}
-
-static bool sdio_response_timed_out(const uint32_t status) {
-	return (status & SDIO_RINTSTS_RTO_BAR(1)) ? true : false;
+	return (status & SDIO_RINTSTS_CDONE_MASK) ? true : false;
 }
 
 static sdio_error_t sdio_status(const uint32_t intsts) {
