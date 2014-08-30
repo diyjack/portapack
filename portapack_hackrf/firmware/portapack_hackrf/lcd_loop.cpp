@@ -1107,6 +1107,19 @@ static void set_console_error_color(const uint32_t error) {
 void handle_command_packet_data_received_fsk(const void* const arg) {
 	const ipc_command_packet_data_received_t* const command = (ipc_command_packet_data_received_t*)arg;
 
+	char tmp[80];
+	sprintf(tmp, "%04d/%02d/%02d %02d:%02d:%02d ",
+		rtc_year(),
+		rtc_month(),
+		rtc_day_of_month(),
+		rtc_hour(),
+		rtc_minute(),
+		rtc_second()
+	);
+
+	UINT bytes_written = 0;
+	f_write(&f_log, tmp, strlen(tmp), &bytes_written);
+
 	uint8_t value[10];
 	uint8_t errors[10];
 	manchester_decode(command->payload, value, errors, 80);
@@ -1116,8 +1129,13 @@ void handle_command_packet_data_received_fsk(const void* const arg) {
 		console_write_uint32(&console, "%01x", value[i] >> 4);
 		set_console_error_color(errors[i] & 0xf);
 		console_write_uint32(&console, "%01x", value[i] & 0xf);
+		sprintf(&tmp[i*2], "%02x", value[i]);
+		sprintf(&tmp[10*2+1+i*2], "%02x", errors[i]);
 	}
 	console_set_background(&console, color_black);
+	tmp[10*2] = '/';
+	tmp[10*2+1+10*2] = '\n';
+	f_write(&f_log, tmp, 10 * 2 + 1 + 10 * 2 + 1, &bytes_written);
 
 	if( ((value[0] >> 5) == 0b001) ) {
 		const uint_fast8_t value_1 = value[6];
@@ -1181,6 +1199,8 @@ void handle_command_rtc_second(const void* const arg) {
 	lcd_colors_invert(&lcd);
 	draw_rtc(11 * 8, 0);
 	lcd_colors_invert(&lcd);
+
+	f_sync(&f_log);
 }
 
 static void ritimer_init_1khz_isr() {
@@ -1235,6 +1255,15 @@ int main() {
 			delay(51000);
 		}
 
+		FRESULT fresult;
+		fresult = f_mount(&fatfs_sd, "", 0);
+		DEBUG_FATFS_FRESULT("f_mount: %d", fresult);
+		fresult = f_open(&f_log, "tpms_fsk.txt", FA_OPEN_ALWAYS | FA_WRITE);
+		DEBUG_FATFS_FRESULT("f_open: %d", fresult);
+		const size_t f_log_size = f_size(&f_log);
+		DEBUG_FATFS_FSIZE("f_size: %u", f_log_size);
+		fresult = f_lseek(&f_log, f_log_size);
+		DEBUG_FATFS_FRESULT("f_lseek: %d", fresult);
 	}
 
 	ipc_command_set_audio_out_gain(&device_state->ipc_m4, 0);
