@@ -523,7 +523,12 @@ sdio_error_t sdio_cmd55() {
 		| SDIO_CMD_VOLT_SWITCH(0)
 		| SDIO_CMD_START_CMD(1)
 		;
-	return sdio_command_no_data(command, 0);
+	const uint32_t rca = 0;
+	const uint32_t arg =
+		  (rca << 16)
+		| (  0 <<  0)
+		;
+	return sdio_command_no_data(command, arg);
 }
 
 sdio_error_t sdio_acmd41(const uint32_t hcs) {
