@@ -56,6 +56,8 @@ sdio_error_t sdio_read(const uint32_t sector, uint32_t* buffer, const size_t sec
 sdio_error_t sdio_write(const uint32_t sector, const uint32_t* buffer, const size_t sector_count);
 
 sdio_error_t sdio_cmd0(const uint_fast8_t init);
+sdio_error_t sdio_cmd2();
+sdio_error_t sdio_cmd3();
 sdio_error_t sdio_cmd7(const uint32_t rca);
 sdio_error_t sdio_cmd8();
 sdio_error_t sdio_acmd41(const uint32_t hcs);
