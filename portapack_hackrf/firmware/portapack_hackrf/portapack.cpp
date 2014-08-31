@@ -38,6 +38,7 @@
 #include "cpld.h"
 #include "i2s.h"
 #include "m0_startup.h"
+#include "rtc.h"
 
 #include "lcd.h"
 #include "tuning.h"
@@ -256,6 +257,11 @@ void handle_command_spectrum_data_done(const void* const arg) {
 	}
 }
 
+extern "C" void rtc_isr() {
+	rtc_counter_interrupt_clear();
+	ipc_command_rtc_second(&device_state->ipc_m0);
+}
+
 #include "portapack_driver.h"
 
 void portapack_init() {
@@ -310,6 +316,11 @@ void portapack_init() {
 	set_rx_mode(RECEIVER_CONFIGURATION_SPEC);
 
 	set_frequency(device_state->tuned_hz);
+
+	rtc_init();
+	rtc_counter_interrupt_second_enable();
+	nvic_set_priority(NVIC_RTC_IRQ, 255);
+	nvic_enable_irq(NVIC_RTC_IRQ);
 }
 
 extern "C" void dma_isr() {

@@ -36,6 +36,7 @@ set(SRC_M4
 	main.cpp
 	portapack.cpp
 	portapack_driver.cpp
+	rtc.cpp
 	access_code_correlator.cpp
 	envelope.cpp
 	clock_recovery.cpp
@@ -92,7 +93,6 @@ set(SRC_M0
 	console.cpp
 	ipc.cpp
 	ipc_m4_client.cpp
-	ipc_m0_client.cpp
 	ipc_m0_server.cpp
 	rtc.cpp
 	ritimer.cpp

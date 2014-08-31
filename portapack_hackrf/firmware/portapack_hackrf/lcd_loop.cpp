@@ -1221,17 +1221,7 @@ extern "C" void ritimer_or_wwdt_isr() {
 	encoder_update();
 }
 
-extern "C" void rtc_isr() {
-	rtc_counter_interrupt_clear();
-	ipc_command_rtc_second(&device_state->ipc_m0);
-}
-
 int main() {
-	rtc_init();
-	rtc_counter_interrupt_second_enable();
-	nvic_set_priority(NVIC_RTC_IRQ, 255);
-	nvic_enable_irq(NVIC_RTC_IRQ);
-
 	sdio_init();
 	rssi_init();
 	lcd_init(&lcd);
