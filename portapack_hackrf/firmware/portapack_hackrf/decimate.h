@@ -107,4 +107,23 @@ size_t fir_64_decim_2_real_s16_s16(
 	const size_t sample_count
 );
 
+typedef struct fir_64_decim_8_cplx_s16_s16_state_t {
+	const int16_t* taps;
+	size_t taps_count;
+	complex_s16_t z[72];
+} fir_64_decim_8_cplx_s16_s16_state_t;
+
+void fir_64_decim_8_cplx_s16_s16_init(
+	fir_64_decim_8_cplx_s16_s16_state_t* const state,
+	const int16_t* const taps,
+	const size_t taps_count
+);
+
+size_t fir_64_decim_8_cplx_s16_s16(
+	fir_64_decim_8_cplx_s16_s16_state_t* const state,
+	complex_s16_t* src,
+	complex_s16_t* dst,
+	const size_t sample_count
+);
+
 #endif/*__DECIMATE_H__*/

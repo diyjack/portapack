@@ -444,6 +444,75 @@ size_t fir_64_decim_2_real_s16_s16(
 
 	return sample_count / 2;
 }
+
+void fir_64_decim_8_cplx_s16_s16_init(
+	fir_64_decim_8_cplx_s16_s16_state_t* const state,
+	const int16_t* const taps,
+	const size_t taps_count
+) {
+	state->taps = taps;
+	state->taps_count = ((taps_count + 7) >> 3) * 8;
+	for(uint32_t i=0; i<state->taps_count + 8; i++) {
+		state->z[i] = { 0, 0 };
+	}
+}
+
+size_t fir_64_decim_8_cplx_s16_s16(
+	fir_64_decim_8_cplx_s16_s16_state_t* const state,
+	complex_s16_t* src,
+	complex_s16_t* dst,
+	const size_t sample_count
+) {
+	/* complex<int16_t> input (sample count "n" must be multiple of 8)
+	 * -> complex<int16_t> output, decimated by 8.
+	 * taps are normalized to 1 << 16 == 1.0.
+	 */
+
+	int32_t n = sample_count;
+	for(; n>0; n-=8) {
+		state->z[state->taps_count + 0] = *(src++);
+		state->z[state->taps_count + 1] = *(src++);
+		state->z[state->taps_count + 2] = *(src++);
+		state->z[state->taps_count + 3] = *(src++);
+		state->z[state->taps_count + 4] = *(src++);
+		state->z[state->taps_count + 5] = *(src++);
+		state->z[state->taps_count + 6] = *(src++);
+		state->z[state->taps_count + 7] = *(src++);
+		
+		int64_t i = 0;
+		int64_t q = 0;
+		for(uint32_t j=0; j<state->taps_count; j+=8) {
+			i += state->z[j+0].i * state->taps[j+0];
+			q += state->z[j+0].q * state->taps[j+0];
+			i += state->z[j+1].i * state->taps[j+1];
+			q += state->z[j+1].q * state->taps[j+1];
+			i += state->z[j+2].i * state->taps[j+2];
+			q += state->z[j+2].q * state->taps[j+2];
+			i += state->z[j+3].i * state->taps[j+3];
+			q += state->z[j+3].q * state->taps[j+3];
+			i += state->z[j+4].i * state->taps[j+4];
+			q += state->z[j+4].q * state->taps[j+4];
+			i += state->z[j+5].i * state->taps[j+5];
+			q += state->z[j+5].q * state->taps[j+5];
+			i += state->z[j+6].i * state->taps[j+6];
+			q += state->z[j+6].q * state->taps[j+6];
+			i += state->z[j+7].i * state->taps[j+7];
+			q += state->z[j+7].q * state->taps[j+7];
+
+			state->z[j+0] = state->z[j+0+8];
+			state->z[j+1] = state->z[j+1+8];
+			state->z[j+2] = state->z[j+2+8];
+			state->z[j+3] = state->z[j+3+8];
+			state->z[j+4] = state->z[j+4+8];
+			state->z[j+5] = state->z[j+5+8];
+			state->z[j+6] = state->z[j+6+8];
+			state->z[j+7] = state->z[j+7+8];
+		}
+		*(dst++) = { int16_t(i / 131072), int16_t(q / 131072) };
+	}
+
+	return sample_count / 8;
+}
 /*
 #include "arm_intrinsics.h"
 
