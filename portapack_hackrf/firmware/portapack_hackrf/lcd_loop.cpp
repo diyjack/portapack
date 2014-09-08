@@ -833,65 +833,6 @@ sdio_error_t sdio_enumerate_card_stack() {
 	default:
 		return sdio_try_sd_version_1();
 	}
-
-	// result_acmd41 = sdio_acmd41((1 << 20) | (1 << 21));
-	// console_write(&console, "ACMD41 ");
-	// sdio_draw_error(result_acmd41);
-/*
-	const sdio_error_t result_cmd2 = sdio_cmd2();
-	console_write(&console, "CMD2 ");
-	sdio_draw_error(result_cmd2);
-
-	const sdio_error_t result_cmd3 = sdio_cmd3();
-	console_write(&console, "CMD3 ");
-	sdio_draw_error(result_cmd3);
-*/
-//	const sdio_error_t result_cmd9 = sdio_cmd9();
-//	console_write(&console, "CMD9 ");
-
-/*
-	const sdio_error_t result_cmd5 = sdio_command_no_data(SDIO_CMD5_INDEX, 0);
-
-	if( result_cmd5 == SDIO_OK ) {
-		lcd_draw_string(16*8, 4*16, "CMD5=OK", 7);
-	} else {
-		if( result_cmd5 == SDIO_ERROR_RESPONSE_TIMED_OUT ) {
-			const sdio_error_t result_acmd41 = sdio_command_no_data(SDIO_ACMD41_INDEX, 0);
-			if( result_acmd41 == SDIO_OK ) {
-				lcd_draw_string(16*8, 4*16, "ACMD41=OK", 9);
-			} else {
-				if( result_acmd41 == SDIO_ERROR_RESPONSE_TIMED_OUT) {
-					const sdio_error_t result_cmd0 = sdio_command_no_data(SDIO_CMD0_INDEX, 0);
-					if( result_cmd0 == SDIO_OK ) {
-						lcd_draw_string(16*8, 4*16, "CMD0=OK", 7);
-					} else {
-						lcd_draw_string(16*8, 4*16, "CMD0=ERR", 8);
-						sdio_draw_error(result_cmd0);
-					}
-				} else {
-					lcd_draw_string(16*8, 4*16, "ACMD41=ERR", 10);
-					sdio_draw_error(result_acmd41);
-				}
-			}
-		} else {
-			lcd_draw_string(16*8, 4*16, "CMD5=ERR", 8);
-			sdio_draw_error(result_cmd5);
-		}
-	}
-*/
-/*	
-	if( cmd5 ) {
-		card_type = SDIO;
-		return;
-	}
-
-	sdio_send_command(ACMD41);
-	if( acmd41 ) {
-		card_type = SD;
-	} else {
-		card_type = MMC_OR_CEATA;
-	}
-*/
 }
 
 DSTATUS disk_initialize(BYTE pdrv) {	
