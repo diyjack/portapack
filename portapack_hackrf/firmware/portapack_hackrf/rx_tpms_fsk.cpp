@@ -124,6 +124,13 @@ void rx_tpms_fsk_baseband_handler(void* const _state, complex_s8_t* const in, co
 	timestamps->channel_filter_end = baseband_timestamp();
 
 	const complex_s16_t* const c = work_cs16;
+	/* Combination +/-fs/4 translation and half-band filters.
+	 * In effect, construct two complex filters:
+	 * 0: passband=-in_fs/2 - 0
+	 * 1: passband=0 to in_fs/2
+	 * Both filter outputs are decimated by two from input rate.
+	 */
+	/* I probably re-invented the Hilbert transform here. */
 	const int16_t t0 = -3, t6 = -3;
 	const int16_t t2 = 19, t4 = 19;
 	const int16_t t3 = 32;
