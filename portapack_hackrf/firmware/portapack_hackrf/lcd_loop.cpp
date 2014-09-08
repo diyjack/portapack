@@ -301,7 +301,8 @@ struct tuning_step_size_t {
 	const char* const name;
 };
 
-static const std::array<tuning_step_size_t, 5> tuning_step_sizes { {
+static const std::array<tuning_step_size_t, 6> tuning_step_sizes { {
+	{     1000, "  1kHz" },
 	{    10000, " 10kHz" },
 	{    25000, " 25kHz" },
 	{   100000, "100kHz" },
