@@ -501,6 +501,8 @@ static const ui_widget_t ui_rssi_bar {
 };
 
 static const std::array<const ui_widget_t*, 9> widgets {
+	&ui_rssi_bar,
+	&ui_cpu_bar,
 	&ui_field_frequency,
 	&ui_field_lna_gain,
 	&ui_field_if_gain,
@@ -508,8 +510,6 @@ static const std::array<const ui_widget_t*, 9> widgets {
 	&ui_field_receiver_configuration,
 	&ui_field_tuning_step_size,
 	&ui_field_audio_out_gain,
-	&ui_cpu_bar,
-	&ui_rssi_bar,
 };
 
 static void ui_widget_update_focus(const ui_widget_t* const focus_widget) {
