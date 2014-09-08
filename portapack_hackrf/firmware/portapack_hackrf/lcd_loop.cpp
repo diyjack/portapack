@@ -1159,7 +1159,7 @@ extern "C" void ritimer_or_wwdt_isr() {
 	ritimer_interrupt_clear();
 	const uint32_t rssi_raw = rssi_read();
 	rssi_convert_start();
-	rssi_raw_avg = (rssi_raw_avg * 31 + rssi_raw) / 32;
+	rssi_raw_avg = (rssi_raw_avg * 15 + rssi_raw) / 16;
 	encoder_update();
 }
 
