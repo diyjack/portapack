@@ -33,10 +33,10 @@
 int8_t* const sample_buffer_0 = (int8_t*)0x20008000;
 int8_t* const sample_buffer_1 = (int8_t*)0x2000c000;
 device_state_t* const device_state = (device_state_t*)0x20007000;
-uint8_t* const ipc_m4_buffer = (uint8_t*)0x20007f00;
-uint8_t* const ipc_m0_buffer = (uint8_t*)0x20007e00;
-const size_t ipc_m4_buffer_size = 256;
-const size_t ipc_m0_buffer_size = 256;
+uint8_t* const ipc_m4_buffer = (uint8_t*)0x20007c00;
+uint8_t* const ipc_m0_buffer = (uint8_t*)0x20007800;
+const size_t ipc_m4_buffer_size = 1024;
+const size_t ipc_m0_buffer_size = 1024;
 
 #define PORTAPACK_SDIO_CD_SCU_PIN (P1_13)
 #define PORTAPACK_SDIO_CD_SCU_FUNCTION (SCU_CONF_FUNCTION7)
