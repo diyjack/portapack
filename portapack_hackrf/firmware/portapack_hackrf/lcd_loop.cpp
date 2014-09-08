@@ -79,6 +79,7 @@ static FATFS fatfs_sd;
 static FIL f_log;
 
 static volatile uint32_t rssi_raw_avg = 0;
+static volatile uint32_t rssi_raw_peak = 0;
 
 lcd_t lcd = {
 	.size = { .w = 240, .h = 320 },
@@ -250,7 +251,7 @@ static void render_field_cpu(const ui_widget_t* const widget) {
 }
 
 static void render_field_rssi(const ui_widget_t* const widget) {
-	const int32_t bar_x = rssi_raw_avg / 16;
+	const int32_t bar_x = rssi_raw_peak / 16;
 	lcd_fill_rectangle(&lcd,
 		widget->position.x, widget->position.y,
 		bar_x, widget->size.h
@@ -1160,6 +1161,11 @@ extern "C" void ritimer_or_wwdt_isr() {
 	const uint32_t rssi_raw = rssi_read();
 	rssi_convert_start();
 	rssi_raw_avg = (rssi_raw_avg * 15 + rssi_raw) / 16;
+	if( rssi_raw > rssi_raw_peak ) {
+		rssi_raw_peak = rssi_raw;
+	} else {
+		rssi_raw_peak = (rssi_raw_peak * 15) / 16;
+	}
 	encoder_update();
 }
 
