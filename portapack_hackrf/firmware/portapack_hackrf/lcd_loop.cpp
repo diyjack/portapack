@@ -1191,7 +1191,7 @@ int main() {
 		FRESULT fresult;
 		fresult = f_mount(&fatfs_sd, "", 0);
 		DEBUG_FATFS_FRESULT("f_mount: %d", fresult);
-		fresult = f_open(&f_log, "tpms_fsk.txt", FA_OPEN_ALWAYS | FA_WRITE);
+		fresult = f_open(&f_log, "log.txt", FA_OPEN_ALWAYS | FA_WRITE);
 		DEBUG_FATFS_FRESULT("f_open: %d", fresult);
 		const size_t f_log_size = f_size(&f_log);
 		DEBUG_FATFS_FSIZE("f_size: %u", f_log_size);
