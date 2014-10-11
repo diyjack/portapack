@@ -287,18 +287,26 @@ static const void* get_audio_out_gain() {
 	return &device_state->audio_out_gain_db;
 }
 
+struct receiver_mode_t {
+	const char* const short_name;
+};
+
+static const std::array<receiver_mode_t, 7> receiver_modes { {
+	{ "SPEC" },
+	{ "NBAM" },
+	{ "NBFM" },
+	{ "WBFM" },
+	{ "TPMS-ASK" },
+	{ "TPMS-FSK" },
+	{ "AIS" },
+} };
+
 static const void* get_receiver_configuration_name() {
-	// TODO: Pull this from a shared structure somewhere!
-	switch(device_state->receiver_configuration_index) {
-	case 0: return "SPEC    ";
-	case 1: return "NBAM    ";
-	case 2: return "NBFM    ";
-	case 3: return "WBFM    ";
-	case 4: return "TPMS-ASK";
-	case 5: return "TPMS-FSK";
-	case 6: return "AIS     ";
-	default: return "????";
+	if( device_state->receiver_configuration_index >= receiver_modes.size() ) {
+		return nullptr;
 	}
+
+	return receiver_modes[device_state->receiver_configuration_index].short_name;
 }
 
 struct tuning_step_size_t {
@@ -447,7 +455,7 @@ static const ui_widget_t ui_field_receiver_configuration {
 		ui_field_value_up_receiver_configuration,
 		ui_field_value_down_receiver_configuration,
 	},
-	"Mode %8s",
+	"Mode %-8s",
 	get_receiver_configuration_name,
 	render_field_str,
 };
