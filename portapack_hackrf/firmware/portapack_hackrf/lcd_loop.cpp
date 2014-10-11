@@ -383,8 +383,10 @@ static void ui_field_value_up_receiver_configuration() {
 }
 
 static void ui_field_value_down_receiver_configuration() {
-	ipc_command_set_receiver_configuration(&device_state->ipc_m4, device_state->receiver_configuration_index - 1);
-	console_init(&console, &lcd, 16 * 6, lcd.size.h);
+	if( device_state->receiver_configuration_index > 0 ) {
+		ipc_command_set_receiver_configuration(&device_state->ipc_m4, device_state->receiver_configuration_index - 1);
+		console_init(&console, &lcd, 16 * 6, lcd.size.h);
+	}
 }
 
 static void ui_field_value_up_tuning_step_size() {
