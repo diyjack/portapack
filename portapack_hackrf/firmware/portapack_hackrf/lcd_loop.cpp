@@ -850,9 +850,6 @@ DSTATUS disk_status(BYTE pdrv) {
 	return sdio_status;
 }
 
-static bool sdio_write_activity = false;
-static bool sdio_read_activity = false;
-
 DRESULT disk_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
 	(void)pdrv;
 
@@ -860,7 +857,6 @@ DRESULT disk_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
 		return RES_ERROR;
 	}
 
-	sdio_read_activity = true;
 	sdio_error_t result = sdio_read(sector, (uint32_t*)buff, count);
 	DEBUG_SDIO_RESULT("[r%d]", result);
 
@@ -874,7 +870,6 @@ DRESULT disk_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
 		return RES_ERROR;
 	}
 
-	sdio_write_activity = true;
 	sdio_error_t result = sdio_write(sector, (uint32_t*)buff, count);
 	DEBUG_SDIO_RESULT("[w%d]", result);
 
@@ -1217,11 +1212,6 @@ bool numeric_entry = false;
 		} else {
 			sdio_status |= STA_NODISK;
 		}
-		lcd_draw_string(&lcd, 16*8, 1*16, sd_card_present ? "SD+" : "SD-", 3);
-		lcd_draw_string(&lcd, 16*8, 2*16, sdio_read_activity ? "R" : " ", 1);
-		sdio_read_activity = false;
-		lcd_draw_string(&lcd, 17*8, 2*16, sdio_write_activity ? "W" : " ", 1);
-		sdio_write_activity = false;
 #ifdef CPU_METRICS
 		draw_cycles(240 - (12 * 8), 96);
 #endif
