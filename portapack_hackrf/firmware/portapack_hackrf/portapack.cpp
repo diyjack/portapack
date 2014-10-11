@@ -49,6 +49,7 @@
 
 #include "rx_fm_broadcast.h"
 #include "rx_fm_narrowband.h"
+#include "rx_ais.h"
 #include "rx_am.h"
 #include "rx_tpms_ask.h"
 #include "rx_tpms_fsk.h"
@@ -97,6 +98,15 @@ static void rx_tpms_fsk_init_wrapper(void* const _state) {
 	rx_tpms_fsk_init(_state, rx_tpms_fsk_packet_handler);
 }
 
+static void rx_ais_packet_handler(const void* const payload, const size_t payload_length, void* const context) {
+	(void)context;
+	ipc_command_packet_data_received(&device_state->ipc_m0, (uint8_t*)payload, payload_length);
+}
+
+static void rx_ais_init_wrapper(void* const _state) {
+	rx_ais_init(_state, rx_ais_packet_handler);
+}
+
 static volatile receiver_baseband_handler_t receiver_baseband_handler = NULL;
 
 typedef enum {
@@ -106,6 +116,7 @@ typedef enum {
 	RECEIVER_CONFIGURATION_WBFM = 3,
 	RECEIVER_CONFIGURATION_TPMS = 4,
 	RECEIVER_CONFIGURATION_TPMS_FSK = 5,
+	RECEIVER_CONFIGURATION_AIS = 6,
 } receiver_configuration_id_t;
 
 typedef struct receiver_configuration_t {
@@ -172,6 +183,15 @@ const receiver_configuration_t receiver_configurations[] = {
 		.baseband_bandwidth = 1750000,
 		.baseband_decimation = 4,
 		.enable_audio = true,
+	},
+	[RECEIVER_CONFIGURATION_AIS] = {
+		.init = rx_ais_init_wrapper,
+		.baseband_handler = rx_ais_baseband_handler,
+		.tuning_offset = -614400,
+		.sample_rate = 9830400,
+		.baseband_bandwidth = 1750000,
+		.baseband_decimation = 4,
+		.enable_audio = false,
 	},
 };
 

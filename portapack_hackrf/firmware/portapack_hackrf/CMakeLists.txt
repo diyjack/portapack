@@ -45,6 +45,7 @@ set(SRC_M4
 	filters.cpp
 	rx_fm_broadcast.cpp
 	rx_fm_narrowband.cpp
+	rx_ais.cpp
 	rx_am.cpp
 	rx_tpms_ask.cpp
 	rx_tpms_fsk.cpp
