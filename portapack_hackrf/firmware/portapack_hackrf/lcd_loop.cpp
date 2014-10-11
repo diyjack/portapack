@@ -65,6 +65,8 @@ extern "C" {
 #include <diskio.h>
 }
 
+static const void* get_receiver_configuration_name();
+
 #if 0
 #define DEBUG_SDIO_RESULT(__s, __result) \
 	console_write_uint32(&console, __s, __result);
@@ -285,28 +287,6 @@ static const void* get_bb_gain() {
 
 static const void* get_audio_out_gain() {
 	return &device_state->audio_out_gain_db;
-}
-
-struct receiver_mode_t {
-	const char* const short_name;
-};
-
-static const std::array<receiver_mode_t, 7> receiver_modes { {
-	{ "SPEC" },
-	{ "NBAM" },
-	{ "NBFM" },
-	{ "WBFM" },
-	{ "TPMS-ASK" },
-	{ "TPMS-FSK" },
-	{ "AIS" },
-} };
-
-static const void* get_receiver_configuration_name() {
-	if( device_state->receiver_configuration_index >= receiver_modes.size() ) {
-		return nullptr;
-	}
-
-	return receiver_modes[device_state->receiver_configuration_index].short_name;
 }
 
 struct tuning_step_size_t {
@@ -1247,23 +1227,35 @@ void handle_command_packet_data_received_ais(const void* const arg) {
 	}
 }
 
+typedef void (*packet_data_received_handler_fn_t)(const void* const args);
+
+struct receiver_mode_t {
+	const char* const short_name;
+	packet_data_received_handler_fn_t const packet_data_received_handler;
+};
+
+static const std::array<receiver_mode_t, 7> receiver_modes { {
+	{ "SPEC", nullptr },
+	{ "NBAM", nullptr },
+	{ "NBFM", nullptr },
+	{ "WBFM", nullptr },
+	{ "TPMS-ASK", handle_command_packet_data_received_ask },
+	{ "TPMS-FSK", handle_command_packet_data_received_fsk },
+	{ "AIS", handle_command_packet_data_received_ais },
+} };
+
+static const void* get_receiver_configuration_name() {
+	if( device_state->receiver_configuration_index >= receiver_modes.size() ) {
+		return nullptr;
+	}
+
+	return receiver_modes[device_state->receiver_configuration_index].short_name;
+}
+
 void handle_command_packet_data_received(const void* const arg) {
-	// TODO: Naughty, hard-coded!
-	switch( device_state->receiver_configuration_index ){
-	case 4:
-		handle_command_packet_data_received_ask(arg);
-		break;
-
-	case 5:
-		handle_command_packet_data_received_fsk(arg);
-		break;
-
-	case 6:
-		handle_command_packet_data_received_ais(arg);
-		break;
-
-	default:
-		break;
+	packet_data_received_handler_fn_t handler_fn = receiver_modes[device_state->receiver_configuration_index].packet_data_received_handler;
+	if( handler_fn != nullptr ) {
+		handler_fn(arg);
 	}
 }
 
