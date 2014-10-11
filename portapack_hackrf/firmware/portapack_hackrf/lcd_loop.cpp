@@ -1183,10 +1183,11 @@ int main() {
 	console_init(&console, &lcd, 16 * 6, lcd.size.h);
 
 	if( sdio_card_is_present() ) {
-		sdio_status &= ~STA_NODISK;
 		for(size_t n=0; n<1000; n++) {
 			delay(51000);
 		}
+
+		sdio_status &= ~STA_NODISK;
 
 		FRESULT fresult;
 		fresult = f_mount(&fatfs_sd, "", 0);
