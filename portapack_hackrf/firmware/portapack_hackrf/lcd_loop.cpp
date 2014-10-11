@@ -1042,11 +1042,27 @@ static void set_console_error_color(const uint32_t error) {
 	}
 }
 
-void handle_command_packet_data_received_fsk(const void* const arg) {
-	const ipc_command_packet_data_received_t* const command = (ipc_command_packet_data_received_t*)arg;
+static void log_buffer(const char* const message, const size_t length) {
+	UINT bytes_written = 0;
+	f_write(&f_log, message, length, &bytes_written);
+}
 
+static void log_string(const char* const message) {
+	log_buffer(message, strlen(message));
+}
+
+static void log_bytes_hex(const uint8_t* const buffer, const size_t count) {
+	/* TODO: Handle count > buffer size */
 	char tmp[80];
-	sprintf(tmp, "%04d/%02d/%02d %02d:%02d:%02d ",
+	for(size_t i=0; i<count; i++) {
+		sprintf(&tmp[i*2], "%02x", buffer[i]);
+	}
+	log_buffer(tmp, count * 2);
+}
+
+static void log_timestamp() {
+	char tmp[80];
+	sprintf(tmp, "%04d/%02d/%02d %02d:%02d:%02d",
 		rtc_year(),
 		rtc_month(),
 		rtc_day_of_month(),
@@ -1054,9 +1070,14 @@ void handle_command_packet_data_received_fsk(const void* const arg) {
 		rtc_minute(),
 		rtc_second()
 	);
+	log_string(tmp);
+}
 
-	UINT bytes_written = 0;
-	f_write(&f_log, tmp, strlen(tmp), &bytes_written);
+void handle_command_packet_data_received_fsk(const void* const arg) {
+	const ipc_command_packet_data_received_t* const command = (ipc_command_packet_data_received_t*)arg;
+
+	log_timestamp();
+	log_string(" ");
 
 	uint8_t value[10];
 	uint8_t errors[10];
@@ -1067,13 +1088,13 @@ void handle_command_packet_data_received_fsk(const void* const arg) {
 		console_write_uint32(&console, "%01x", value[i] >> 4);
 		set_console_error_color(errors[i] & 0xf);
 		console_write_uint32(&console, "%01x", value[i] & 0xf);
-		sprintf(&tmp[i*2], "%02x", value[i]);
-		sprintf(&tmp[10*2+1+i*2], "%02x", errors[i]);
 	}
 	console_set_background(&console, color_black);
-	tmp[10*2] = '/';
-	tmp[10*2+1+10*2] = '\n';
-	f_write(&f_log, tmp, 10 * 2 + 1 + 10 * 2 + 1, &bytes_written);
+
+	log_bytes_hex(value, 10);
+	log_string("/");
+	log_bytes_hex(errors, 10);
+	log_string("\n");
 
 	if( ((value[0] >> 5) == 0b001) ) {
 		const uint_fast8_t value_1 = value[6];
