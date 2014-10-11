@@ -39,6 +39,7 @@ void console_set_background(console_t* const console, const lcd_color_t new_colo
 
 void console_write(console_t* const console, const char* message);
 void console_writeln(console_t* const console, const char* message);
+void console_write_int32(console_t* const console, const char* format, const int32_t value);
 void console_write_uint32(console_t* const console, const char* format, const uint32_t value);
 
 #endif/*__CONSOLE_H__*/

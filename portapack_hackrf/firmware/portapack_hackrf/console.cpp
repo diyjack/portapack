@@ -90,6 +90,12 @@ void console_writeln(console_t* const console, const char* message) {
 	console_crlf(console);
 }
 
+void console_write_int32(console_t* const console, const char* format, const int32_t value) {
+	char temp[80];
+	sprintf(temp, format, value);
+	console_write(console, temp);
+}
+
 void console_write_uint32(console_t* const console, const char* format, const uint32_t value) {
 	char temp[80];
 	sprintf(temp, format, value);
