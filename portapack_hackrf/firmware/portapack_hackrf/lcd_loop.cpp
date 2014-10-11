@@ -48,6 +48,9 @@
 #include "ipc_m0_client.h"
 #include "ipc_m4_client.h"
 
+#include "bits.h"
+#include "crc.h"
+
 #include <array>
 #include <algorithm>
 
@@ -293,6 +296,7 @@ static const void* get_receiver_configuration_name() {
 	case 3: return "WBFM    ";
 	case 4: return "TPMS-ASK";
 	case 5: return "TPMS-FSK";
+	case 6: return "AIS     ";
 	default: return "????";
 	}
 }
@@ -1127,12 +1131,129 @@ void handle_command_packet_data_received_fsk(const void* const arg) {
 	console_writeln(&console, "");
 }
 
+static uint32_t reverse_byte(const uint32_t v) {
+	uint32_t r = 0;
+	for(size_t j=0; j<8; j++) {
+		r <<= 1;
+		r |= (v >> j) & 1;
+	}
+	return r;
+}
+
+size_t find_packet_end(const uint8_t* data, const size_t bit_count) {
+	const uint32_t end_code = 0b01111110;
+	const size_t end_code_length = 8;
+
+	bit_history_t<uint32_t> history;
+	for(size_t n=0; n<bit_count; n++) {
+		const size_t byte_index = n >> 3;
+		const size_t bit_index = (n & 7) ^ 7;
+		const uint32_t value = (data[byte_index] >> bit_index) & 1;
+		history.push(value);
+		if( n >= end_code_length ) {
+			if( history.match(end_code, end_code_length) ) {
+				return n + 1 - end_code_length;
+			}
+		}
+	}
+	return 0;
+}
+
+size_t unstuff(uint8_t* data, const size_t bit_count) {
+	const uint32_t stuffing_code = 0b111110;
+	const size_t stuffing_code_length = 6;
+
+	bit_history_t<uint32_t> history;
+	bit_buffer_t buffer(data);
+	for(size_t n=0; n<bit_count; n++) {
+		const size_t byte_index = n >> 3;
+		const size_t bit_index = (n & 7) ^ 7;
+		const uint32_t value = (data[byte_index] >> bit_index) & 1;
+		history.push(value);
+		if( history.match(stuffing_code, stuffing_code_length) ) {
+			// Unstuff this bit.
+		} else {
+			buffer.push(value);
+		}
+	}
+	return buffer.size();
+}
+
+static void console_write_ais_latlon(console_t* const console, const int32_t normalized) {
+	const int32_t t = (normalized * 5) / 3;
+	const int32_t degrees = t / (100 * 10000);
+	const int32_t fraction = abs(t) % (100 * 10000);
+	console_write_int32(console, "%d.", degrees);
+	console_write_int32(console, "%06d", fraction);
+}
+
+void handle_command_packet_data_received_ais(const void* const arg) {
+	ipc_command_packet_data_received_t* const command = (ipc_command_packet_data_received_t*)arg;
+
+	const size_t stuffed_length = find_packet_end(command->payload, command->payload_length);
+	if( stuffed_length > 0 ) {
+		const size_t payload_length = unstuff(command->payload, stuffed_length);
+		if( (payload_length >= 16) && ((payload_length & 7) == 0) ) {
+			const size_t byte_count = (payload_length + 7) >> 3;
+			const uint16_t crc_calculated = crc<uint16_t>(command->payload, byte_count - 2) ^ 0xffff;
+			const uint16_t crc_in_packet = (command->payload[byte_count - 2] << 8) | command->payload[byte_count - 1];
+			if( crc_calculated == crc_in_packet ) {
+				for(size_t i=0; i<byte_count - 2; i++) {
+					command->payload[i] = reverse_byte(command->payload[i]);
+				}
+
+				log_timestamp();
+				log_string(" ");
+
+				bit_buffer_t payload(command->payload);
+				const uint8_t message_id = payload.extract(0, 6);
+				console_write_uint32(&console, "%2d:", message_id);
+				if( (message_id > 0) && (message_id < 5) ) {
+					const uint32_t user_id = payload.extract(8, 30);
+					console_write_uint32(&console, "%10d", user_id);
+					
+					int32_t longitude = payload.extract(61, 28) << 4;
+					longitude /= 16;
+					console_write(&console, " ");
+					console_write_ais_latlon(&console, longitude);
+
+					int32_t latitude = payload.extract(89, 27) << 5;
+					latitude /= 32;
+					console_write(&console, " ");
+					console_write_ais_latlon(&console, latitude);
+				} else {
+					for(size_t i=0; i<byte_count - 2; i++) {
+						console_write_uint32(&console, "%01x", command->payload[i] >> 4);
+						console_write_uint32(&console, "%01x", command->payload[i] & 0xf);
+					}
+				}
+
+				log_bytes_hex(command->payload, byte_count - 2);
+				log_string("\n");
+
+				console_writeln(&console, "");
+			}
+		}
+	}
+}
+
 void handle_command_packet_data_received(const void* const arg) {
 	// TODO: Naughty, hard-coded!
-	if( device_state->receiver_configuration_index == 5 ) {
-		handle_command_packet_data_received_fsk(arg);
-	} else {
+	switch( device_state->receiver_configuration_index ){
+	case 4:
 		handle_command_packet_data_received_ask(arg);
+		break;
+
+	case 5:
+		handle_command_packet_data_received_fsk(arg);
+		break;
+
+	case 6:
+		handle_command_packet_data_received_ais(arg);
+		break;
+
+	default:
+		break;
 	}
 }
 

@@ -101,6 +101,8 @@ set(SRC_M0
 	sdio.cpp
 	rssi.cpp
 	manchester.cpp
+	bits.cpp
+	crc.cpp
 	${PATH_FATFS_SRC}/ff.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/delay.c
 	${PATH_HACKRF_FIRMWARE_COMMON}/led.c
