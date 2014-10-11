@@ -62,7 +62,7 @@ typedef struct device_state_t {
 	int32_t if_gain_db;
 	int32_t bb_gain_db;
 	int32_t audio_out_gain_db;
-	int32_t receiver_configuration_index;
+	size_t receiver_configuration_index;
 	
 	int32_t encoder_position;
 
@@ -76,7 +76,7 @@ void portapack_init();
 void portapack_run();
 
 bool set_frequency(const int64_t new_frequency);
-void set_rx_mode(const uint32_t new_receiver_configuration_index);
+void set_rx_mode(const size_t new_receiver_configuration_index);
 
 void copy_to_audio_output(const int16_t* const source, const size_t sample_count);
 

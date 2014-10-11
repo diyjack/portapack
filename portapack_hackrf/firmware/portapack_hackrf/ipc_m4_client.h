@@ -23,6 +23,7 @@
 #define __IPC_M4_CLIENT_H__
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "ipc.h"
 
@@ -31,7 +32,7 @@ void ipc_command_set_rf_gain(ipc_channel_t* const channel, const int32_t value_d
 void ipc_command_set_if_gain(ipc_channel_t* const channel, const int32_t value_db);
 void ipc_command_set_bb_gain(ipc_channel_t* const channel, const int32_t value_db);
 void ipc_command_set_audio_out_gain(ipc_channel_t* const channel, const int32_t value_db);
-void ipc_command_set_receiver_configuration(ipc_channel_t* const channel, const uint32_t index);
+void ipc_command_set_receiver_configuration(ipc_channel_t* const channel, const size_t index);
 void ipc_command_spectrum_data_done(ipc_channel_t* const channel);
 
 #endif/*__IPC_M4_CLIENT_H__*/

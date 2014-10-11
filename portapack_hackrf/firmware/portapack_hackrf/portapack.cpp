@@ -230,7 +230,7 @@ void increment_frequency(const int32_t increment) {
 
 static uint8_t receiver_state_buffer[4096];
 
-void set_rx_mode(const uint32_t new_receiver_configuration_index) {
+void set_rx_mode(const size_t new_receiver_configuration_index) {
 	if( new_receiver_configuration_index >= ARRAY_SIZE(receiver_configurations) ) {
 		return;
 	}

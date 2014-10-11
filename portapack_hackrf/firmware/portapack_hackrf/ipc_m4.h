@@ -23,6 +23,7 @@
 #define __IPC_M4_H__
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "ipc.h"
 
@@ -65,7 +66,7 @@ typedef struct ipc_command_set_audio_out_gain_t {
 
 typedef struct ipc_command_set_receiver_configuration_t {
 	uint32_t id;
-	uint32_t index;
+	size_t index;
 } ipc_command_set_receiver_configuration_t;
 
 typedef struct ipc_command_spectrum_data_done_t {

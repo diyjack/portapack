@@ -62,7 +62,7 @@ void ipc_command_set_audio_out_gain(ipc_channel_t* const channel, const int32_t 
 	ipc_channel_write(channel, &command, sizeof(command));
 }
 
-void ipc_command_set_receiver_configuration(ipc_channel_t* const channel, const uint32_t index) {
+void ipc_command_set_receiver_configuration(ipc_channel_t* const channel, const size_t index) {
 	ipc_command_set_receiver_configuration_t command = {
 		.id = IPC_COMMAND_ID_SET_RECEIVER_CONFIGURATION,
 		.index = index
