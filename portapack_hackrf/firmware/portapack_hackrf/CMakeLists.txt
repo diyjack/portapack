@@ -36,6 +36,7 @@ set(SRC_M4
 	main.cpp
 	portapack.cpp
 	portapack_driver.cpp
+	#cpld.cpp
 	rtc.cpp
 	access_code_correlator.cpp
 	envelope.cpp

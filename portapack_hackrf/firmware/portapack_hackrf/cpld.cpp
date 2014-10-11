@@ -21,6 +21,8 @@
 
 #include <stddef.h>
 
+#include "portapack.h"
+
 #include <delay.h>
 
 #include <libopencm3/lpc43xx/gpio.h>
@@ -178,7 +180,13 @@ void portapack_cpld_jtag_io_init() {
 #ifdef CPLD_PROGRAM
 
 #include "cpld_data.h"
-#include "linux_stuff.h"
+
+static void jtag_runtest_tck(const jtag_target_t* const target, const size_t count) {
+	// TODO: Implement a proper delay.
+	for(size_t i=0; i<count; i++) {
+		delay(4);
+	}
+}
 
 static uint_fast8_t jtag_tms_clock(const jtag_target_t* const target, const uint_fast8_t value) {
 	target->tms(value);
@@ -241,7 +249,9 @@ static bool jtag_verify_block(const jtag_target_t* const target, const uint16_t*
 	return (failure == false);
 }
 
-bool portapack_cpld_jtag_program(const jtag_target_t* const target) {
+bool portapack_cpld_jtag_program() {
+	jtag_target_t* const target = &jtag_target_portapack_cpld;
+
 	/* Unknown state */
 	jtag_reset(target);
 	/* Test-Logic-Reset */

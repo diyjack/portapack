@@ -30,6 +30,9 @@
 #include "complex.h"
 #include "ipc.h"
 
+//#define CPLD_PROGRAM 1
+//#define LCD_BACKLIGHT_TEST
+
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define M_PI (3.14159265358979323846264338327950f)
 

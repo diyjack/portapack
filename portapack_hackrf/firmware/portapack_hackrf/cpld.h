@@ -22,6 +22,8 @@
 #ifndef __CPLD_H__
 #define __CPLD_H__
 
+#include "portapack.h"
+
 void portapack_cpld_jtag_io_init();
 
 #ifdef CPLD_PROGRAM

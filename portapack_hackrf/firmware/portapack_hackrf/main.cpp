@@ -91,15 +91,13 @@ void usb_configuration_changed(
 	led_set(LED1, device->configuration->number == 1);
 }
 */
-//#define CPLD_PROGRAM 1
-//#define LCD_BACKLIGHT_TEST
-
 #ifdef LCD_BACKLIGHT_TEST
 #include <led.h>
 #endif
 
 #ifdef CPLD_PROGRAM
-#include "portapack_cpld.h"
+#include <led.h>
+#include "cpld.h"
 #endif
 
 int main(void) {
