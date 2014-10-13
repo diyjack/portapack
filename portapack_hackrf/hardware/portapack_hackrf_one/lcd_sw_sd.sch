@@ -25,7 +25,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 3 4
 Title "PortaPack for HackRF One"
-Date "26 Aug 2014"
+Date "13 Oct 2014"
 Rev "20140826"
 Comp "ShareBrained Technology, Inc."
 Comment1 "Copyright © 2014 Jared Boone"
@@ -296,7 +296,7 @@ F 1 "MICROSD_DETSW" H 4050 6950 60  0000 C CNN
 F 2 "" H 3900 6300 60  0000 C CNN
 F 3 "" H 3900 6300 60  0000 C CNN
 F 4 "ALPS" H 3900 6300 60  0001 C CNN "Mfr"
-F 5 "SCHA4B0100" H 3900 6300 60  0001 C CNN "Part"
+F 5 "SCHA4B0415" H 3900 6300 60  0001 C CNN "Part"
 	1    3900 6300
 	1    0    0    -1  
 $EndComp
