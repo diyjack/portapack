@@ -101,6 +101,7 @@ void usb_configuration_changed(
 #endif
 
 int main(void) {
+/*
 	RESET_CTRL0 =
 		  RESET_CTRL0_SCU_RST
 		| RESET_CTRL0_LCD_RST
@@ -141,7 +142,7 @@ int main(void) {
 		| RESET_CTRL1_SGPIO_RST
 		| RESET_CTRL1_SPI_RST
 		;
-	
+*/
 	NVIC_ICER(0) = 0xffffffff;
 	NVIC_ICER(1) = 0xffffffff;
 
