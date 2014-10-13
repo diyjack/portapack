@@ -27,6 +27,10 @@ set(CMAKE_TOOLCHAIN_FILE ${PATH_HACKRF}/firmware/toolchain-arm-cortex-m.cmake)
 set(PATH_FATFS fatfs)
 set(PATH_FATFS_SRC ${PATH_FATFS}/src/)
 
+set(LDSCRIPT_M0_MEMORY "-T./m0_memory.ld")
+set(LDSCRIPT_M0_SECTIONS "-T./m0_sections_flash.ld")
+set(LDSCRIPT_M4_EMBED_M0 "")
+
 project(portapack_hackrf)
 
 include(${PATH_HACKRF}/firmware/hackrf-common.cmake)
