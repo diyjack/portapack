@@ -23,6 +23,7 @@
 #define __M0_STARTUP_H__
 
 void m0_load_code_from_m4_text();
+void m0_configure_for_spifi();
 void m0_run();
 
 #endif//__M0_STARTUP_H__

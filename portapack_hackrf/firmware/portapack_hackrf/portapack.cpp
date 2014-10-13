@@ -310,7 +310,7 @@ void portapack_init() {
 	max2837_set_lna_gain(device_state->if_gain_db);	/* 8dB increments */
 	max2837_set_vga_gain(device_state->bb_gain_db);	/* 2dB increments, up to 62dB */
 
-	m0_load_code_from_m4_text();
+	m0_configure_for_spifi();
 	m0_run();
 
 	systick_set_reload(0xffffff); 
