@@ -75,9 +75,9 @@ static const void* get_receiver_configuration_name();
 #define DEBUG_FATFS_FSIZE(__s, __fsize);
 	console_write_uint32(&console, __s, __fsize);
 #else
-#define DEBUG_SDIO_RESULT(__x, __result)
-#define DEBUG_FATFS_FRESULT(__x, __fresult)
-#define DEBUG_FATFS_FSIZE(__s, __fsize)
+#define DEBUG_SDIO_RESULT(__x, __result) ((void)(__result));
+#define DEBUG_FATFS_FRESULT(__x, __fresult) ((void)(__fresult));
+#define DEBUG_FATFS_FSIZE(__s, __fsize) ((void)(__fsize));
 #endif
 
 static FATFS fatfs_sd;
