@@ -41,7 +41,7 @@ set_global_assignment -name DEVICE 5M40ZE64C5
 set_global_assignment -name TOP_LEVEL_ENTITY top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "21:24:55  APRIL 29, 2014"
-set_global_assignment -name LAST_QUARTUS_VERSION 13.1
+set_global_assignment -name LAST_QUARTUS_VERSION 14.0
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
@@ -277,8 +277,8 @@ set_instance_assignment -name PCI_IO OFF -to MCU_BACKLIGHT
 set_instance_assignment -name PCI_IO OFF -to MCU_STROBE
 set_instance_assignment -name PCI_IO OFF -to MCU_DIR
 set_global_assignment -name ALLOW_LVTTL_LVCMOS_INPUT_LEVELS_TO_OVERDRIVE_INPUT_BUFFER ON
-set_location_assignment PIN_37 -to LCD_BACKLIGHTX
-set_instance_assignment -name IO_STANDARD "1.8 V" -to LCD_BACKLIGHTX
-set_instance_assignment -name CURRENT_STRENGTH_NEW "MINIMUM CURRENT" -to LCD_BACKLIGHTX
-set_instance_assignment -name SLOW_SLEW_RATE ON -to LCD_BACKLIGHTX
-set_instance_assignment -name PCI_IO OFF -to LCD_BACKLIGHTX
+set_location_assignment PIN_4 -to LCD_BACKLIGHT
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to LCD_BACKLIGHT
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MINIMUM CURRENT" -to LCD_BACKLIGHT
+set_instance_assignment -name SLOW_SLEW_RATE ON -to LCD_BACKLIGHT
+set_instance_assignment -name PCI_IO OFF -to LCD_BACKLIGHT
