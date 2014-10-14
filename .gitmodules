@@ -1,0 +1,3 @@
+[submodule "portapack_hackrf/firmware/hackrf"]
+	path = portapack_hackrf/firmware/hackrf
+	url = git@github.com:jboone/hackrf.git
