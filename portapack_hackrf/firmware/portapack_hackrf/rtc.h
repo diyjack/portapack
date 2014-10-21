@@ -32,6 +32,15 @@ void rtc_disable();
 void rtc_date_set(const uint_fast16_t year, const uint_fast8_t month, const  uint_fast8_t day_of_month);
 void rtc_time_set(const uint_fast8_t hour, const uint_fast8_t minute, const uint_fast8_t second);
 
+struct rtc_datetime_t {
+	uint16_t year;
+	uint8_t month;
+	uint8_t day;
+	uint8_t hour;
+	uint8_t minute;
+	uint8_t second;
+};
+
 uint_fast16_t rtc_year();
 uint_fast8_t rtc_month();
 uint_fast16_t rtc_day_of_year();
@@ -40,6 +49,8 @@ uint_fast8_t rtc_day_of_month();
 uint_fast8_t rtc_hour();
 uint_fast8_t rtc_minute();
 uint_fast8_t rtc_second();
+
+rtc_datetime_t rtc_datetime();
 
 void rtc_counter_interrupt_second_enable();
 void rtc_counter_interrupt_clear();

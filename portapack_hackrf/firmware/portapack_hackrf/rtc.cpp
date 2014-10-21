@@ -19,6 +19,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
+#include "rtc.h"
+
 #include <libopencm3/lpc43xx/rtc.h>
 #include <libopencm3/lpc43xx/creg.h>
 
@@ -118,6 +120,17 @@ uint_fast8_t rtc_minute() {
 
 uint_fast8_t rtc_second() {
 	return RTC_SEC;
+}
+
+rtc_datetime_t rtc_datetime() {
+	return {
+		static_cast<uint16_t>(rtc_year()),
+		static_cast<uint8_t>(rtc_month()),
+		static_cast<uint8_t>(rtc_day_of_month()),
+		static_cast<uint8_t>(rtc_hour()),
+		static_cast<uint8_t>(rtc_minute()),
+		static_cast<uint8_t>(rtc_second())
+	};
 }
 
 void rtc_counter_interrupt_second_enable() {
