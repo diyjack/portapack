@@ -1387,6 +1387,11 @@ bool numeric_entry = false;
 	return 0;
 }
 
+/* Note: Added to deal with static variables:
+ * undefined reference to `__dso_handle'
+ */
+void *__dso_handle;
+
 /* Note: This supposedly exists in retarget.c */
 #if defined(TOOLCHAIN_GCC)
 /* prevents the exception handling name demangling code getting pulled in */
