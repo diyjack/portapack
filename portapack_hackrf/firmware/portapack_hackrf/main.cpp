@@ -225,3 +225,16 @@ while(true) {
 
 	return 0;
 }
+
+/* Note: This supposedly exists in retarget.c */
+#if defined(TOOLCHAIN_GCC)
+/* prevents the exception handling name demangling code getting pulled in */
+namespace __gnu_cxx {
+    void __verbose_terminate_handler() {
+    }
+}
+extern "C" WEAK void __cxa_pure_virtual(void);
+extern "C" WEAK void __cxa_pure_virtual(void) {
+    exit(1);
+}
+#endif
